@@ -1,47 +1,50 @@
+<!-- 
+CruxCounterR.xml
+ -->
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="https://in.imic.us/schema/esoui/101039/guixml.xsd">
     <Animations>
-        <AnimationTimeline name="CruxCounterV2_RotateTextureCW" playbackType="LOOP"
+        <AnimationTimeline name="CruxCounterR_RotateTextureCW" playbackType="LOOP"
             loopCount="LOOP_INDEFINITELY">
             <Animations>
                 <TextureRotateAnimation duration="6000" startRotation="ZO_TWO_PI" endRotation="0" />
             </Animations>
         </AnimationTimeline>
-        <AnimationTimeline name="CruxCounterV2_RotateTextureCCW" playbackType="LOOP"
+        <AnimationTimeline name="CruxCounterR_RotateTextureCCW" playbackType="LOOP"
             loopCount="LOOP_INDEFINITELY">
             <Animations>
                 <TextureRotateAnimation duration="6000" startRotation="0" endRotation="-ZO_TWO_PI" />
             </Animations>
         </AnimationTimeline>
-        <AnimationTimeline name="CruxCounterV2_RotateControlCCW" playbackType="LOOP"
+        <AnimationTimeline name="CruxCounterR_RotateControlCCW" playbackType="LOOP"
             loopCount="LOOP_INDEFINITELY">
             <Animations>
                 <TransformRotationAnimation duration="6000" startZ="0" endZ="ZO_TWO_PI" />
             </Animations>
         </AnimationTimeline>
-        <AnimationTimeline name="CruxCounterV2_RotateControlCW" playbackType="LOOP"
+        <AnimationTimeline name="CruxCounterR_RotateControlCW" playbackType="LOOP"
             loopCount="LOOP_INDEFINITELY">
             <Animations>
                 <TransformRotationAnimation duration="6000" startZ="ZO_TWO_PI" endZ="0" />
             </Animations>
         </AnimationTimeline>
-        <AnimationTimeline name="CruxCounterV2_RotateBG" playbackType="LOOP"
+        <AnimationTimeline name="CruxCounterR_RotateBG" playbackType="LOOP"
             loopCount="LOOP_INDEFINITELY">
             <Animations>
                 <TransformRotationAnimation duration="25000" startZ="ZO_TWO_PI" endZ="0" />
             </Animations>
         </AnimationTimeline>
-        <AnimationTimeline name="CruxCounterV2_CruxFadeIn">
+        <AnimationTimeline name="CruxCounterR_CruxFadeIn">
             <Animations>
                 <AlphaAnimation duration="150" startAlpha="0.0" endAlpha="1.0" />
             </Animations>
         </AnimationTimeline>
-        <AnimationTimeline name="CruxCounterV2_CruxFadeOut">
+        <AnimationTimeline name="CruxCounterR_CruxFadeOut">
             <Animations>
                 <AlphaAnimation duration="150" startAlpha="1.0" endAlpha="0.0" />
             </Animations>
         </AnimationTimeline>
-        <AnimationTimeline name="CruxCounterV2_CruxSmokeDontBreatheThis" playbackType="LOOP"
+        <AnimationTimeline name="CruxCounterR_CruxSmokeDontBreatheThis" playbackType="LOOP"
             loopCount="LOOP_INDEFINITELY">
             <Animations>
                 <TextureAnimation cellsHigh="6" cellsWide="6" framerate="30" />
@@ -51,7 +54,7 @@
 
     <Controls>
         <Texture
-            name="CruxCounterV2_AuraRune"
+            name="CruxCounterR_AuraRune"
             virtual="true"
             textureFile="/art/fx/texture/arcanist_trianglerune_01.dds"
             inheritScale="true"
@@ -60,7 +63,7 @@
         >
             <Dimensions x="32" y="32" />
         </Texture>
-        <Control name="CruxCounterV2_Crux" virtual="true" alpha="0.0">
+        <Control name="CruxCounterR_Crux" virtual="true" alpha="0.0">
             <Dimensions x="64" y="64" />
             <Controls>
                 <Texture
@@ -84,23 +87,23 @@
                     <Dimensions x="64" y="64" />
                     <Anchor point="CENTER" relativeTo="$(parent)" offsetY="0" offsetX="0" />
                 </Texture>
-                <Texture name="$(parent)Rune" inherits="CruxCounterV2_AuraRune">
+                <Texture name="$(parent)Rune" inherits="CruxCounterR_AuraRune">
                     <Anchor point="CENTER" relativeTo="$(parent)" offsetY="0" offsetX="0" />
                 </Texture>
             </Controls>
         </Control>
         <TopLevelControl
-            name="CruxCounterV2_AuraControl"
+            name="CruxCounterR_AuraControl"
             movable="true"
             mouseEnabled="true"
             hidden="true"
             clampedToScreen="false"
         >
             <OnInitialized>
-                CruxCounterV2_Aura_OnInitialized(self)
+                CruxCounterR_Aura_OnInitialized(self)
             </OnInitialized>
             <OnMoveStop>
-                CruxCounterV2_Aura_OnMoveStop(self)
+                CruxCounterR_Aura_OnMoveStop(self)
             </OnMoveStop>
 
             <Dimensions x="128" y="128" />
@@ -114,9 +117,9 @@
             <Controls>
                 <Control name="$(parent)Orbit">
                     <Controls>
-                        <Control name="$(parent)Crux1" inherits="CruxCounterV2_Crux" />
-                        <Control name="$(parent)Crux2" inherits="CruxCounterV2_Crux" />
-                        <Control name="$(parent)Crux3" inherits="CruxCounterV2_Crux" />
+                        <Control name="$(parent)Crux1" inherits="CruxCounterR_Crux" />
+                        <Control name="$(parent)Crux2" inherits="CruxCounterR_Crux" />
+                        <Control name="$(parent)Crux3" inherits="CruxCounterR_Crux" />
                     </Controls>
                     <Anchor point="CENTER" relativeTo="$(parent)" offsetX="0" offsetY="0" />
                 </Control>

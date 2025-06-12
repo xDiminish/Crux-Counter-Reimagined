@@ -2,7 +2,7 @@
 -- Init.lua
 -- -----------------------------------------------------------------------------
 
-local CC     = CruxCounterV2
+local CC     = CruxCounterR
 local EM     = EVENT_MANAGER
 
 --- @type string Namespace for addon init event
@@ -23,12 +23,18 @@ local function init(_, addonName)
 
     CC.Language:Setup()
     CC.Settings:Setup()
-    CruxCounterV2_Display:ApplySettings()
+    CruxCounterR_Display:ApplySettings()
+
+    -- Initialize rune display
+    CC.Display:Initialize()
 
     -- Defer RegisterEvents until after player is in-world
-    EM:RegisterForEvent("CruxCounterV2_InitPlayerActivated", EVENT_PLAYER_ACTIVATED, function()
-        EM:UnregisterForEvent("CruxCounterV2_InitPlayerActivated", EVENT_PLAYER_ACTIVATED)
+    EM:RegisterForEvent("CruxCounterR_InitPlayerActivated", EVENT_PLAYER_ACTIVATED, function()
+        EM:UnregisterForEvent("CruxCounterR_InitPlayerActivated", EVENT_PLAYER_ACTIVATED)
         CC.Events:RegisterEvents()
+
+        -- Start periodic update loop for Crux color updates in Events.lua
+        CC.Events:StartPeriodicUpdate()
     end)
 end
 

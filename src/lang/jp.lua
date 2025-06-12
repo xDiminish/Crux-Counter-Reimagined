@@ -3,7 +3,7 @@
 -- -----------------------------------------------------------------------------
 
 local M = {}
-local CC = CruxCounterV2
+local CC = CruxCounterR
 
 --- Setup translation strings
 --- @return nil

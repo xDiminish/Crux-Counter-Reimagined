@@ -3,7 +3,7 @@
 -- -----------------------------------------------------------------------------
 
 local M     = {}
-local CC    = CruxCounterV2
+local CC    = CruxCounterR
 
 --- @type integer Current number of Crux stacks
 M.stacks    = 0
@@ -14,6 +14,9 @@ M.maxStacks = 3
 --- @type boolean True when the player is in combat
 M.inCombat  = false
 
+--- @type integer Time when the last Crux was gained
+M.lastCruxGainTime = 0
+
 -- -----------------------------------------------------------------------------
 -- Stacks State
 -- -----------------------------------------------------------------------------
@@ -23,42 +26,101 @@ M.inCombat  = false
 --- @param playSound boolean? Optional: True to evaluate sound playback logic, false to force not playing a sound
 --- @return nil
 function M:SetStacks(count, playSound)
-    -- Set default for not provided value
     if playSound == nil then playSound = true end
 
     local previousStacks = self.stacks
     self.stacks = count
 
-    -- Do nothing if stack count hasn't changed
-    if count == previousStacks then
-        CC.Debug:Trace(2, "Crux Unchanged: <<1>> -> <<2>>", previousStacks, count)
-        return
-    end
+    -- Always check if a Crux was gained or refreshed
+    local cruxGainedOrRefreshed = false
 
-    CC.Debug:Trace(2, "Updating Crux: <<1>> -> <<2>>", previousStacks, count)
-    CruxCounterV2_Display:UpdateCount(count)
-
-    local soundToPlay
-    if count < previousStacks then
-        CC.Debug:Trace(1, "Crux Lost: <<1>> -> <<2>>", previousStacks, count)
-        soundToPlay = "cruxLost"
-    elseif count > previousStacks and count < self.maxStacks then
+    if count > previousStacks then
+        cruxGainedOrRefreshed = true
         CC.Debug:Trace(1, "Crux Gained: <<1>> -> <<2>>", previousStacks, count)
-        soundToPlay = "cruxGained"
-    else
-        CC.Debug:Trace(1, "Max Crux: <<1>> -> <<2>>", previousStacks, count)
-        soundToPlay = "maxCrux"
+    elseif count == previousStacks and count == self.maxStacks then
+        -- Special case: Already at 3, but a new Crux was generated and replaced the oldest
+        cruxGainedOrRefreshed = true
+        CC.Debug:Trace(1, "Crux Refreshed at Max Stack: <<1>>", count)
+    elseif count < previousStacks then
+        CC.Debug:Trace(1, "Crux Lost: <<1>> -> <<2>>", previousStacks, count)
     end
 
-    if playSound then
-        CC.UI:PlaySoundForType(soundToPlay)
+    if cruxGainedOrRefreshed then
+        self.lastCruxGainTime = GetGameTimeMilliseconds()
+
+        if CC.Display and CC.Display.ResetRuneColors then
+            CC.Display:ResetRuneColors()
+        end
+    end
+
+    -- Only update UI and play sounds if stack count actually changed
+    if count ~= previousStacks then
+        CC.Debug:Trace(2, "Updating Crux: <<1>> -> <<2>>", previousStacks, count)
+        CruxCounterR_Display:UpdateCount(count)
+
+        if playSound then
+            local soundToPlay = nil
+            if count < previousStacks then
+                soundToPlay = "cruxLost"
+            elseif count > previousStacks then
+                soundToPlay = (count < self.maxStacks) and "cruxGained" or "maxCrux"
+            end
+
+            if soundToPlay then
+                CC.UI:PlaySoundForType(soundToPlay)
+            end
+        end
     end
 end
+-- function M:SetStacks(count, playSound)
+--     if playSound == nil then playSound = true end
+
+--     local previousStacks = self.stacks
+--     self.stacks = count
+
+--     if count == previousStacks then
+--         CC.Debug:Trace(2, "Crux Unchanged: <<1>> -> <<2>>", previousStacks, count)
+--         return
+--     end
+
+--     CC.Debug:Trace(2, "Updating Crux: <<1>> -> <<2>>", previousStacks, count)
+--     CruxCounterR_Display:UpdateCount(count)
+
+--     local soundToPlay
+--     if count < previousStacks then
+--         CC.Debug:Trace(1, "Crux Lost: <<1>> -> <<2>>", previousStacks, count)
+--         soundToPlay = "cruxLost"
+--     elseif count >= previousStacks then
+--         CC.Debug:Trace(1, "Crux Gained: <<1>> -> <<2>>", previousStacks, count)
+
+--         -- Track last crux gained time
+--         self.lastCruxGainTime = GetGameTimeMilliseconds()
+
+--         -- Reset all rune colors to green on any Crux gain
+--         if CC.Display and CC.Display.ResetRuneColors then
+--             CC.Display:ResetRuneColors()
+--         end
+
+--         if count < self.maxStacks then
+--             soundToPlay = "cruxGained"
+--         else
+--             soundToPlay = "maxCrux"
+--         end
+--     end
+
+--     if playSound then
+--         CC.UI:PlaySoundForType(soundToPlay)
+--     end
+-- end
+
 
 --- Reset stack count to zero
 --- @return nil
 function M:ClearStacks()
     self:SetStacks(0)
+
+    -- Reset last crux gained timer
+    self.lastCruxGainTime = 0
 end
 
 -- -----------------------------------------------------------------------------

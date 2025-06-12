@@ -3,7 +3,7 @@
 -- -----------------------------------------------------------------------------
 
 local M = {}
-local CC = CruxCounterV2
+local CC = CruxCounterR
 
 --- Setup translation strings
 --- @return nil
@@ -79,6 +79,12 @@ function M.Setup()
 
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_CRUX_LOST", "Crux Lost")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_CRUX_LOST_DESC", "Play a sound when losing Crux.")
+
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_THRESHOLD", "Expiry Warn Threshold")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_THRESHOLD_DESC", "Trigger rune color change at this threshold to set run color to the Expiry Warn Color you have defined.")
+
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR", "Expiry Warn Color")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR_DESC", "The color of any active runes when they are about to expire.")
 end
 
 CC.Translation = M

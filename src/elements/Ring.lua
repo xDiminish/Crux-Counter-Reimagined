@@ -3,16 +3,16 @@
 -- -----------------------------------------------------------------------------
 
 local AM         = ANIMATION_MANAGER
-local CC         = CruxCounterV2
+local CC         = CruxCounterR
 
---- @class CruxCounterV2_Ring
+--- @class CruxCounterR_Ring
 --- @field New fun(self, control: any)
-CruxCounterV2_Ring = ZO_InitializingObject:Subclass()
+CruxCounterR_Ring = ZO_InitializingObject:Subclass()
 
 --- Initialize the Aura
 --- @param control any Element control
 --- @return nil
-function CruxCounterV2_Ring:Initialize(control)
+function CruxCounterR_Ring:Initialize(control)
     self.control = control
 
     local settings = CC.Settings:GetElement("background")
@@ -21,15 +21,15 @@ function CruxCounterV2_Ring:Initialize(control)
     self.hideZeroStacks = settings.hideZeroStacks
 
     self.timelines = {
-        rotate  = AM:CreateTimelineFromVirtual("CruxCounterV2_RotateBG", self.control),
-        fadeIn  = AM:CreateTimelineFromVirtual("CruxCounterV2_CruxFadeIn", self.control),
-        fadeOut = AM:CreateTimelineFromVirtual("CruxCounterV2_CruxFadeOut", self.control),
+        rotate  = AM:CreateTimelineFromVirtual("CruxCounterR_RotateBG", self.control),
+        fadeIn  = AM:CreateTimelineFromVirtual("CruxCounterR_CruxFadeIn", self.control),
+        fadeOut = AM:CreateTimelineFromVirtual("CruxCounterR_CruxFadeOut", self.control),
     }
 end
 
 --- Apply settings to the Ring background
 --- @return nil
-function CruxCounterV2_Ring:ApplySettings()
+function CruxCounterR_Ring:ApplySettings()
     local ring = CC.Settings:GetElement("background")
 
     self:SetEnabled(ring.enabled)
@@ -40,26 +40,26 @@ end
 
 --- Start the Ring rotation animation
 --- @return nil
-function CruxCounterV2_Ring:StartRotation()
+function CruxCounterR_Ring:StartRotation()
     self.timelines.rotate:PlayFromStart()
 end
 
 --- Stop the Ring rotation animation
 --- @return nil
-function CruxCounterV2_Ring:StopRotation()
+function CruxCounterR_Ring:StopRotation()
     self.timelines.rotate:Stop()
 end
 
 --- Is the Ring background currently hidden?
 --- @return boolean hidden True when the background Ring is hidden
-function CruxCounterV2_Ring:IsHidden()
+function CruxCounterR_Ring:IsHidden()
     return self.control:GetAlpha() == 0 or self.control:IsHidden()
 end
 
 --- Set whether or not the Ring background should show
 --- @param shouldShow boolean True to show the Ring background
 --- @return nil
-function CruxCounterV2_Ring:SetShowing(shouldShow)
+function CruxCounterR_Ring:SetShowing(shouldShow)
     local hidden = self:IsHidden()
     local animation = shouldShow and "fadeIn" or "fadeOut"
 
@@ -75,7 +75,7 @@ end
 --- Set whether or not the Ring background is enabled
 --- @param enabled boolean True to enable the Ring background
 --- @return nil
-function CruxCounterV2_Ring:SetEnabled(enabled)
+function CruxCounterR_Ring:SetEnabled(enabled)
     self.enabled = enabled
     self.control:SetHidden(not enabled)
     self:UpdateRotation()
@@ -84,14 +84,14 @@ end
 --- Set the Ring background color
 --- @param color ZO_ColorDef
 --- @return nil
-function CruxCounterV2_Ring:SetColor(color)
+function CruxCounterR_Ring:SetColor(color)
     self.control:SetColor(color:UnpackRGBA())
 end
 
 --- Set whether or not the Ring background animation is enabled
 --- @param rotationEnabled boolean True to enable the Ring background animation
 --- @return nil
-function CruxCounterV2_Ring:SetRotationEnabled(rotationEnabled)
+function CruxCounterR_Ring:SetRotationEnabled(rotationEnabled)
     self.rotationEnabled = rotationEnabled
     self:UpdateRotation()
 end
@@ -99,7 +99,7 @@ end
 --- Set whether or not to hide the Ring background on zero stacks
 --- @param hideZero boolean True to hide the Ring background on zero stacks
 --- @return nil
-function CruxCounterV2_Ring:SetHideZeroStacks(hideZero)
+function CruxCounterR_Ring:SetHideZeroStacks(hideZero)
     self.hideZeroStacks = hideZero
     if hideZero then
         self:SetShowing(CC.State.stacks > 0)
@@ -111,7 +111,7 @@ end
 --- Update the Ring background rotation
 --- Ensures it's playing when it should and isn't when it shouldn't
 --- @return nil
-function CruxCounterV2_Ring:UpdateRotation()
+function CruxCounterR_Ring:UpdateRotation()
     local timeline = self.timelines.rotate
 
     if not timeline then return end
@@ -130,7 +130,7 @@ end
 --- Update the count for use with the hideZeroStacks option
 --- @param count number Number of stacks
 --- @return nil
-function CruxCounterV2_Ring:UpdateCount(count)
+function CruxCounterR_Ring:UpdateCount(count)
     if self.hideZeroStacks then
         self:SetShowing(count > 0)
     else

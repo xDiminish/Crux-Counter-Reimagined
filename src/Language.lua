@@ -2,7 +2,7 @@
 -- Language.lua
 -- -----------------------------------------------------------------------------
 
-local CC = CruxCounterV2
+local CC = CruxCounterR
 local M = {}
 
 M.translationPrefix = "CRUX_COUNTER_"

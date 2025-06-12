@@ -3,18 +3,18 @@
 -- -----------------------------------------------------------------------------
 
 local WM         = WINDOW_MANAGER
-local CC         = CruxCounterV2
-local Orbit      = CruxCounterV2_Orbit
-local Ring       = CruxCounterV2_Ring
+local CC         = CruxCounterR
+local Orbit      = CruxCounterR_Orbit
+local Ring       = CruxCounterR_Ring
 
---- @class CruxCounterV2_Aura
+--- @class CruxCounterR_Aura
 --- @field New fun(self, control: any)
-CruxCounterV2_Aura = ZO_InitializingObject:Subclass()
+CruxCounterR_Aura = ZO_InitializingObject:Subclass()
 
 --- Initialize the Aura
 --- @param control any Element control
 --- @return nil
-function CruxCounterV2_Aura:Initialize(control)
+function CruxCounterR_Aura:Initialize(control)
     self.control = control
     self.fragment = nil
     self.hideOutOfCombat = CC.Settings:Get("hideOutOfCombat")
@@ -37,20 +37,20 @@ end
 --- Set whether or not the Number element disable is enabled
 --- @param enabled boolean True to enable the element
 --- @return nil
-function CruxCounterV2_Aura:SetNumberEnabled(enabled)
+function CruxCounterR_Aura:SetNumberEnabled(enabled)
     self.count:SetHidden(not enabled)
 end
 
 --- Set the color of the Number element
 --- @param color ZO_ColorDef
 --- @return nil
-function CruxCounterV2_Aura:SetNumberColor(color)
+function CruxCounterR_Aura:SetNumberColor(color)
     self.count:SetColor(color:UnpackRGBA())
 end
 
 --- Apply settings to the Aura
 --- @return nil
-function CruxCounterV2_Aura:ApplySettings()
+function CruxCounterR_Aura:ApplySettings()
     local settings = CC.Settings:Get()
 
     -- Aura settings
@@ -71,7 +71,7 @@ end
 
 --- Hide the counter display
 --- @return nil
-function CruxCounterV2_Aura:Hide()
+function CruxCounterR_Aura:Hide()
     CC.Debug:Trace(1, "Hide() called")
 
     HUD_UI_SCENE:RemoveFragment(self.fragment)
@@ -80,7 +80,7 @@ end
 
 --- Show/unhide the counter display
 --- @return nil
-function CruxCounterV2_Aura:Unhide()
+function CruxCounterR_Aura:Unhide()
     CC.Debug:Trace(1, "Unhide() called")
 
     HUD_UI_SCENE:AddFragment(self.fragment)
@@ -90,7 +90,7 @@ end
 --- Show or hide the aura based on visibility flag
 --- @param isVisible boolean
 --- @return nil
-function CruxCounterV2_Aura:SetVisible(isVisible)
+function CruxCounterR_Aura:SetVisible(isVisible)
     CC.Debug:Trace(2, "SetVisible called with: <<1>>", tostring(isVisible))
 
     if isVisible then
@@ -117,20 +117,20 @@ end
 --- @param top number Top position
 --- @param left number Left position
 --- @return nil
-function CruxCounterV2_Aura:SetPosition(top, left)
+function CruxCounterR_Aura:SetPosition(top, left)
     self.control:ClearAnchors()
     self.control:SetAnchor(CENTER, GuiRoot, CENTER, left, top)
 end
 
 --- Move the Aura to center
 --- @return nil
-function CruxCounterV2_Aura:MoveToCenter()
+function CruxCounterR_Aura:MoveToCenter()
     self:SetPosition(0, 0)
 end
 
 --- Setup handlers for the Aura
 --- @return nil
-function CruxCounterV2_Aura:SetHandlers()
+function CruxCounterR_Aura:SetHandlers()
     self.control.OnMoveStop = function()
         CC.Debug:Trace(3, "Aura OnMoveStop")
         local centerX, centerY = self.control:GetCenter()
@@ -154,20 +154,20 @@ end
 --- Set the counter display size
 --- @param size number Counter size in (roughly) pixels, is divided by the default size to set the float scale amount
 --- @return nil
-function CruxCounterV2_Aura:SetSize(size)
+function CruxCounterR_Aura:SetSize(size)
     self:SetScale(size / CC.Settings:GetDefault("size"))
 end
 
 --- Set the scale of the counter display
 --- @param scale number Float scaling value
 --- @return nil
-function CruxCounterV2_Aura:SetScale(scale)
+function CruxCounterR_Aura:SetScale(scale)
     self.control:SetScale(scale)
 end
 
 --- Setup scenes the addon should appear
 --- @return nil
-function CruxCounterV2_Aura:AddSceneFragments()
+function CruxCounterR_Aura:AddSceneFragments()
     CC.Debug:Trace(2, "Adding scene fragments")
 
     local fragment = ZO_SimpleSceneFragment:New(self.control)
@@ -180,7 +180,7 @@ end
 
 -- --- Remove fragments from scenes
 -- --- @return nil
-function CruxCounterV2_Aura:RemoveSceneFragments()
+function CruxCounterR_Aura:RemoveSceneFragments()
     if self.fragment then
         CC.Debug:Trace(2, "Removing scene fragments")
 
@@ -193,7 +193,7 @@ end
 
 --- Update the elements with a new count
 --- @return nil
-function CruxCounterV2_Aura:UpdateCount(count)
+function CruxCounterR_Aura:UpdateCount(count)
     CC.Debug:Trace(1, "Updating Aura count to <<1>>", count)
     self.count:SetText(count)
     self.orbit:UpdateCount(count)
@@ -203,7 +203,7 @@ end
 --- Set whether or not the Aura can be moved
 --- @param movable boolean True enable moving
 --- @return nil
-function CruxCounterV2_Aura:SetMovable(movable)
+function CruxCounterR_Aura:SetMovable(movable)
     CC.Debug:Trace(2, "Setting movable <<1>>", movable)
     self.locked = not movable
     self.control:SetMovable(movable)
@@ -211,8 +211,8 @@ end
 
 --- Initialization of the Aura display
 --- @return nil
-function CruxCounterV2_Aura_OnInitialized(control)
-    CruxCounterV2_Display = CruxCounterV2_Aura:New(control)
+function CruxCounterR_Aura_OnInitialized(control)
+    CruxCounterR_Display = CruxCounterR_Aura:New(control)
 
     -- Now safe to call ReevaluateVisibility
     CC.Events:ReevaluateVisibility()
@@ -220,6 +220,6 @@ end
 
 --- When the Aura has stopped moving, handle the move
 --- @return nil
-function CruxCounterV2_Aura_OnMoveStop(self)
+function CruxCounterR_Aura_OnMoveStop(self)
     self.OnMoveStop()
 end

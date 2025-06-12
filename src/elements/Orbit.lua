@@ -3,18 +3,18 @@
 -- -----------------------------------------------------------------------------
 
 local AM          = ANIMATION_MANAGER
-local CC          = CruxCounterV2
+local CC          = CruxCounterR
 
-local Rune        = CruxCounterV2_Rune
+local Rune        = CruxCounterR_Rune
 
---- @class CruxCounterV2_Orbit
+--- @class CruxCounterR_Orbit
 --- @field New fun(self, control: any, index: number)
-CruxCounterV2_Orbit = ZO_InitializingObject:Subclass()
+CruxCounterR_Orbit = ZO_InitializingObject:Subclass()
 
 --- Initialize the Aura
 --- @param control any Element control
 --- @return nil
-function CruxCounterV2_Orbit:Initialize(control)
+function CruxCounterR_Orbit:Initialize(control)
     self.control = control
     self.runes = {}
 
@@ -25,7 +25,7 @@ function CruxCounterV2_Orbit:Initialize(control)
 
     self:InitializeRunes()
 
-    self.timeline = AM:CreateTimelineFromVirtual("CruxCounterV2_RotateControlCCW", self.control)
+    self.timeline = AM:CreateTimelineFromVirtual("CruxCounterR_RotateControlCCW", self.control)
 
     self.timeline:SetHandler("OnPlay", function()
         self:ForRunes(function(_, rune)
@@ -42,7 +42,7 @@ end
 
 --- Apply settings to the Orbit
 --- @return nil
-function CruxCounterV2_Orbit:ApplySettings()
+function CruxCounterR_Orbit:ApplySettings()
     local runes = CC.Settings:GetElement("runes")
 
     self:SetEnabled(runes.enabled)
@@ -54,7 +54,7 @@ end
 --- Set whether or not the Orbit is enabled
 --- @param enabled boolean True to enable
 --- @return nil
-function CruxCounterV2_Orbit:SetEnabled(enabled)
+function CruxCounterR_Orbit:SetEnabled(enabled)
     self.enabled = enabled
     self:SetHidden(not enabled)
 end
@@ -62,7 +62,7 @@ end
 --- Set the Orbit color
 --- @param color ZO_ColorDef
 --- @return nil
-function CruxCounterV2_Orbit:SetColor(color)
+function CruxCounterR_Orbit:SetColor(color)
     self:ForRunes(function(_, rune)
         rune:SetColor(color)
     end)
@@ -71,7 +71,7 @@ end
 --- Set whether or not rotation is enabled
 --- @param rotationEnabled boolean True to enable rotation
 --- @return nil
-function CruxCounterV2_Orbit:SetRotationEnabled(rotationEnabled)
+function CruxCounterR_Orbit:SetRotationEnabled(rotationEnabled)
     self.rotationEnabled = rotationEnabled
 
     if self.enabled and rotationEnabled then
@@ -84,7 +84,7 @@ end
 --- Set the hidden state of the element
 --- @param hidden boolean True to hide the element
 --- @return nil
-function CruxCounterV2_Orbit:SetHidden(hidden)
+function CruxCounterR_Orbit:SetHidden(hidden)
     self.control:SetHidden(hidden)
 
     if not hidden and self.enabled and self.rotationEnabled then
@@ -95,9 +95,9 @@ function CruxCounterV2_Orbit:SetHidden(hidden)
 end
 
 --- Run a callback on each of the Rune elements within the Orbit
---- @param callback fun(index: number, rune: CruxCounterV2_Rune): nil Callback to execute for each Rune
+--- @param callback fun(index: number, rune: CruxCounterR_Rune): nil Callback to execute for each Rune
 --- @return nil
-function CruxCounterV2_Orbit:ForRunes(callback)
+function CruxCounterR_Orbit:ForRunes(callback)
     for index, rune in ipairs(self.runes) do
         callback(index, rune)
     end
@@ -106,7 +106,7 @@ end
 --- Update the Crux count
 --- @param count number Number of Crux active
 --- @return nil
-function CruxCounterV2_Orbit:UpdateCount(count)
+function CruxCounterR_Orbit:UpdateCount(count)
     if count == 0 then
         -- Fade out all
         self:ForRunes(function(_, rune)
@@ -138,7 +138,7 @@ end
 --- Set the Orbit rotation animation duration
 --- @param duration number Milliseconds for a full rotation
 --- @return nil
-function CruxCounterV2_Orbit:SetRotationDuration(duration)
+function CruxCounterR_Orbit:SetRotationDuration(duration)
     self.rotationSpeed = duration
 
     for _, rune in ipairs(self.runes) do
@@ -151,20 +151,20 @@ end
 --- Play the Orbit rotation animation
 --- The OnPlay handler plays the Rune animations
 --- @return nil
-function CruxCounterV2_Orbit:PlayFromStart()
+function CruxCounterR_Orbit:PlayFromStart()
     self.timeline:PlayFromStart()
 end
 
 --- Stop the Orbit rotation animation
 --- The OnStop handler stops the Rune animations
 --- @return nil
-function CruxCounterV2_Orbit:Stop()
+function CruxCounterR_Orbit:Stop()
     self.timeline:PlayInstantlyToStart(false)
     self.timeline:Stop()
 end
 
 --- Initialize the Runes within the Orbit
-function CruxCounterV2_Orbit:InitializeRunes()
+function CruxCounterR_Orbit:InitializeRunes()
     for i = 1, self.control:GetNumChildren(), 1 do
         local child = self.control:GetNamedChild("Crux" .. i)
         self.runes[i] = Rune:New(child, i)

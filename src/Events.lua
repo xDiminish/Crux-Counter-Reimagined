@@ -3,7 +3,7 @@
 -- -----------------------------------------------------------------------------
 
 local EM    = EVENT_MANAGER
-local CC    = CruxCounterV2
+local CC    = CruxCounterR
 local M     = {}
 
 local ARCANIST_CLASS_ID = 117
@@ -73,6 +73,91 @@ local function onPlayerChanged()
     end)
 end
 
+-- -----------------------------------------------------------------------------
+-- Rune elapsed timer
+-- -----------------------------------------------------------------------------
+-- function M:PeriodicUpdate()
+--     local currentTime = GetGameTimeMilliseconds()
+--     local elapsed = currentTime - (CC.State.lastCruxGainTime or 0)
+--     local warningThresholdMs = 25000
+--     local isWarning = elapsed >= warningThresholdMs
+
+--     d(string.format("CruxCounter PeriodicUpdate: elapsed=%d, isWarning=%s", elapsed, tostring(isWarning)))
+
+--     if CC.Display and CC.Display.runes then
+--         d("Rune count: " .. tostring(#CC.Display.runes))
+--         for i, rune in ipairs(CC.Display.runes) do
+--             if rune and rune.SetColor then
+--                 d(string.format("Updating rune %d color to %s", i, isWarning and "red" or "green"))
+--                 if isWarning then
+--                     rune:SetColor(ZO_ColorDef:New(1, 0, 0, 1)) -- red
+--                 else
+--                     rune:SetColor(ZO_ColorDef:New(0.7176, 1, 0.4862, 1)) -- light green
+--                 end
+--             else
+--                 d(string.format("Rune %d missing or has no SetColor!", i))
+--             end
+--         end
+--     else
+--         d("CC.Display.runes is nil or missing")
+--     end
+
+--     zo_callLater(function() self:PeriodicUpdate() end, 500)
+-- end
+-- function M:PeriodicUpdate()
+--     local currentTime = GetGameTimeMilliseconds()
+--     local lastGain = CC.State.lastCruxGainTime
+
+--     if not lastGain then
+--         -- Skip warning check if we haven't gained Crux yet
+--         zo_callLater(function() self:PeriodicUpdate() end, 500)
+--         return
+--     end
+
+--     local elapsed = currentTime - lastGain
+--     local warningThresholdMs = 5000
+--     local isWarning = elapsed >= warningThresholdMs
+
+--     for i, rune in ipairs(CC.Display.runes or {}) do
+--         if rune and rune.SetColor then
+--             rune:SetColor(isWarning and ZO_ColorDef:New(1, 0, 0, 1) or ZO_ColorDef:New(0.7176, 1, 0.4862, 1)) -- default to light green
+--         end
+--     end
+
+--     zo_callLater(function() self:PeriodicUpdate() end, 500)
+-- end
+function M:PeriodicUpdate()
+    local currentTime = GetGameTimeMilliseconds()
+    local lastGain = CC.State.lastCruxGainTime
+
+    if not lastGain then
+        zo_callLater(function() self:PeriodicUpdate() end, 500)
+        return
+    end
+
+    local elapsedMs = currentTime - lastGain
+    local elapsedSec = elapsedMs / 1000
+
+    for _, rune in ipairs(CC.Display.runes or {}) do
+        if rune and rune.UpdateColorBasedOnElapsed then
+            rune:UpdateColorBasedOnElapsed(elapsedSec)
+        end
+    end
+
+    zo_callLater(function() self:PeriodicUpdate() end, 500)
+end
+
+
+
+function M:StartPeriodicUpdate()
+    self:PeriodicUpdate()
+end
+
+-- When stack count increases, save start time
+function M:OnStackGained(index)
+    CC.State.stackStartTimes[index] = GetGameTimeMilliseconds()
+end
+
 --- Check if the player is an Arcanist via class or skill lines
 --- @return boolean
 function M:IsArcanist()
@@ -112,10 +197,10 @@ function M:UpdateVisibility()
     local inCombat = CC.State:IsInCombat()
     local shouldShow = isArcanist and (not hideOutOfCombat or inCombat)
 
-    if CruxCounterV2_Display and CruxCounterV2_Display.SetVisible then
-        CruxCounterV2_Display:SetVisible(shouldShow)
+    if CruxCounterR_Display and CruxCounterR_Display.SetVisible then
+        CruxCounterR_Display:SetVisible(shouldShow)
     else
-        CC.Debug:Trace(1, "ERROR: CruxCounterV2_Display or SetVisible is nil")
+        CC.Debug:Trace(1, "ERROR: CruxCounterR_Display or SetVisible is nil")
     end
 end
 
@@ -123,12 +208,12 @@ end
 --- @return nil
 function M:ReevaluateVisibility()
     CC.Debug:Trace(1, "ReevaluateVisibility() called")
-    CC.Debug:Trace(2, "CruxCounterV2_Display = <<1>>", tostring(CruxCounterV2_Display))
+    CC.Debug:Trace(2, "CruxCounterR_Display = <<1>>", tostring(CruxCounterR_Display))
 
-    if CruxCounterV2_Display then
-        CC.Debug:Trace(2, "CruxCounterV2_Display.SetVisible = <<1>>", tostring(CruxCounterV2_Display.SetVisible))
+    if CruxCounterR_Display then
+        CC.Debug:Trace(2, "CruxCounterR_Display.SetVisible = <<1>>", tostring(CruxCounterR_Display.SetVisible))
     else
-        CC.Debug:Trace(2, "CruxCounterV2_Display is nil")
+        CC.Debug:Trace(2, "CruxCounterR_Display is nil")
     end
 
     local isNowArcanist = self:IsArcanist()
@@ -136,10 +221,10 @@ function M:ReevaluateVisibility()
     CC.Debug:Trace(2, "wasArcanist: <<1>>, isNowArcanist: <<2>>", tostring(wasArcanist), tostring(isNowArcanist))
     CC.Debug:Trace(2, "IsArcanist? <<1>>", tostring(isNowArcanist))
 
-    if CruxCounterV2_Display and CruxCounterV2_Display.SetVisible then
-        CruxCounterV2_Display:SetVisible(isNowArcanist)
+    if CruxCounterR_Display and CruxCounterR_Display.SetVisible then
+        CruxCounterR_Display:SetVisible(isNowArcanist)
     else
-        CC.Debug:Trace(1, "CruxCounterV2_Display or SetVisible method is nil, skipping SetVisible call")
+        CC.Debug:Trace(1, "CruxCounterR_Display or SetVisible method is nil, skipping SetVisible call")
     end
 
     if wasArcanist == nil then

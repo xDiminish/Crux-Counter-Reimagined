@@ -2,7 +2,7 @@
 -- Debug.lua
 -- -----------------------------------------------------------------------------
 
-local CC = CruxCounterV2
+local CC = CruxCounterR
 local M  = {}
 
 --- @type integer Current debug level

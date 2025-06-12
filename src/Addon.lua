@@ -2,12 +2,12 @@
 -- Addon.lua
 -- -----------------------------------------------------------------------------
 
-CruxCounterV2 = {}
+CruxCounterR = {}
 
 --- @type { name: string, version: string } General addon information
 local M = {
-    name    = "CruxCounterV2",
+    name    = "CruxCounterR",
     version = "2.0.0",
 }
 
-CruxCounterV2.Addon = M
+CruxCounterR.Addon = M

@@ -1,9 +1,9 @@
-## Title: Crux Counter v2
+## Title: Crux Counter (Reimagined)
 ## APIVersion: 101046
-## SavedVariables: CruxCounterV2Data
+## SavedVariables: CruxCounterReimaginedData
 ## Description: Crux Counter updated with subclassing support
-## Version: 2.0.0
-## AddOnVersion: 020001
+## Version: 1.0.1
+## AddOnVersion: 010001
 ## Author: |c4cdcb2Dim|r (@xDiminish) (NA)
 ## DependsOn: LibAddonMenu-2.0>=40
 
@@ -25,11 +25,11 @@ src/elements/Rune.lua
 src/elements/Orbit.lua
 src/elements/Aura.lua
 
-CruxCounterV2.xml
+CruxCounterR.xml
 
-; This Add-on is an updated version of Crux Counter v1.3.0 created by @g4rr3t to add 
-; support for subclassing. With the exception of the original code, the original author
-; is not affiliated with this version of the Add-on.
+; This Add-on is an updated version of Crux Counter v1.3.0 created by @g4rr3t. 
+; With the exception of the original Crux Counter v1.3.0 code, the original author
+; is not affiliated not associated with this project.
 ;
 ; Furthermore, this Add-on is not created by, affiliated with or sponsored by ZeniMax
 ; Media Inc. or its affiliates. The Elder Scrolls® and related logos are

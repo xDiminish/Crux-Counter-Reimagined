@@ -2,7 +2,7 @@
 -- Settings.lua
 -- -----------------------------------------------------------------------------
 
-local CC                  = CruxCounterV2
+local CC                  = CruxCounterR
 local LAM                 = LibAddonMenu2
 local M                   = {}
 
@@ -24,7 +24,7 @@ local mediumGreen         = ZO_ColorDef:New(0.6784313725, 0.9607843137, 0.450980
 
 M.settings       = {}
 M.dbVersion      = 0
-M.savedVariables = "CruxCounterV2Data"
+M.savedVariables = "CruxCounterRData"
 M.defaults       = {
     top             = 0,
     left            = 0,
@@ -38,10 +38,12 @@ M.defaults       = {
             color   = veryLightGreen,
         },
         runes      = {
-            enabled       = true,
-            rotate        = true,
-            rotationSpeed = 9600,
-            color         = lightGreen,
+            enabled             = true,
+            rotate              = true,
+            rotationSpeed       = 9600,
+            color               = lightGreen,
+            expireWarnThreshold = 25,
+            expireWarnColor     = { r = 1, g = 0, b = 0, a = 1 },
         },
         background = {
             enabled        = true,
@@ -67,6 +69,7 @@ M.defaults       = {
             volume  = 20,
         },
     },
+    cruxDuration = 30,
 }
 
 --- Save counter position
@@ -97,8 +100,8 @@ end
 --- @type table Options data
 local optionsData = {}
 
-CruxCounterV2_LockButton = nil
-CruxCounterV2_MoveToCenterButton = nil
+CruxCounterR_LockButton = nil
+CruxCounterR_MoveToCenterButton = nil
 
 -- -----------------------------------------------------------------------------
 -- Display
@@ -107,8 +110,8 @@ CruxCounterV2_MoveToCenterButton = nil
 --- Move the counter to the center of the screen
 --- @return nil
 local function moveToCenter()
-    CruxCounterV2_Display:Unhide()
-    CruxCounterV2_Display:MoveToCenter()
+    CruxCounterR_Display:Unhide()
+    CruxCounterR_Display:MoveToCenter()
     M:SavePosition(0, 0)
 end
 
@@ -117,7 +120,7 @@ end
 --- @return nil
 local function setLocked(isLocked)
     M.settings.locked = isLocked
-    CruxCounterV2_Display:SetMovable(not isLocked)
+    CruxCounterR_Display:SetMovable(not isLocked)
 end
 
 --- Get the locked state of the counter
@@ -177,19 +180,19 @@ local function setLockToReticle(state)
     if state then
         moveToCenter()
     else
-        CruxCounterV2_Display:SetPosition(M.settings.top, M.settings.left)
+        CruxCounterR_Display:SetPosition(M.settings.top, M.settings.left)
     end
 
     setLocked(state)
     M.settings.lockToReticle = state
 
-    CruxCounterV2_LockButton.button.data = {
+    CruxCounterR_LockButton.button.data = {
         tooltipText = LAM.util.GetStringFromValue(getLockUnlockTooltipText())
     }
-    CruxCounterV2_MoveToCenterButton.button.data = {
+    CruxCounterR_MoveToCenterButton.button.data = {
         tooltipText = LAM.util.GetStringFromValue(getMoveToCenterTooltipText())
     }
-    CruxCounterV2_LockButton.button:SetText(getLockUnlockButtonText())
+    CruxCounterR_LockButton.button:SetText(getLockUnlockButtonText())
 end
 
 --- Set the lock to reticle state
@@ -215,7 +218,7 @@ end
 --- @return nil
 local function setSize(value)
     M.settings.size = value
-    CruxCounterV2_Display:SetSize(value)
+    CruxCounterR_Display:SetSize(value)
 end
 
 --- Get the counter display size
@@ -240,7 +243,7 @@ local displayOptions = {
         disabled = getLockToReticle,
         func = toggleLocked,
         width = "half",
-        reference = "CruxCounterV2_LockButton"
+        reference = "CruxCounterR_LockButton"
     },
     {
         -- Move to Center
@@ -250,7 +253,7 @@ local displayOptions = {
         disabled = getLockToReticle,
         func = moveToCenter,
         width = "half",
-        reference = "CruxCounterV2_MoveToCenterButton",
+        reference = "CruxCounterR_MoveToCenterButton",
     },
     {
         -- Lock to Reticle
@@ -295,13 +298,13 @@ local displayOptions = {
 --- @return nil
 local function setElementEnabled(element, enabled)
     if element == "background" then
-        CruxCounterV2_Display.ring:SetEnabled(enabled)
-        CruxCounterV2_Display.ring:SetRotationEnabled(M:GetElement("background").rotate)
+        CruxCounterR_Display.ring:SetEnabled(enabled)
+        CruxCounterR_Display.ring:SetRotationEnabled(M:GetElement("background").rotate)
     elseif element == "runes" then
-        CruxCounterV2_Display.orbit:SetEnabled(enabled)
-        CruxCounterV2_Display.orbit:SetRotationEnabled(M:GetElement("runes").rotate)
+        CruxCounterR_Display.orbit:SetEnabled(enabled)
+        CruxCounterR_Display.orbit:SetRotationEnabled(M:GetElement("runes").rotate)
     elseif element == "number" then
-        CruxCounterV2_Display:SetNumberEnabled(enabled)
+        CruxCounterR_Display:SetNumberEnabled(enabled)
     else
         CC.Debug:Trace(0, "Invalid element '<<1>>' specified for element display setting", element)
         return
@@ -324,9 +327,9 @@ end
 --- @return nil
 local function setElementRotate(element, rotate)
     if element == "background" then
-        CruxCounterV2_Display.ring:SetRotationEnabled(rotate)
+        CruxCounterR_Display.ring:SetRotationEnabled(rotate)
     elseif element == "runes" then
-        CruxCounterV2_Display.orbit:SetRotationEnabled(rotate)
+        CruxCounterR_Display.orbit:SetRotationEnabled(rotate)
     else
         CC.Debug:Trace(0, "Invalid element '<<1>>' specified for rotation setting", element)
         return
@@ -350,11 +353,11 @@ local function setElementColor(element, color)
     local r, g, b, a = color:UnpackRGBA()
 
     if element == "background" then
-        CruxCounterV2_Display.ring:SetColor(color)
+        CruxCounterR_Display.ring:SetColor(color)
     elseif element == "runes" then
-        CruxCounterV2_Display.orbit:SetColor(color)
+        CruxCounterR_Display.orbit:SetColor(color)
     elseif element == "number" then
-        CruxCounterV2_Display:SetNumberColor(color)
+        CruxCounterR_Display:SetNumberColor(color)
     else
         CC.Debug:Trace(0, "Invalid element '<<1>>' specified for color setting", element)
         return
@@ -412,7 +415,7 @@ end
 --- @return nil
 local function setBackgroundHideZeroStacks(hideZeroStacks)
     M.settings.elements.background.hideZeroStacks = hideZeroStacks
-    CruxCounterV2_Display.ring:SetHideZeroStacks(hideZeroStacks)
+    CruxCounterR_Display.ring:SetHideZeroStacks(hideZeroStacks)
 end
 
 --- Get the rotation speed representation for the settings slider
@@ -435,10 +438,24 @@ local function setRotationSpeed(value)
     local speed = rotationSpeedFactor - (rotationSpeedFactor * percent)
     M.settings.elements.runes.rotationSpeed = speed
 
-    CruxCounterV2_Display.orbit:SetRotationDuration(speed)
+    CruxCounterR_Display.orbit:SetRotationDuration(speed)
 
     CC.Debug:Trace(3, "Value: <<1>>, Speed: <<2>>", value, speed)
 end
+
+local function GetRuneSettings()
+    local settings = M.settings or {}
+    local elements = settings.elements or {}
+    local rune = elements.rune or {}  -- singular
+
+    -- fallback to defaults if missing
+    local defaults = M.defaults or {}
+    local defaultElements = defaults.elements or {}
+    local defaultRune = defaultElements.rune or {}  -- singular
+
+    return setmetatable(rune, { __index = defaultRune })
+end
+
 
 --- @type table Options for Style settings
 local styleOptions = {
@@ -706,6 +723,50 @@ local styleOptions = {
         end,
         width = "half",
         disabled = function() return isElementDefaultColorOrDisabled("background") end,
+    },
+    {
+        type = "slider",
+        name = function()
+            return CC.Language:GetString("SETTINGS_STYLE_CRUX_WARN_THRESHOLD")
+        end,
+        tooltip = function()
+            return CC.Language:GetString("SETTINGS_STYLE_CRUX_WARN_THRESHOLD_DESC")
+        end,
+        min = 1,
+        max = 30,
+        step = 1,
+        getFunc = function()
+            return M:GetElement("runes").expireWarnThreshold
+        end,
+        setFunc = function(value)
+            M.settings.elements.runes.expireWarnThreshold = value
+        end,
+        width = "half",
+        default = M.defaults.elements.runes.expireWarnThreshold,
+        disabled = function()
+            return not getElementEnabled("runes")
+        end,
+    },
+    {
+        type = "colorpicker",
+        name = function()
+            return CC.Language:GetString("SETTINGS_STYLE_CRUX_WARN_COLOR")
+        end,
+        tooltip = function()
+            return CC.Language:GetString("SETTINGS_STYLE_CRUX_WARN_COLOR_DESC")
+        end,
+        getFunc = function()
+            local c = M:GetElement("runes").expireWarnColor
+            return c.r, c.g, c.b, c.a
+        end,
+        setFunc = function(r, g, b, a)
+            M.settings.elements.runes.expireWarnColor = { r = r, g = g, b = b, a = a }
+        end,
+        width = "half",
+        default = M.defaults.elements.runes.expireWarnColor,
+        disabled = function()
+            return not getElementEnabled("runes")
+        end,
     },
 }
 
