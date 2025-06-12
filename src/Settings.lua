@@ -18,13 +18,15 @@ local veryLightGreen      = ZO_ColorDef:New(0.7176470588, 1, 0.7764705882, 1)
 local lightGreen          = ZO_ColorDef:New(0.7176470588, 1, 0.4862745098, 1)
 -- ADF573
 local mediumGreen         = ZO_ColorDef:New(0.6784313725, 0.9607843137, 0.4509803921, 1)
+-- FF3333
+local brightRed           = ZO_ColorDef:New(1, 0.2, 0.2, 1)
 
 
 -- Defaults/Settings Storage
 
 M.settings       = {}
 M.dbVersion      = 0
-M.savedVariables = "CruxCounterRData"
+M.savedVariables = "CruxCounterReimaginedData"
 M.defaults       = {
     top             = 0,
     left            = 0,
@@ -38,12 +40,15 @@ M.defaults       = {
             color   = veryLightGreen,
         },
         runes      = {
-            enabled             = true,
-            rotate              = true,
-            rotationSpeed       = 9600,
-            color               = lightGreen,
-            expireWarnThreshold = 25,
-            expireWarnColor     = { r = 1, g = 0, b = 0, a = 1 },
+            enabled                     = true,
+            rotate                      = true,
+            rotationSpeed               = 9600,
+            color                       = lightGreen,
+            reimagined = {
+                expireWarnThreshold         = 25,
+                expireWarnColor             = brightRed,
+                expireWarnPollingInterval   = 200,
+            },
         },
         background = {
             enabled        = true,
@@ -371,6 +376,32 @@ local function setElementColor(element, color)
     }
 end
 
+--- Set the reimagined color of an element
+--- @param element string Name of the element
+--- @param color ZO_ColorDef
+--- @return nil
+local function setElementReimaginedColor(element, color)
+    local r, g, b, a = color:UnpackRGBA()
+
+    if element == "background" then
+        CruxCounterR_Display.ring:SetColor(color)
+    elseif element == "runes" then
+        CruxCounterR_Display.orbit:SetColor(color)
+    elseif element == "number" then
+        CruxCounterR_Display:SetNumberColor(color)
+    else
+        CC.Debug:Trace(0, "Invalid reimagined element '<<1>>' specified for color setting", element)
+        return
+    end
+
+    M.settings.elements[element].color = {
+        r = r,
+        g = g,
+        b = b,
+        a = a,
+    }
+end
+
 --- Get the color of an element
 --- @param element string Name of the element
 --- @return ZO_ColorDef
@@ -383,6 +414,13 @@ end
 --- @return ZO_ColorDef
 local function getDefaultColor(element)
     return M.defaults.elements[element].color
+end
+
+--- Get the default reimagined color for an element
+--- @param element string Name of the element
+--- @return ZO_ColorDef
+local function getDefaultReimaginedColor(element)
+    return M.defaults.elements[element].reimagined.color
 end
 
 --- Get if the element is already set to the default color or disabled
@@ -402,6 +440,13 @@ end
 --- @return nil
 local function setToDefaultColor(element)
     setElementColor(element, getDefaultColor(element))
+end
+
+--- Reset an element to its default reimagined color
+--- @param element string Name of the element
+--- @return nil
+local function setToDefaultReimaginedColor(element)
+    setElementReimaginedColor(element, getDefaultReimaginedColor(element))
 end
 
 --- Get the Hide for No Crux setting
@@ -443,34 +488,138 @@ local function setRotationSpeed(value)
     CC.Debug:Trace(3, "Value: <<1>>, Speed: <<2>>", value, speed)
 end
 
+-- Get total crux duration (ms)
+local function getCruxDuration()
+    return M.settings.cruxDuration or M.defaults.cruxDuration
+end
+
+local function setCruxDuration(value)
+    M.settings.cruxDuration = value
+end
+
+-- -- Get expire warning threshold (sec)
+-- local function getExpireWarnThreshold()
+--     return M.settings.elements.runes.expireWarnThreshold or M.defaults.elements.runes.expireWarnThreshold
+-- end
+
+-- local function setExpireWarnThreshold(value)
+--     M.settings.elements.runes.expireWarnThreshold = value
+-- end
+-- Get expire warning threshold (sec)
+local function getExpireWarnThreshold()
+    return M.settings.elements.runes.reimagined.expireWarnThreshold or M.defaults.elements.runes.reimagined.expireWarnThreshold
+end
+
+local function setExpireWarnThreshold(value)
+    M.settings.elements.runes.reimagined.expireWarnThreshold = value
+end
+
+-- -- Get expire warning color (return unpacked rgba for LAM colorpicker)
+-- local function getExpireWarnColor()
+--     local color = M.settings.elements.runes.expireWarnColor or M.defaults.elements.runes.expireWarnColor
+--     if type(color) == "table" and color.UnpackRGBA then
+--         return color:UnpackRGBA()
+--     elseif type(color) == "table" then
+--         -- Fallback if saved as a simple table {r,g,b,a}
+--         return color.r or 1, color.g or 0, color.b or 0, color.a or 1
+--     else
+--         return 1, 0, 0, 1  -- fallback red
+--     end
+-- end
+
+-- local function setExpireWarnColor(r, g, b, a)
+--     M.settings.elements.runes.expireWarnColor = ZO_ColorDef:New(r, g, b, a)
+-- end
+-- Get expire warning color (return unpacked rgba for LAM colorpicker)
+local function getExpireWarnColor()
+    local color = M.settings.elements.runes.reimagined.expireWarnColor or M.defaults.elements.runes.reimagined.expireWarnColor
+    if type(color) == "table" and color.UnpackRGBA then
+        return color:UnpackRGBA()
+    elseif type(color) == "table" then
+        -- Fallback if saved as a simple table {r,g,b,a}
+        return color.r or 1, color.g or 0, color.b or 0, color.a or 1
+    else
+        return 1, 0, 0, 1  -- fallback red
+    end
+end
+
+local function setExpireWarnColor(r, g, b, a)
+    M.settings.elements.runes.reimagined.expireWarnColor = ZO_ColorDef:New(r, g, b, a)
+end
+
+-- -- Get the crux expire warn polling interval (ms)
+-- local function getExpireWarnPollingInterval()
+--     return M.settings.elements.runes.expireWarnPollingInterval or M.defaults.elements.runes.expireWarnPollingInterval
+-- end
+
+-- local function setExpireWarnPollingInterval(value)
+--     M.settings.elements.runes.expireWarnPollingInterval = value
+-- end
+-- Get the crux expire warn polling interval (ms)
+local function getExpireWarnPollingInterval()
+    return M.settings.elements.runes.reimagined.expireWarnPollingInterval or M.defaults.elements.runes.reimagined.expireWarnPollingInterval
+end
+
+local function setExpireWarnPollingInterval(value)
+    M.settings.elements.runes.reimagined.expireWarnPollingInterval = value
+end
+
 local function GetRuneSettings()
     local settings = M.settings or {}
     local elements = settings.elements or {}
-    local runes = elements.runes or {}  -- singular
+    local runes = elements.runes or {}
 
-    -- fallback to defaults if missing
     local defaults = M.defaults or {}
     local defaultElements = defaults.elements or {}
-    local defaultRunes = defaultElements.runes or {}  -- singular
+    local defaultRunes = defaultElements.runes or {}
 
-    return setmetatable(rune, { __index = defaultRune })
+    d("[CruxCounter] runes table keys:")
+    for k,v in pairs(runes) do
+        d("  " .. tostring(k) .. " = " .. tostring(v))
+    end
+
+    d("[CruxCounter] defaultRunes table keys:")
+    for k,v in pairs(defaultRunes) do
+        d("  " .. tostring(k) .. " = " .. tostring(v))
+    end
+
+    return setmetatable(runes, { __index = defaultRunes })
 end
 
+-- Export it on the module table
+M.GetRuneSettings = GetRuneSettings
+
+-- local function getCruxWarnThreshold()
+--     return M:GetElement("runes").expireWarnThreshold
+-- end
+
+-- local function setCruxWarnThreshold(v)
+--     M.settings.elements.runes.expireWarnThreshold = v
+-- end
+
+-- local function getCruxWarnColor()
+--     local c = M:GetElement("runes").expireWarnColor
+--     return c.r, c.g, c.b, c.a
+-- end
+
+-- local function setCruxWarnColor(r, g, b, a)
+--     M.settings.elements.runes.expireWarnColor = {r=r,g=g,b=b,a=a}
+-- end
 local function getCruxWarnThreshold()
-    return M:GetElement("runes").expireWarnThreshold
+    return M:GetElement("runes").reimagined.expireWarnThreshold
 end
 
 local function setCruxWarnThreshold(v)
-    M.settings.elements.runes.expireWarnThreshold = v
+    M.settings.elements.runes.reimagined.expireWarnThreshold = v
 end
 
 local function getCruxWarnColor()
-    local c = M:GetElement("runes").expireWarnColor
+    local c = M:GetElement("runes").reimagined.expireWarnColor
     return c.r, c.g, c.b, c.a
 end
 
 local function setCruxWarnColor(r, g, b, a)
-    M.settings.elements.runes.expireWarnColor = {r=r,g=g,b=b,a=a}
+    M.settings.elements.runes.reimagined.expireWarnColor = {r=r,g=g,b=b,a=a}
 end
 
 --- @type table Options for Style settings
@@ -743,6 +892,57 @@ local styleOptions = {
     {
         type = "slider",
         name = function()
+            return CC.Language:GetString("SETTINGS_STYLE_CRUX_DURATION")
+        end,
+        tooltip = function()
+            return CC.Language:GetString("SETTINGS_STYLE_CRUX_DURATION_DESC")
+        end,
+        min = 1,
+        max = 30,
+        step = 1,
+        getFunc = getCruxDuration,
+        setFunc = setCruxDuration,
+        default = M.defaults.cruxDuration,
+        width = "full",
+    },
+    -- {
+    --     type = "slider",
+    --     name = function()
+    --         return CC.Language:GetString("SETTINGS_STYLE_CRUX_WARN_THRESHOLD")
+    --     end,
+    --     tooltip = function()
+    --         return CC.Language:GetString("SETTINGS_STYLE_CRUX_WARN_THRESHOLD_DESC")
+    --     end,
+    --     min = 1,
+    --     max = 30,
+    --     step = 1,
+    --     getFunc = getExpireWarnThreshold,
+    --     setFunc = setExpireWarnThreshold,
+    --     default = M.defaults.elements.runes.expireWarnThreshold,
+    --     width = "full",
+    --     disabled = function() return not getElementEnabled("runes") end,
+    -- },
+    -- {
+    --     type = "colorpicker",
+    --     name = function()
+    --         return CC.Language:GetString("SETTINGS_STYLE_CRUX_WARN_COLOR")
+    --     end,
+    --     tooltip = function()
+    --         return CC.Language:GetString("SETTINGS_STYLE_CRUX_WARN_COLOR_DESC")
+    --     end,
+    --     getFunc = getExpireWarnColor,
+    --     setFunc = setExpireWarnColor,
+    --     default = function()
+    --         local c = M.defaults.elements.runes.expireWarnColor
+    --         return c:UnpackRGBA()
+    --     end,
+    --     default = getDefaultColor("runes"),
+    --     disabled = function() return not getElementEnabled("runes") end,
+    --     width = "full",
+    -- },
+    {
+        type = "slider",
+        name = function()
             return CC.Language:GetString("SETTINGS_STYLE_CRUX_WARN_THRESHOLD")
         end,
         tooltip = function()
@@ -751,17 +951,11 @@ local styleOptions = {
         min = 1,
         max = 30,
         step = 1,
-        getFunc = function()
-            return M:GetElement("runes").expireWarnThreshold
-        end,
-        setFunc = function(value)
-            M.settings.elements.runes.expireWarnThreshold = value
-        end,
-        width = "half",
-        default = M.defaults.elements.runes.expireWarnThreshold,
-        disabled = function()
-            return not getElementEnabled("runes")
-        end,
+        getFunc = getExpireWarnThreshold,
+        setFunc = setExpireWarnThreshold,
+        default = M.defaults.elements.runes.reimagined.expireWarnThreshold,
+        width = "full",
+        disabled = function() return not getElementEnabled("runes") end,
     },
     {
         type = "colorpicker",
@@ -771,18 +965,46 @@ local styleOptions = {
         tooltip = function()
             return CC.Language:GetString("SETTINGS_STYLE_CRUX_WARN_COLOR_DESC")
         end,
-        getFunc = function()
-            local c = M:GetElement("runes").expireWarnColor
-            return c.r, c.g, c.b, c.a
+        getFunc = getExpireWarnColor,
+        setFunc = setExpireWarnColor,
+        default = function()
+            local c = M.defaults.elements.runes.reimagined.expireWarnColor
+            return c:UnpackRGBA()
         end,
-        setFunc = function(r, g, b, a)
-            M.settings.elements.runes.expireWarnColor = { r = r, g = g, b = b, a = a }
+        default = getDefaultReimaginedColor("runes"),
+        disabled = function() return not getElementEnabled("runes") end,
+        width = "full",
+    },
+    {
+        type = "button",
+        name = function()
+            return CC.Language:GetString("SETTINGS_STYLE_CRUX_WARN_COLOR_RESET")
+        end,
+        tooltip = function()
+            return CC.Language:GetString("SETTINGS_STYLE_CRUX_WARN_COLOR_RESET_DESC")
+        end,
+        func = function()
+            setToDefaultReimaginedColor("expireWarnColor")
         end,
         width = "half",
-        default = M.defaults.elements.runes.expireWarnColor,
-        disabled = function()
-            return not getElementEnabled("runes")
+        disabled = function() return isElementDefaultColorOrDisabled("expireWarnColor") end,
+    },
+
+    {
+        type = "slider",
+        name = function()
+            return CC.Language:GetString("SETTINGS_STYLE_CRUX_WARN_POLLING_INTERVAL")
         end,
+        tooltip = function()
+            return CC.Language:GetString("SETTINGS_STYLE_CRUX_WARN_POLLING_INTERVAL_DESC")
+        end,
+        min = 100,
+        max = 1000,
+        step = 100,
+        getFunc = getExpireWarnPollingInterval,
+        setFunc = setExpireWarnPollingInterval,
+        default = M.defaults.elements.runes.reimagined.expireWarnPollingInterval,
+        width = "full",
     },
 }
 
@@ -1111,6 +1333,21 @@ end
 function M:GetElement(element)
     local elements = self:Get("elements")
     local selection = elements[element] or nil
+
+    -- Bad and weird
+    assert(selection ~= nil,
+        zo_strformat("No loaded settings for element '<<1>>' found and no default settings exist", element))
+
+    return selection
+end
+
+--- Get setting by key
+--- If no such key exists, get the default value
+--- @param element string Element setting to get
+--- @return table elementSetting Settings for the element
+function M:GetReimagined(element)
+    local elements = self:Get("reimagined")
+    local selection = reimagined[element] or nil
 
     -- Bad and weird
     assert(selection ~= nil,

@@ -130,48 +130,74 @@ function CruxCounterR_Rune:IsShowing()
     return self.control:GetAlpha() == 1
 end
 
---- Update a rune color based on elapsed time
---- @return nil
--- function CruxCounterR_Rune:UpdateColorBasedOnElapsed(elapsedMs)
---     local totalDurationMs = 30000 -- assumed Crux duration is 30s
---     local warningThresholdRemainingMs = 25000
---     local warningElapsedMs = totalDurationMs - warningThresholdRemainingMs -- = 5000ms
---     local lightGreen = ZO_ColorDef:New(0.7176470588, 1, 0.4862745098, 1)
---     local red = ZO_ColorDef:New(1, 0, 0, 1)
-
---     if elapsedMs >= warningElapsedMs then
---         self:SetColor(red)
---     else
---         self:SetColor(lightGreen)
---     end
--- end
-function CruxCounterR_Rune:UpdateColorBasedOnElapsed(elapsedSec)
-    local runes = GetRuneSettings()
-    if not runes then
-        d("[CruxCounter] Rune settings missing!")
-        return
-    end
-
-    -- Duration of crux before it expires
-    local totalDurationSec = M.settings.cruxDuration or M.defaults.cruxDuration or 30
-
-    -- How long before expiration to start warning
-    local warnThresholdSec = runes.expireWarnThreshold or 5
-    local warnStartTimeSec = totalDurationSec - warnThresholdSec
-
-    -- Normal color fallback (greenish)
-    local normalColor = runes.color or ZO_ColorDef:New(0.7176, 1, 0.4862, 1)
-
-    -- Warning color fallback (red)
-    local warnColorTable = runes.expireWarnColor or { r = 1, g = 0, b = 0, a = 1 }
-    local warnColor = ZO_ColorDef:New(warnColorTable.r, warnColorTable.g, warnColorTable.b, warnColorTable.a)
-
-    if elapsedSec >= warnStartTimeSec then
-        self:SetColor(warnColor)
+local function EnsureColorDef(color)
+    if not color then return nil end
+    if color.UnpackRGBA then
+        return color  -- already ZO_ColorDef
+    elseif type(color) == "table" then
+        -- Create a ZO_ColorDef from table fields, defaulting missing channels to 1 or 0
+        return ZO_ColorDef:New(
+            color.r or color[1] or 1,
+            color.g or color[2] or 1,
+            color.b or color[3] or 1,
+            color.a or color[4] or 1
+        )
     else
-        self:SetColor(normalColor)
+        return nil
     end
 end
 
+--- Update a rune color based on elapsed time
+--- @return nil
+-- function CruxCounterR_Rune:UpdateColorBasedOnElapsed(elapsedSec, settings)
+--     if not settings then
+--         d("[CruxCounter] ERROR: settings is nil")
+--         return
+--     end
 
+--     local runeSettings = settings.elements and settings.elements.runes
+--     if not runeSettings then
+--         d("[CruxCounter] ERROR: settings.elements.runes is nil")
+--         return
+--     end
 
+--     local baseColor = EnsureColorDef(runeSettings.color) or ZO_ColorDef:New(0.7176, 1, 0.4862, 1)
+--     local warnColor = EnsureColorDef(runeSettings.expireWarnColor) or ZO_ColorDef:New(1, 0, 0, 1)
+
+--     local totalDurationSec = settings.cruxDuration or 30
+--     local warningThresholdRemainingSec = runeSettings.expireWarnThreshold or 25
+--     local warningElapsedSec = totalDurationSec - warningThresholdRemainingSec
+
+--     local epsilon = 0.1 -- 100 ms margin
+--     if elapsedSec + epsilon >= warningElapsedSec - 1 then
+--         self:SetColor(warnColor)
+--     else
+--         self:SetColor(baseColor)
+--     end
+-- end
+function CruxCounterR_Rune:UpdateColorBasedOnElapsed(elapsedSec, settings)
+    if not settings then
+        d("[CruxCounter] ERROR: settings is nil")
+        return
+    end
+
+    local runeSettings = settings.elements and settings.elements.runes
+    if not runeSettings then
+        d("[CruxCounter] ERROR: settings.elements.runes is nil")
+        return
+    end
+
+    local baseColor = EnsureColorDef(runeSettings.color) or ZO_ColorDef:New(0.7176, 1, 0.4862, 1)
+    local warnColor = EnsureColorDef(runeSettings.reimagined.expireWarnColor) or ZO_ColorDef:New(1, 0, 0, 1)
+
+    local totalDurationSec = settings.cruxDuration or 30
+    local warningThresholdRemainingSec = runeSettings.reimagined.expireWarnThreshold or 25
+    local warningElapsedSec = totalDurationSec - warningThresholdRemainingSec
+
+    local epsilon = 0.1 -- 100 ms margin
+    if elapsedSec + epsilon >= warningElapsedSec - 1 then
+        self:SetColor(warnColor)
+    else
+        self:SetColor(baseColor)
+    end
+end

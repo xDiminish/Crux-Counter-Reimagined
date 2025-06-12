@@ -74,80 +74,27 @@ local function onPlayerChanged()
 end
 
 -- -----------------------------------------------------------------------------
--- Rune elapsed timer
+-- Crux buff poller
 -- -----------------------------------------------------------------------------
--- function M:PeriodicUpdate()
---     local currentTime = GetGameTimeMilliseconds()
---     local elapsed = currentTime - (CC.State.lastCruxGainTime or 0)
---     local warningThresholdMs = 25000
---     local isWarning = elapsed >= warningThresholdMs
-
---     d(string.format("CruxCounter PeriodicUpdate: elapsed=%d, isWarning=%s", elapsed, tostring(isWarning)))
-
---     if CC.Display and CC.Display.runes then
---         d("Rune count: " .. tostring(#CC.Display.runes))
---         for i, rune in ipairs(CC.Display.runes) do
---             if rune and rune.SetColor then
---                 d(string.format("Updating rune %d color to %s", i, isWarning and "red" or "green"))
---                 if isWarning then
---                     rune:SetColor(ZO_ColorDef:New(1, 0, 0, 1)) -- red
---                 else
---                     rune:SetColor(ZO_ColorDef:New(0.7176, 1, 0.4862, 1)) -- light green
---                 end
---             else
---                 d(string.format("Rune %d missing or has no SetColor!", i))
---             end
---         end
---     else
---         d("CC.Display.runes is nil or missing")
---     end
-
---     zo_callLater(function() self:PeriodicUpdate() end, 500)
--- end
--- function M:PeriodicUpdate()
---     local currentTime = GetGameTimeMilliseconds()
---     local lastGain = CC.State.lastCruxGainTime
-
---     if not lastGain then
---         -- Skip warning check if we haven't gained Crux yet
---         zo_callLater(function() self:PeriodicUpdate() end, 500)
---         return
---     end
-
---     local elapsed = currentTime - lastGain
---     local warningThresholdMs = 5000
---     local isWarning = elapsed >= warningThresholdMs
-
---     for i, rune in ipairs(CC.Display.runes or {}) do
---         if rune and rune.SetColor then
---             rune:SetColor(isWarning and ZO_ColorDef:New(1, 0, 0, 1) or ZO_ColorDef:New(0.7176, 1, 0.4862, 1)) -- default to light green
---         end
---     end
-
---     zo_callLater(function() self:PeriodicUpdate() end, 500)
--- end
 function M:PeriodicUpdate()
-    local currentTime = GetGameTimeMilliseconds()
-    local lastGain = CC.State.lastCruxGainTime
+    local currentTimeMs = GetGameTimeMilliseconds()
+    local lastGainMs = CC.State.lastCruxGainTime
 
-    if not lastGain then
-        zo_callLater(function() self:PeriodicUpdate() end, 500)
+    if not lastGainMs then
+        zo_callLater(function() self:PeriodicUpdate() end, CC.settings.elements.runes.reimagined.expireWarnPollingInterval)
         return
     end
 
-    local elapsedMs = currentTime - lastGain
-    local elapsedSec = elapsedMs / 1000
+    local elapsedSec = (currentTimeMs - lastGainMs) / 1000  -- convert ms to seconds
 
     for _, rune in ipairs(CC.Display.runes or {}) do
         if rune and rune.UpdateColorBasedOnElapsed then
-            rune:UpdateColorBasedOnElapsed(elapsedSec)
+            rune:UpdateColorBasedOnElapsed(elapsedSec, CC.settings)
         end
     end
 
-    zo_callLater(function() self:PeriodicUpdate() end, 500)
+    zo_callLater(function() self:PeriodicUpdate() end, CC.settings.elements.runes.reimagined.expireWarnPollingInterval)
 end
-
-
 
 function M:StartPeriodicUpdate()
     self:PeriodicUpdate()

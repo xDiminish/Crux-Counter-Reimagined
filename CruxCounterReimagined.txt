@@ -25,7 +25,7 @@ src/elements/Rune.lua
 src/elements/Orbit.lua
 src/elements/Aura.lua
 
-CruxCounterR.xml
+CruxCounterReimagined.xml
 
 ; This Add-on is an updated version of Crux Counter v1.3.0 created by @g4rr3t. 
 ; With the exception of the original Crux Counter v1.3.0 code, the original author

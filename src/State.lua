@@ -72,47 +72,6 @@ function M:SetStacks(count, playSound)
         end
     end
 end
--- function M:SetStacks(count, playSound)
---     if playSound == nil then playSound = true end
-
---     local previousStacks = self.stacks
---     self.stacks = count
-
---     if count == previousStacks then
---         CC.Debug:Trace(2, "Crux Unchanged: <<1>> -> <<2>>", previousStacks, count)
---         return
---     end
-
---     CC.Debug:Trace(2, "Updating Crux: <<1>> -> <<2>>", previousStacks, count)
---     CruxCounterR_Display:UpdateCount(count)
-
---     local soundToPlay
---     if count < previousStacks then
---         CC.Debug:Trace(1, "Crux Lost: <<1>> -> <<2>>", previousStacks, count)
---         soundToPlay = "cruxLost"
---     elseif count >= previousStacks then
---         CC.Debug:Trace(1, "Crux Gained: <<1>> -> <<2>>", previousStacks, count)
-
---         -- Track last crux gained time
---         self.lastCruxGainTime = GetGameTimeMilliseconds()
-
---         -- Reset all rune colors to green on any Crux gain
---         if CC.Display and CC.Display.ResetRuneColors then
---             CC.Display:ResetRuneColors()
---         end
-
---         if count < self.maxStacks then
---             soundToPlay = "cruxGained"
---         else
---             soundToPlay = "maxCrux"
---         end
---     end
-
---     if playSound then
---         CC.UI:PlaySoundForType(soundToPlay)
---     end
--- end
-
 
 --- Reset stack count to zero
 --- @return nil

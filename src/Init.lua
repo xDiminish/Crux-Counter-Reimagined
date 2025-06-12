@@ -23,6 +23,8 @@ local function init(_, addonName)
 
     CC.Language:Setup()
     CC.Settings:Setup()
+    CC.settings = CC.Settings.settings
+    d("[CruxCounter] CC.settings initialized: " .. tostring(CC.settings))
     CruxCounterR_Display:ApplySettings()
 
     -- Initialize rune display
