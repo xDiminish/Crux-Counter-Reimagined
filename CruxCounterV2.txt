@@ -1,0 +1,38 @@
+## Title: Crux Counter v2
+## APIVersion: 101046
+## SavedVariables: CruxCounterV2Data
+## Description: Crux Counter updated with subclassing support
+## Version: 2.0.0
+## AddOnVersion: 020001
+## Author: |c4cdcb2Dim|r (@xDiminish) (NA)
+## DependsOn: LibAddonMenu-2.0>=40
+
+src/Addon.lua
+src/Debug.lua
+
+src/lang/en.lua
+src/lang/$(language).lua
+src/Language.lua
+
+src/Settings.lua
+src/Interface.lua
+src/State.lua
+src/Events.lua
+src/Init.lua
+
+src/elements/Ring.lua
+src/elements/Rune.lua
+src/elements/Orbit.lua
+src/elements/Aura.lua
+
+CruxCounterV2.xml
+
+; This Add-on is an updated version of Crux Counter v1.3.0 created by @g4rr3t to add 
+; support for subclassing. With the exception of the original code, the original author
+; is not affiliated with this version of the Add-on.
+;
+; Furthermore, this Add-on is not created by, affiliated with or sponsored by ZeniMax
+; Media Inc. or its affiliates. The Elder Scrolls® and related logos are
+; registered trademarks or trademarks of ZeniMax Media Inc. in the United
+; States and/or other countries. All rights reserved.
+; You can read the full terms at https://account.elderscrollsonline.com/add-on-terms
