@@ -73,31 +73,56 @@ local function onPlayerChanged()
     end)
 end
 
--- -----------------------------------------------------------------------------
--- Crux buff poller
--- -----------------------------------------------------------------------------
-function M:PeriodicUpdate()
-    local currentTimeMs = GetGameTimeMilliseconds()
-    local lastGainMs = CC.State.lastCruxGainTime
+--- Periodically checks the time since the last Crux gain and updates rune and ring colors
+--- based on whether the Crux is nearing expiration. Continues polling at a defined interval.
+--- 
+--- Uses settings from `CC.settings.reimagined.expireWarning` to determine:
+--- - `pollingInterval` (in ms)
+--- - `threshold` (in sec) for expiration warning
+--- - `color` settings for both runes and background ring
+---
+--- @return nil
+function M:UpdateWarnState()
+    local currentTimeMs     = GetGameTimeMilliseconds()
+    local lastGainMs        = CC.State.lastCruxGainTime
+
+    local baseSettings = CC.settings
+    if not baseSettings then
+        CC.Debug:Trace(3, "[Crux Counter Reimagined] ERROR: baseSettings is nil")
+        return
+    end
+
+    local reimaginedSettings    = baseSettings.reimagined or {}
+    local pollingInterval       = (reimaginedSettings.expireWarning and reimaginedSettings.expireWarning.pollingInterval) or 200
 
     if not lastGainMs then
-        zo_callLater(function() self:PeriodicUpdate() end, CC.settings.elements.runes.reimagined.expireWarnPollingInterval)
+        zo_callLater(function() self:UpdateWarnState() end, pollingInterval)
         return
     end
 
     local elapsedSec = (currentTimeMs - lastGainMs) / 1000  -- convert ms to seconds
 
+    -- Update runes color as crux nears expiration, passing full CC.settings for element access
     for _, rune in ipairs(CC.Display.runes or {}) do
         if rune and rune.UpdateColorBasedOnElapsed then
-            rune:UpdateColorBasedOnElapsed(elapsedSec, CC.settings)
+            rune:UpdateColorBasedOnElapsed(elapsedSec, baseSettings)
         end
     end
 
-    zo_callLater(function() self:PeriodicUpdate() end, CC.settings.elements.runes.reimagined.expireWarnPollingInterval)
+    -- Update ring color similarly
+    if CC.Display.ring and CC.Display.ring.UpdateColorBasedOnElapsed then
+        CC.Display.ring:UpdateColorBasedOnElapsed(elapsedSec, baseSettings)
+    end
+
+    zo_callLater(function() self:UpdateWarnState() end, pollingInterval)
 end
 
-function M:StartPeriodicUpdate()
-    self:PeriodicUpdate()
+--- Starts the periodic loop to monitor Crux expiration and update visuals.
+--- Calls `UpdateWarnState()` once, which schedules itself repeatedly.
+---
+--- @return nil
+function M:PollUpdateWarnState()
+    self:UpdateWarnState()
 end
 
 -- When stack count increases, save start time

@@ -46,10 +46,16 @@ function M:SetStacks(count, playSound)
     end
 
     if cruxGainedOrRefreshed then
-        self.lastCruxGainTime = GetGameTimeMilliseconds()
+        -- self.lastCruxGainTime = GetGameTimeMilliseconds()
+        CC.State.lastCruxGainTime = GetGameTimeMilliseconds()
 
+        -- Reset rune display
         if CC.Display and CC.Display.ResetRuneColors then
             CC.Display:ResetRuneColors()
+        end
+        -- Reset ring display
+        if CC.Display and CC.Display.ResetRingColor then
+            CC.Display:ResetRingColor()
         end
     end
 

@@ -2,7 +2,7 @@
 -- Addon.lua
 -- -----------------------------------------------------------------------------
 
-CruxCounterR = {}
+CruxCounterR = CruxCounterR or {}
 
 --- @type { name: string, version: string } General addon information
 local M = {

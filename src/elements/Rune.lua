@@ -2,8 +2,9 @@
 -- Rune.lua
 -- -----------------------------------------------------------------------------
 
-local AM          = ANIMATION_MANAGER
-local orbitRadius = 32
+local AM                = ANIMATION_MANAGER
+local CC                = CruxCounterR
+local orbitRadius       = 32
 
 --- @class CruxCounterR_Rune
 --- @field New fun(self, control: any, index: number)
@@ -67,6 +68,13 @@ end
 --- @param color ZO_ColorDef
 --- @return nil
 function CruxCounterR_Rune:SetColor(color)
+    if not self.rune or not self.glow or not self.smoke or not self.smoke.control then
+        CC.Debug:Trace(3, "[Crux Counter Reimagined Rune] ERROR: one or more controls are nil in SetColor")
+        return
+    end
+
+    CC.Debug:Trace(3, string.format("[Crux Counter Reimagined] Rune SetColor called with RGBA = %.2f, %.2f, %.2f, %.2f", color:UnpackRGBA()))
+
     self.rune:SetColor(color:UnpackRGBA())
     self.glow:SetColor(color:UnpackRGBA())
     self.smoke.control:SetColor(color:UnpackRGBA())
@@ -130,69 +138,34 @@ function CruxCounterR_Rune:IsShowing()
     return self.control:GetAlpha() == 1
 end
 
-local function EnsureColorDef(color)
-    if not color then return nil end
-    if color.UnpackRGBA then
-        return color  -- already ZO_ColorDef
-    elseif type(color) == "table" then
-        -- Create a ZO_ColorDef from table fields, defaulting missing channels to 1 or 0
-        return ZO_ColorDef:New(
-            color.r or color[1] or 1,
-            color.g or color[2] or 1,
-            color.b or color[3] or 1,
-            color.a or color[4] or 1
-        )
-    else
-        return nil
-    end
-end
-
---- Update a rune color based on elapsed time
+--- Updates the color of the runes based on how much time has elapsed.
+---
+--- If the elapsed time is within the "expire warning" threshold, the rune colors
+--- switch to the defined warning color. Otherwise, it uses the base rune color.
+---
+--- @param elapsedSec number Time in seconds that has passed since the Crux was gained.
+--- @param baseSettings table The full SavedVariables settings table containing color 
+--- definitions and warning thresholds under `.elements.runes and `.reimagined.expireWarning`.
+---
 --- @return nil
--- function CruxCounterR_Rune:UpdateColorBasedOnElapsed(elapsedSec, settings)
---     if not settings then
---         d("[CruxCounter] ERROR: settings is nil")
---         return
---     end
-
---     local runeSettings = settings.elements and settings.elements.runes
---     if not runeSettings then
---         d("[CruxCounter] ERROR: settings.elements.runes is nil")
---         return
---     end
-
---     local baseColor = EnsureColorDef(runeSettings.color) or ZO_ColorDef:New(0.7176, 1, 0.4862, 1)
---     local warnColor = EnsureColorDef(runeSettings.expireWarnColor) or ZO_ColorDef:New(1, 0, 0, 1)
-
---     local totalDurationSec = settings.cruxDuration or 30
---     local warningThresholdRemainingSec = runeSettings.expireWarnThreshold or 25
---     local warningElapsedSec = totalDurationSec - warningThresholdRemainingSec
-
---     local epsilon = 0.1 -- 100 ms margin
---     if elapsedSec + epsilon >= warningElapsedSec - 1 then
---         self:SetColor(warnColor)
---     else
---         self:SetColor(baseColor)
---     end
--- end
-function CruxCounterR_Rune:UpdateColorBasedOnElapsed(elapsedSec, settings)
-    if not settings then
-        d("[CruxCounter] ERROR: settings is nil")
+function CruxCounterR_Rune:UpdateColorBasedOnElapsed(elapsedSec, baseSettings)
+    if not baseSettings then
+        CC.Debug:Trace(3, "[Crux Counter Reimagined] ERROR: baseSettings is nil")
         return
     end
 
-    local runeSettings = settings.elements and settings.elements.runes
-    if not runeSettings then
-        d("[CruxCounter] ERROR: settings.elements.runes is nil")
+    local reimaginedSettings = baseSettings.reimagined or {}
+    if not reimaginedSettings then
+        CC.Debug:Trace(3, "[Crux Counter Reimagined] ERROR: reimaginedSettings is nil")
         return
     end
 
-    local baseColor = EnsureColorDef(runeSettings.color) or ZO_ColorDef:New(0.7176, 1, 0.4862, 1)
-    local warnColor = EnsureColorDef(runeSettings.reimagined.expireWarnColor) or ZO_ColorDef:New(1, 0, 0, 1)
+    local baseColor = CruxCounterR.UI:GetEnsuredColor(baseSettings.elements.runes.color)
+    local warnColor = CruxCounterR.UI:GetEnsuredColor(reimaginedSettings.expireWarning.elements.runes.color, ZO_ColorDef:New(1, 0, 0, 1))
 
-    local totalDurationSec = settings.cruxDuration or 30
-    local warningThresholdRemainingSec = runeSettings.reimagined.expireWarnThreshold or 25
-    local warningElapsedSec = totalDurationSec - warningThresholdRemainingSec
+    local totalDurationSec              = reimaginedSettings.cruxDuration or 30
+    local warningThresholdRemainingSec  = reimaginedSettings.expireWarning.threshold or 25
+    local warningElapsedSec             = totalDurationSec - warningThresholdRemainingSec
 
     local epsilon = 0.1 -- 100 ms margin
     if elapsedSec + epsilon >= warningElapsedSec - 1 then

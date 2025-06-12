@@ -24,7 +24,9 @@ local function init(_, addonName)
     CC.Language:Setup()
     CC.Settings:Setup()
     CC.settings = CC.Settings.settings
-    d("[CruxCounter] CC.settings initialized: " .. tostring(CC.settings))
+
+    CC.Debug:Trace(1, "[Crux Counter Reimagined] CC.settings initialized: " .. tostring(CC.settings))
+    
     CruxCounterR_Display:ApplySettings()
 
     -- Initialize rune display
@@ -35,8 +37,8 @@ local function init(_, addonName)
         EM:UnregisterForEvent("CruxCounterR_InitPlayerActivated", EVENT_PLAYER_ACTIVATED)
         CC.Events:RegisterEvents()
 
-        -- Start periodic update loop for Crux color updates in Events.lua
-        CC.Events:StartPeriodicUpdate()
+        -- Start polling for updates to the warn state
+        CC.Events:PollUpdateWarnState()
     end)
 end
 
