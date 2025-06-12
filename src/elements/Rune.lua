@@ -146,8 +146,8 @@ end
 --     end
 -- end
 function CruxCounterR_Rune:UpdateColorBasedOnElapsed(elapsedSec)
-    local rune = GetRuneSettings()
-    if not rune then
+    local runes = GetRuneSettings()
+    if not runes then
         d("[CruxCounter] Rune settings missing!")
         return
     end
@@ -156,14 +156,14 @@ function CruxCounterR_Rune:UpdateColorBasedOnElapsed(elapsedSec)
     local totalDurationSec = M.settings.cruxDuration or M.defaults.cruxDuration or 30
 
     -- How long before expiration to start warning
-    local warnThresholdSec = rune.expireWarnThreshold or 5
+    local warnThresholdSec = runes.expireWarnThreshold or 5
     local warnStartTimeSec = totalDurationSec - warnThresholdSec
 
     -- Normal color fallback (greenish)
-    local normalColor = rune.color or ZO_ColorDef:New(0.7176, 1, 0.4862, 1)
+    local normalColor = runes.color or ZO_ColorDef:New(0.7176, 1, 0.4862, 1)
 
     -- Warning color fallback (red)
-    local warnColorTable = rune.expireWarnColor or { r = 1, g = 0, b = 0, a = 1 }
+    local warnColorTable = runes.expireWarnColor or { r = 1, g = 0, b = 0, a = 1 }
     local warnColor = ZO_ColorDef:New(warnColorTable.r, warnColorTable.g, warnColorTable.b, warnColorTable.a)
 
     if elapsedSec >= warnStartTimeSec then

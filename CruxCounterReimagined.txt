@@ -1,9 +1,9 @@
 ## Title: Crux Counter (Reimagined)
 ## APIVersion: 101046
 ## SavedVariables: CruxCounterReimaginedData
-## Description: Crux Counter updated with subclassing support
-## Version: 1.0.1
-## AddOnVersion: 010001
+## Description: Crux Counter reimagined with new features and support!
+## Version: 1.0.2
+## AddOnVersion: 010002
 ## Author: |c4cdcb2Dim|r (@xDiminish) (NA)
 ## DependsOn: LibAddonMenu-2.0>=40
 

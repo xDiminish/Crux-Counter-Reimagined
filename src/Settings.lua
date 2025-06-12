@@ -446,16 +446,32 @@ end
 local function GetRuneSettings()
     local settings = M.settings or {}
     local elements = settings.elements or {}
-    local rune = elements.rune or {}  -- singular
+    local runes = elements.runes or {}  -- singular
 
     -- fallback to defaults if missing
     local defaults = M.defaults or {}
     local defaultElements = defaults.elements or {}
-    local defaultRune = defaultElements.rune or {}  -- singular
+    local defaultRunes = defaultElements.runes or {}  -- singular
 
     return setmetatable(rune, { __index = defaultRune })
 end
 
+local function getCruxWarnThreshold()
+    return M:GetElement("runes").expireWarnThreshold
+end
+
+local function setCruxWarnThreshold(v)
+    M.settings.elements.runes.expireWarnThreshold = v
+end
+
+local function getCruxWarnColor()
+    local c = M:GetElement("runes").expireWarnColor
+    return c.r, c.g, c.b, c.a
+end
+
+local function setCruxWarnColor(r, g, b, a)
+    M.settings.elements.runes.expireWarnColor = {r=r,g=g,b=b,a=a}
+end
 
 --- @type table Options for Style settings
 local styleOptions = {
@@ -1117,12 +1133,12 @@ function M:Setup()
 
     LAM:RegisterAddonPanel(addon.name, {
         type               = "panel",
-        name               = "Crux Counter v2",
-        displayName        = "Crux Counter v2",
+        name               = "Crux Counter (Reimagined)",
+        displayName        = "Crux Counter (Reimagined)",
         author             = "Dim (@xDiminish)",
         version            = addon.version,
         registerForRefresh = true,
-        slashCommand       = "/ccv2",
+        slashCommand       = "/ccr",
     })
     LAM:RegisterOptionControls(addon.name, optionsData)
 
