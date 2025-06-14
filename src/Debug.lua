@@ -41,4 +41,20 @@ function M:SayLater(delayMs, ...)
     end, delayMs)
 end
 
+--- Helper to print RGBA values of a color
+--- @param label string - A descriptive label
+--- @param color ZO_ColorDef or nil
+function M:PrintColor(label, color)
+    if not color then
+        self:Trace(2, "%s: nil", label)
+        return
+    end
+
+    -- Unpack the color into individual red, green, blue, and alpha components
+    -- Each component is a number between 0 and 1
+    local r, g, b, a = color:UnpackRGBA()
+
+    self:Trace(2, "%s: r=%.2f g=%.2f b=%.2f a=%.2f", label, r, g, b, a)
+end
+
 CC.Debug = M

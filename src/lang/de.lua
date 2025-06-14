@@ -86,6 +86,27 @@ function M.Setup()
 
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_CRUX_LOST", "Crux verloren")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_CRUX_LOST_DESC", "Spielt einen Ton ab, wenn man Crux verliert.")
+
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR", "Textfarbe bei Ablaufwarnung")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR_DESC", "Die Farbe der aktiven Crux-Anzahl, wenn sie kurz vor dem Ablauf steht.")
+
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR_RESET", "Farbe zurücksetzen")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR_RESET_DESC", "Setzt die Warntextfarbe für ablaufende Crux auf den Standardwert zurück.")
+
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR", "Warnfarbe für Rune bei Ablauf")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR_DESC", "Die Farbe aktiver Runen, wenn sie kurz vor dem Ablauf stehen.")
+
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR_RESET", "Farbe zurücksetzen")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR_RESET_DESC", "Setzt die Warnfarbe für ablaufende Runen auf den Standardwert zurück.")
+
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_POLLING_INTERVAL", "Abfrageintervall der Ablaufwarnung")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_POLLING_INTERVAL_DESC", "Wie oft (in Millisekunden) überprüft wird, wie viel Zeit bis zum Ablauf des Crux-Buffs verbleibt.")
+
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR", "Warnfarbe für Hintergrund bei Ablauf")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR_DESC", "Die Farbe der Hintergrundtextur, wenn Runen kurz vor dem Ablauf stehen.")
+
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR_RESET", "Farbe zurücksetzen")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR_RESET_DESC", "Setzt die Warnfarbe des Hintergrunds für ablaufende Crux auf den Standardwert zurück.")
 end
 
 CC.Translation = M

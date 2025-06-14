@@ -88,6 +88,27 @@ function M.Setup()
 
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_CRUX_LOST", "Perte d'Interprétation")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_CRUX_LOST_DESC", "Jouer un son lorsqu'on perd de l'Interprétation.")
+
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR", "Couleur du texte d'avertissement d'expiration")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR_DESC", "La couleur du nombre de Crux actif lorsqu'il est sur le point d'expirer.")
+
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR_RESET", "Réinitialiser la couleur")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR_RESET_DESC", "Réinitialise la couleur du texte d'avertissement d'expiration du Crux à la valeur par défaut.")
+
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR", "Couleur de la rune d'avertissement d'expiration")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR_DESC", "La couleur des runes actives lorsqu'elles sont sur le point d'expirer.")
+
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR_RESET", "Réinitialiser la couleur")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR_RESET_DESC", "Réinitialise la couleur d'avertissement d'expiration des runes à la valeur par défaut.")
+
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_POLLING_INTERVAL", "Intervalle de vérification d'expiration")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_POLLING_INTERVAL_DESC", "Fréquence à laquelle la durée restante avant l'expiration du bonus Crux est vérifiée (en millisecondes).")
+
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR", "Couleur d'arrière-plan d'avertissement d'expiration")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR_DESC", "La couleur de la texture d'arrière-plan lorsque les runes sont sur le point d'expirer.")
+
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR_RESET", "Réinitialiser la couleur")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR_RESET_DESC", "Réinitialise la couleur d'arrière-plan d'avertissement d'expiration du Crux à la valeur par défaut.")
 end
 
 CC.Translation = M

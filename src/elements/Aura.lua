@@ -97,12 +97,21 @@ function CruxCounterR_Aura:SetVisible(isVisible)
         if not self.fragment then
             self:AddSceneFragments()
         end
+
         self.control:SetHidden(false)
     else
         if self.fragment then
             self:RemoveSceneFragments()
         end
+        
         self.control:SetHidden(true)
+
+        -- Reset colors after hiding, with a small delay to allow transitions to finish
+        if CC.Display and CC.Display.ResetAllColors then
+            zo_callLater(function()
+                CC.Display:ResetAllColors()
+            end, 2000)
+        end
     end
 
     -- Debug
@@ -133,20 +142,25 @@ end
 function CruxCounterR_Aura:SetHandlers()
     self.control.OnMoveStop = function()
         CC.Debug:Trace(3, "Aura OnMoveStop")
-        local centerX, centerY = self.control:GetCenter()
-        local parentCenterX, parentCenterY = self.control:GetParent():GetCenter()
-        local top, left = centerY - parentCenterY, centerX - parentCenterX
+
+        local centerX, centerY              = self.control:GetCenter()
+        local parentCenterX, parentCenterY  = self.control:GetParent():GetCenter()
+        local top, left                     = centerY - parentCenterY, centerX - parentCenterX
+
         CC.Debug:Trace(3, "Top: <<1>> Left: <<2>>", top, left)
+
         CC.Settings:SavePosition(top, left)
     end
 
     self.control:SetHandler("OnMouseEnter", function()
         if CC.Settings:Get("locked") then return end
+
         WM:SetMouseCursor(MOUSE_CURSOR_PAN)
     end)
 
     self.control:SetHandler("OnMouseExit", function()
         if CC.Settings:Get("locked") then return end
+
         WM:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
     end)
 end
@@ -195,6 +209,7 @@ end
 --- @return nil
 function CruxCounterR_Aura:UpdateCount(count)
     CC.Debug:Trace(1, "Updating Aura count to <<1>>", count)
+
     self.count:SetText(count)
     self.orbit:UpdateCount(count)
     self.ring:UpdateCount(count)
@@ -205,6 +220,7 @@ end
 --- @return nil
 function CruxCounterR_Aura:SetMovable(movable)
     CC.Debug:Trace(2, "Setting movable <<1>>", movable)
+
     self.locked = not movable
     self.control:SetMovable(movable)
 end
@@ -222,4 +238,56 @@ end
 --- @return nil
 function CruxCounterR_Aura_OnMoveStop(self)
     self.OnMoveStop()
+end
+
+--- Updates the color of the number display based on elapsed time.
+---
+--- When the elapsed time passes the warning threshold (close to expiry), the
+--- number color switches to the configured warning color. Otherwise, it uses
+--- the base (normal) color.
+---
+--- @param elapsedSec number Time in seconds since the Crux was gained.
+--- @param baseSettings table SavedVariables settings containing color configs
+---        and expire warning thresholds under .elements.number and
+---        .reimagined.expireWarning.elements.number.
+---
+--- @return nil
+function CruxCounterR_Aura:UpdateColorBasedOnElapsed(elapsedSec, baseSettings)
+    -- Clamp elapsed time to 0
+    if elapsedSec < 0 then elapsedSec = 0 end
+
+    if not baseSettings then
+        CC.Debug:Trace(3, "[Crux Counter Reimagined] ERROR: baseSettings is nil")
+        return
+    end
+
+    local reimaginedSettings = baseSettings.reimagined or {}
+    if not reimaginedSettings then
+        CC.Debug:Trace(3, "[Crux Counter Reimagined] ERROR: reimaginedSettings is nil")
+        return
+    end
+
+    -- Check current stack count and set the base color if they are 0
+    local currentStacks = CC.State and CC.State.stacks or 0
+    if currentStacks == 0 then
+        -- No stacks, always use baseColor, no warning color
+        local baseColor = CruxCounterR.UI:GetEnsuredColor(baseSettings.elements.number.color)
+        CruxCounterR_Display:SetNumberColor(baseColor)
+        return
+    end
+
+    -- Get base and warning colors for number 
+    local baseColor = CruxCounterR.UI:GetEnsuredColor(baseSettings.elements.number.color)
+    local warnColor = CruxCounterR.UI:GetEnsuredColor(reimaginedSettings.expireWarning.elements.number.color, ZO_ColorDef:New(1, 1, 1, 1))
+
+    local totalDurationSec              = reimaginedSettings.cruxDuration or 30
+    local warningThresholdRemainingSec  = reimaginedSettings.expireWarning.threshold or 25
+    local warningElapsedSec             = totalDurationSec - warningThresholdRemainingSec
+    local epsilon                       = 0.1 -- 100ms margin
+
+    if elapsedSec + epsilon >= warningElapsedSec - 1 then
+        CruxCounterR_Display:SetNumberColor(warnColor)
+    else
+        CruxCounterR_Display:SetNumberColor(baseColor)
+    end
 end

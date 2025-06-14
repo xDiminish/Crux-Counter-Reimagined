@@ -4,7 +4,6 @@
 
 local AM          = ANIMATION_MANAGER
 local CC          = CruxCounterR
-
 local Rune        = CruxCounterR_Rune
 
 --- @class CruxCounterR_Orbit
@@ -163,10 +162,18 @@ function CruxCounterR_Orbit:Stop()
     self.timeline:Stop()
 end
 
---- Initialize the Runes within the Orbit
+--- Initialize the Runes within the Orbit element.
+--- Iterates through each child control named "Crux1", "Crux2", etc.,
+--- creates a Rune instance for each, and stores them in self.runes.
+--- @return nil
 function CruxCounterR_Orbit:InitializeRunes()
+    -- Loop through each child control of the main control
     for i = 1, self.control:GetNumChildren(), 1 do
+        -- Retrieve the child control named "Crux" concatenated with the index (r.g. "Crux1", "Crux2", etcc)
         local child = self.control:GetNamedChild("Crux" .. i)
+
+        -- Create a new Rune instance using the child control and the current index i
+        -- Store the new Rune object in the runes table at position i
         self.runes[i] = Rune:New(child, i)
     end
 end

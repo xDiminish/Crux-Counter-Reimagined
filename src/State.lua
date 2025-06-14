@@ -26,46 +26,38 @@ M.lastCruxGainTime = 0
 --- @param playSound boolean? Optional: True to evaluate sound playback logic, false to force not playing a sound
 --- @return nil
 function M:SetStacks(count, playSound)
-    if playSound == nil then playSound = true end
+    playSound               = (playSound ~= false) -- default true
+    local previousStacks    = self.stacks
+    self.stacks             = count
 
-    local previousStacks = self.stacks
-    self.stacks = count
+    local function isGainedOrRefreshed()
+        if count > previousStacks then
+            CC.Debug:Trace(1, "Crux Gained: <<1>> -> <<2>>", previousStacks, count)
+            return true
+        elseif count == previousStacks and count == self.maxStacks then
+            CC.Debug:Trace(1, "Crux Refreshed at Max Stack: <<1>>", count)
+            return true
+        elseif count < previousStacks then
+            CC.Debug:Trace(1, "Crux Lost: <<1>> -> <<2>>", previousStacks, count)
+        end
 
-    -- Always check if a Crux was gained or refreshed
-    local cruxGainedOrRefreshed = false
-
-    if count > previousStacks then
-        cruxGainedOrRefreshed = true
-        CC.Debug:Trace(1, "Crux Gained: <<1>> -> <<2>>", previousStacks, count)
-    elseif count == previousStacks and count == self.maxStacks then
-        -- Special case: Already at 3, but a new Crux was generated and replaced the oldest
-        cruxGainedOrRefreshed = true
-        CC.Debug:Trace(1, "Crux Refreshed at Max Stack: <<1>>", count)
-    elseif count < previousStacks then
-        CC.Debug:Trace(1, "Crux Lost: <<1>> -> <<2>>", previousStacks, count)
+        return false
     end
+
+    local cruxGainedOrRefreshed = isGainedOrRefreshed()
 
     if cruxGainedOrRefreshed then
-        -- self.lastCruxGainTime = GetGameTimeMilliseconds()
         CC.State.lastCruxGainTime = GetGameTimeMilliseconds()
-
-        -- Reset rune display
-        if CC.Display and CC.Display.ResetRuneColors then
-            CC.Display:ResetRuneColors()
-        end
-        -- Reset ring display
-        if CC.Display and CC.Display.ResetRingColor then
-            CC.Display:ResetRingColor()
-        end
     end
 
-    -- Only update UI and play sounds if stack count actually changed
     if count ~= previousStacks then
         CC.Debug:Trace(2, "Updating Crux: <<1>> -> <<2>>", previousStacks, count)
+
         CruxCounterR_Display:UpdateCount(count)
 
         if playSound then
             local soundToPlay = nil
+
             if count < previousStacks then
                 soundToPlay = "cruxLost"
             elseif count > previousStacks then
@@ -77,6 +69,10 @@ function M:SetStacks(count, playSound)
             end
         end
     end
+end
+
+function M:GetCruxCount()
+    return self.stacks or 0
 end
 
 --- Reset stack count to zero

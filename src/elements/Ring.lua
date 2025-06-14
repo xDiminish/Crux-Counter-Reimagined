@@ -13,12 +13,11 @@ CruxCounterR_Ring = ZO_InitializingObject:Subclass()
 --- @param control any Element control
 --- @return nil
 function CruxCounterR_Ring:Initialize(control)
-    self.control = control
-
-    local settings = CC.Settings:GetElement("background")
-    self.enabled = settings.enabled
-    self.rotationEnabled = settings.rotate
-    self.hideZeroStacks = settings.hideZeroStacks
+    self.control            = control
+    local settings          = CC.Settings:GetElement("background")
+    self.enabled            = settings.enabled
+    self.rotationEnabled    = settings.rotate
+    self.hideZeroStacks     = settings.hideZeroStacks
 
     self.timelines = {
         rotate  = AM:CreateTimelineFromVirtual("CruxCounterR_RotateBG", self.control),
@@ -60,7 +59,7 @@ end
 --- @param shouldShow boolean True to show the Ring background
 --- @return nil
 function CruxCounterR_Ring:SetShowing(shouldShow)
-    local hidden = self:IsHidden()
+    local hidden    = self:IsHidden()
     local animation = shouldShow and "fadeIn" or "fadeOut"
 
     -- Skip animation when already in preferred state
@@ -91,6 +90,7 @@ function CruxCounterR_Ring:SetColor(color)
     end
 
     CC.Debug:Trace(3, string.format("[Crux Counter Reimagined] Ring SetColor called with RGBA = %.2f, %.2f, %.2f, %.2f", color:UnpackRGBA()))
+
     self.control:SetColor(color:UnpackRGBA())
 end
 
@@ -107,6 +107,7 @@ end
 --- @return nil
 function CruxCounterR_Ring:SetHideZeroStacks(hideZero)
     self.hideZeroStacks = hideZero
+
     if hideZero then
         self:SetShowing(CC.State.stacks > 0)
     else

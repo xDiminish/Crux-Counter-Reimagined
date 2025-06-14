@@ -5,7 +5,7 @@
 local CC = CruxCounterR
 local M  = {}
 
-CC.Display = {}
+CC.Display = M
 
 --- Play a sound at a specific volume
 --- @param sound string Name of the sound
@@ -86,14 +86,15 @@ function CC.Display:Initialize()
     }
 
     -- Resolve color defs once using fallback-safe wrapper
-    local runeColor = CC.UI:GetEnsuredColor(baseSettings.elements.runes.color)
-    local ringColor = CC.UI:GetEnsuredColor(baseSettings.elements.background.color)
+    local runeColor     = CC.UI:GetEnsuredColor(baseSettings.elements.runes.color)
+    local ringColor     = CC.UI:GetEnsuredColor(baseSettings.elements.background.color)
+    local numberColor   = CC.UI:GetEnsuredColor(baseSettings.elements.number.color)
 
     -- Initialize rune controls
     for i, control in ipairs(runeControls) do
         if control then
-            local rune = CruxCounterR_Rune:New(control, i)
-            self.runes[i] = rune
+            local rune      = CruxCounterR_Rune:New(control, i)
+            self.runes[i]   = rune
 
             if rune and rune.SetColor then
                 rune:SetColor(runeColor)
@@ -107,8 +108,10 @@ function CC.Display:Initialize()
 
     -- Initialize ring control
     local ringControl = WINDOW_MANAGER:GetControlByName("CruxCounterR_AuraControlBG")
+
     if ringControl then
         self.ring = CruxCounterR_Ring:New(ringControl)
+
         if self.ring.SetColor then
             self.ring:SetColor(ringColor)
         else
@@ -116,6 +119,13 @@ function CC.Display:Initialize()
         end
     else
         CC.Debug:Trace(2, "[Crux Counter Reimagined] Ring control is missing!")
+    end
+
+    -- Initialize number color
+    if self.SetNumberColor then
+        self:SetNumberColor(numberColor)
+    else
+        CC.Debug:Trace(2, "[Crux Counter Reimagined] Display missing SetNumberColor method!")
     end
 end
 
@@ -130,9 +140,20 @@ end
 --- Calls `SetColor` on each rune if available.
 --- @return nil
 function CC.Display:ResetRuneColors()
+    local baseSettings = CC.settings or {}
+
     for i, rune in ipairs(self.runes or {}) do
         if rune and rune.SetColor then
-            rune:SetColor(ZO_ColorDef:New(0.7176, 1, 0.4862, 1)) -- light green
+            local runeColor = CruxCounterR.UI:GetEnsuredColor(
+                baseSettings.elements 
+                and baseSettings.elements.runes 
+                and baseSettings.elements.runes.color,
+                ZO_ColorDef:New(0.7176, 1, 0.4862, 1) -- light green (fallback)
+            )
+
+            rune:SetColor(runeColor)
+        else
+            CC.Debug:Trace(2, "[Crux Counter Reimagined] ResetRingColor: rune or SetColor is nil")
         end
     end
 end
@@ -142,7 +163,99 @@ end
 --- @return nil
 function CC.Display:ResetRingColor()
     if self.ring and self.ring.SetColor then
-        self.ring:SetColor(ZO_ColorDef:New(0.6784, 0.9607,0.4509, 1)) -- medium green
+        local baseSettings = CC.settings or {}
+
+        -- Use color from base settings or fallback medium green color
+        local color = CruxCounterR.UI:GetEnsuredColor(
+            baseSettings.elements 
+            and baseSettings.elements.background 
+            and baseSettings.elements.background.color,
+            ZO_ColorDef:New(0.6784, 0.9607, 0.4509, 1) -- medium green (fallback)
+        )
+
+        self.ring:SetColor(color)
+    else
+        CC.Debug:Trace(2, "[Crux Counter Reimagined] ResetRingColor: ring or SetColor is nil")
+    end
+end
+
+--- Resets the number color to the default base color from settings.
+--- Calls `SetNumberColor` on the display if available.
+--- @return nil
+function CC.Display:ResetNumberColor()
+    d("- ResetNumberColor")
+
+    if CruxCounterR_Display and CruxCounterR_Display.SetNumberColor then
+        local baseSettings      = CC.settings or {}
+       
+        local color = CruxCounterR.UI:GetEnsuredColor(
+            baseSettings.elements 
+            and baseSettings.elements.number 
+            and baseSettings.elements.number.color, 
+            ZO_ColorDef:New(0.7176, 1, 0.7764, 1)
+        )
+
+        CruxCounterR.PrintColor("Current Color", color)        
+        CruxCounterR_Display:SetNumberColor(color)
+    else
+        CC.Debug:Trace(2, "[Crux Counter Reimagined] ResetRingColor: aura or SetNumberColor is nil")
+    end
+end
+
+--- Updates a control's color based on time elapsed and threshold
+--- @param elapsedSec number Elapsed time in seconds
+--- @param baseSettings table The settings table
+--- @param currentStacks number Current crux stack count
+--- @param colorKey string Key inside `elements` (e.g., "runes", "number", "background")
+--- @param setColorFunc function Function to apply the color (e.g., control:SetColor or aura:SetNumberColor)
+function CC.Display:UpdateElementColor(elapsedSec, baseSettings, currentStacks, colorKey, setColorFunc)
+    if elapsedSec < 0 then elapsedSec = 0 end
+    if not baseSettings then return end
+
+    local reimagined        = baseSettings.reimagined or {}
+    local totalDurationSec  = reimagined.cruxDuration or 30
+    local thresholdSec      = reimagined.expireWarning and reimagined.expireWarning.threshold or 25
+    local warnElapsedSec    = totalDurationSec - thresholdSec
+    local epsilon           = 0.1
+
+    local baseColor = CruxCounterR.UI:GetEnsuredColor(baseSettings.elements[colorKey].color)
+    local warnColor = CruxCounterR.UI:GetEnsuredColor(
+        (reimagined.expireWarning.elements[colorKey] and reimagined.expireWarning.elements[colorKey].color),
+        ZO_ColorDef:New(1, 0, 0, 1) -- default to red
+    )
+
+    if currentStacks == 0 then
+        setColorFunc(baseColor)
+        return
+    end
+
+    if elapsedSec + epsilon >= warnElapsedSec - 1 then
+        setColorFunc(warnColor)
+    else
+        setColorFunc(baseColor)
+    end
+end
+
+function M:ResetAllColors()
+    local baseSettings = CC.settings
+
+    if not baseSettings then return end
+
+    for _, rune in ipairs(CC.Display.runes or {}) do
+        if rune and rune.SetColor then
+            local baseColor = CruxCounterR.UI:GetEnsuredColor(baseSettings.elements.runes.color)
+            rune:SetColor(baseColor)
+        end
+    end
+
+    if CC.Display.ring and CC.Display.ring.SetColor then
+        local baseColor = CruxCounterR.UI:GetEnsuredColor(baseSettings.elements.background.color)
+        CC.Display.ring:SetColor(baseColor)
+    end
+
+    if CruxCounterR_Display and CruxCounterR_Display.SetNumberColor then
+        local baseColor = CruxCounterR.UI:GetEnsuredColor(baseSettings.elements.number.color)
+        CruxCounterR_Display:SetNumberColor(baseColor)
     end
 end
 

@@ -102,16 +102,44 @@ function M:UpdateWarnState()
 
     local elapsedSec = (currentTimeMs - lastGainMs) / 1000  -- convert ms to seconds
 
-    -- Update runes color as crux nears expiration, passing full CC.settings for element access
+    if not CC.State.GetCruxCount then
+        CC.Debug:Trace(3, "ERROR: GetCruxCount is nil, retrying later")
+
+        zo_callLater(function() self:UpdateWarnState() end, pollingInterval)
+
+        return
+    end
+
+    local cruxCount = CC.State:GetCruxCount()
+
+    CC.Debug:Trace(3, "Current Crux Count: <<1>>", tostring(cruxCount))
+
+    if cruxCount == 0 then
+        CC.Debug:Trace(3, "Resetting all colors due to zero crux count...")
+
+        -- reset all control colors to help prevent color flicker on initial crux gain
+        CC.Display:ResetAllColors()
+
+        -- Still schedule next update to keep checking for changes
+        zo_callLater(function() self:UpdateWarnState() end, pollingInterval)
+        return
+    end
+
+    -- Update runes color as crux nears expiration
     for _, rune in ipairs(CC.Display.runes or {}) do
         if rune and rune.UpdateColorBasedOnElapsed then
             rune:UpdateColorBasedOnElapsed(elapsedSec, baseSettings)
         end
     end
 
-    -- Update ring color similarly
+    -- Update ring color as crux nears expiration
     if CC.Display.ring and CC.Display.ring.UpdateColorBasedOnElapsed then
         CC.Display.ring:UpdateColorBasedOnElapsed(elapsedSec, baseSettings)
+    end
+
+    -- -- Update number color as crux nears expiration
+    if CruxCounterR_Display and CruxCounterR_Display.UpdateColorBasedOnElapsed then
+        CruxCounterR_Display:UpdateColorBasedOnElapsed(elapsedSec, baseSettings)
     end
 
     zo_callLater(function() self:UpdateWarnState() end, pollingInterval)
@@ -119,9 +147,13 @@ end
 
 --- Starts the periodic loop to monitor Crux expiration and update visuals.
 --- Calls `UpdateWarnState()` once, which schedules itself repeatedly.
----
 --- @return nil
 function M:PollUpdateWarnState()
+    if not CC.State or not CC.State.GetCruxCount then
+        CC.Debug:Trace(1, "[CruxCounterReimagined] WARN: CC.State or GetCruxCount not ready, retrying later")
+        zo_callLater(function() self:PollUpdateWarnState() end, 100)
+        return
+    end
     self:UpdateWarnState()
 end
 
@@ -164,10 +196,10 @@ end
 --- Update addon visibility
 --- @return nil
 function M:UpdateVisibility()
-    local isArcanist = self:IsArcanist()
-    local hideOutOfCombat = CC.Settings:Get("hideOutOfCombat")
-    local inCombat = CC.State:IsInCombat()
-    local shouldShow = isArcanist and (not hideOutOfCombat or inCombat)
+    local isArcanist        = self:IsArcanist()
+    local hideOutOfCombat   = CC.Settings:Get("hideOutOfCombat")
+    local inCombat          = CC.State:IsInCombat()
+    local shouldShow        = isArcanist and (not hideOutOfCombat or inCombat)
 
     if CruxCounterR_Display and CruxCounterR_Display.SetVisible then
         CruxCounterR_Display:SetVisible(shouldShow)
@@ -269,7 +301,10 @@ function M:RegisterEvents()
     CC.Debug:Trace(2, "Registering events...")
 
     -- Ability updates
-    self:Listen("EffectChanged", EVENT_EFFECT_CHANGED, onEffectChanged)
+    -- self:Listen("EffectChanged", EVENT_EFFECT_CHANGED, onEffectChanged)
+    self:Listen("EffectChanged", EVENT_EFFECT_CHANGED, function(eventCode, ...)
+        return onEffectChanged(eventCode, ...)
+    end)
     self:AddFilter(
         "EffectChanged",
         EVENT_EFFECT_CHANGED,

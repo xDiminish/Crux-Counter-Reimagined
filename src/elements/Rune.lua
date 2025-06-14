@@ -49,10 +49,12 @@ function CruxCounterR_Rune:Initialize(control, num)
     self.timelines.fadeOut:SetHandler("OnStop", function()
         self:SetRotation2D(self.startingRotation)
         self.smoke.timeline:Stop()
+        self:StopSpin()
     end)
 
     self.timelines.fadeIn:SetHandler("OnPlay", function()
         self.smoke.timeline:PlayFromStart()
+        self:PlaySpin()
     end)
 
     control.OnHidden = function()
@@ -61,6 +63,41 @@ function CruxCounterR_Rune:Initialize(control, num)
 
     control.OnShow = function()
         self.smoke.timeline:PlayFromStart()
+    end
+
+    self.spinTimeline = nil
+    local runeControl = self.rune
+
+    if runeControl then
+        -- Assign spinTimeline based on rune number
+        if num % 2 == 1 then
+            -- Odd runes: clockwise
+            self.spinTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CruxCounterR_SpinRuneCW", self.rune)
+        else
+            -- Even runes: counterclockwise
+            self.spinTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CruxCounterR_SpinRuneCCW", self.rune)
+        end
+    else
+        CC.Debug:Trace(2, "WARNING: Rune control not found for Crux: <<1>>", tostring(num))
+    end
+end
+
+--- Starts the rune spin animation with a staggered delay based on the rune's index.
+--- @return nil
+function CruxCounterR_Rune:PlaySpin()
+    if self.spinTimeline then
+        local delay = (self.number - 1) * 100  -- stagger by 100ms per rune
+        zo_callLater(function()
+            self.spinTimeline:PlayFromStart()
+        end, delay)
+    end
+end
+
+--- Stops the rune spin animation immediately.
+--- @return nil
+function CruxCounterR_Rune:StopSpin()
+    if self.spinTimeline then
+        self.spinTimeline:Stop()
     end
 end
 
@@ -107,6 +144,9 @@ end
 
 --- Hide the Rune instantly via the fadeOut animation
 --- @return nil
+-- function CruxCounterR_Rune:HideInstantly()
+--     self.timelines.fadeOut:PlayInstantlyToEnd()
+-- end
 function CruxCounterR_Rune:HideInstantly()
     self.timelines.fadeOut:PlayInstantlyToEnd()
 end
@@ -149,6 +189,9 @@ end
 ---
 --- @return nil
 function CruxCounterR_Rune:UpdateColorBasedOnElapsed(elapsedSec, baseSettings)
+    -- Clamp elapsed time to 0
+    if elapsedSec < 0 then elapsedSec = 0 end
+
     if not baseSettings then
         CC.Debug:Trace(3, "[Crux Counter Reimagined] ERROR: baseSettings is nil")
         return
@@ -160,17 +203,19 @@ function CruxCounterR_Rune:UpdateColorBasedOnElapsed(elapsedSec, baseSettings)
         return
     end
 
+    -- Get base and warning colors for runes 
     local baseColor = CruxCounterR.UI:GetEnsuredColor(baseSettings.elements.runes.color)
     local warnColor = CruxCounterR.UI:GetEnsuredColor(reimaginedSettings.expireWarning.elements.runes.color, ZO_ColorDef:New(1, 0, 0, 1))
 
     local totalDurationSec              = reimaginedSettings.cruxDuration or 30
     local warningThresholdRemainingSec  = reimaginedSettings.expireWarning.threshold or 25
     local warningElapsedSec             = totalDurationSec - warningThresholdRemainingSec
+    local epsilon                       = 0.1 -- 100 ms margin
 
-    local epsilon = 0.1 -- 100 ms margin
     if elapsedSec + epsilon >= warningElapsedSec - 1 then
         self:SetColor(warnColor)
     else
         self:SetColor(baseColor)
     end
 end
+

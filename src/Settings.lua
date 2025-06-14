@@ -71,9 +71,13 @@ M.defaults       = {
     reimagined = {
         cruxDuration = 30,
         expireWarning = {
-            threshold = 25,
+            threshold = 10,
             pollingInterval = 200,
+            enabled = true,
             elements = {
+                number = {
+                    color = brightRed,
+                },
                 runes = {
                     color = brightRed,
                 },
@@ -358,56 +362,6 @@ local function getElementRotate(element)
     return M.settings.elements[element].rotate
 end
 
--- --- Set the color of an element
--- --- @param element string Name of the element
--- --- @param color ZO_ColorDef
--- --- @return nil
--- local function setElementColor(element, color)
---     local r, g, b, a = color:UnpackRGBA()
-
---     if element == "background" then
---         CruxCounterR_Display.ring:SetColor(color)
---     elseif element == "runes" then
---         CruxCounterR_Display.orbit:SetColor(color)
---     elseif element == "number" then
---         CruxCounterR_Display:SetNumberColor(color)
---     else
---         CC.Debug:Trace(0, "Invalid element '<<1>>' specified for color setting", element)
---         return
---     end
-
---     M.settings.elements[element].color = {
---         r = r,
---         g = g,
---         b = b,
---         a = a,
---     }
--- end
-
--- --- Sets the warning color for a specified reimagined UI element both visually and in settings.
--- --- @param element string The name of the UI element ("background", "runes", or "number")
--- --- @param color ZO_ColorDef The color object to apply
--- local function setElementReimaginedColor(element, color)
---     local r, g, b, a = color:UnpackRGBA()
-
---     -- Update the visual (adjust to your actual display implementation)
---     if element == "background" then
---         CruxCounterR_Display.ring:SetColor(color)
---     elseif element == "runes" then
---         CruxCounterR_Display.orbit:SetColor(color)
---     elseif element == "number" then
---         CruxCounterR_Display:SetNumberColor(color)
---     else
---         CC.Debug:Trace(0, "Invalid reimagined element '<<1>>' specified for warn color", element)
---         return
---     end
-
---     -- Save it to settings
---     M.settings.reimagined.expireWarning.elements[element].color = {
---         r = r, g = g, b = b, a = a,
---     }
--- end
-
 --- Sets the color of a UI element, optionally saving to the "reimagined" warning settings or normal settings.
 --- @param element string The element name: "background", "runes", or "number"
 --- @param color ZO_ColorDef The color object to apply
@@ -451,33 +405,15 @@ end
 --- Get the color of an element
 --- @param element string Name of the element
 --- @return ZO_ColorDef
-local function getElementColor(element)
-    return ZO_ColorDef:New(M.settings.elements[element].color)
+local function getElementColor(element, isReimagined)
+    isReimagined = isReimagined or false
+
+    if isReimagined then
+        return ZO_ColorDef:New(M.settings.reimagined.expireWarning.elements[element].color)
+    else 
+        return ZO_ColorDef:New(M.settings.elements[element].color)
+    end
 end
-
--- --- Get the default color for an element
--- --- @param element string Name of the element
--- --- @return ZO_ColorDef
--- local function getDefaultColor(element)
---     return M.defaults.elements[element].color
--- end
-
--- --- Retrieves the default reimagined warning color for a specified UI element.
--- --- Logs the color components if found; otherwise logs a warning.
--- --- @param element string The key/name of the UI element (e.g., "runes", "background")
--- --- @return ZO_ColorDef|nil The default color object or nil if not found
--- local function getDefaultReimaginedWarnColor(element)
---     local color = M.defaults.reimagined.expireWarning.elements[element].color
-
---     if color then
---         local r, g, b, a = color:UnpackRGBA()
---         CC.Debug:Trace(3, string.format("Default warn color for '%s': r=%.2f, g=%.2f, b=%.2f, a=%.2f", element, r, g, b, a))
---     else
---         CC.Debug:Trace(2, string.format("No default warn color found for element '%s'", element))
---     end
-
---     return color
--- end
 
 --- Retrieves the default color for a specified UI element.
 --- Optionally retrieves the reimagined expire warning color.
@@ -489,6 +425,7 @@ local function getDefaultColor(element, isReimagined)
     isReimagined = isReimagined or false
 
     local color
+
     if isReimagined then
         color = M.defaults.reimagined.expireWarning.elements[element].color
         if color then
@@ -504,26 +441,6 @@ local function getDefaultColor(element, isReimagined)
     return color
 end
 
---- Retrieves the current reimagined warning color for a specified UI element.
--- Wraps the stored color table in a ZO_ColorDef object for consistent color handling.
--- @param element string The key/name of the UI element (e.g., "runes", "background")
--- @return ZO_ColorDef The color object representing the element's warning color
-local function getElementReimaginedWarnColor(element)
-    return ZO_ColorDef:New(M.settings.reimagined.expireWarning.elements[element].color)
-end
-
--- --- Get if the element is already set to the default color or disabled
--- --- @param element string Name of the element
--- --- @return boolean
--- local function isElementDefaultColorOrDisabled(element)
---     -- Disabled
---     if not getElementEnabled(element) then
---         return true
---     end
-
---     return getElementColor(element):IsEqual(getDefaultColor(element))
--- end
-
 --- Get if the element is already set to the default color or disabled
 --- @param element string Name of the element
 --- @param isReimagined boolean Whether to use reimagined color checks (default: false)
@@ -533,7 +450,9 @@ local function isElementDefaultColorOrDisabled(element, isReimagined)
 
     -- Disabled check applies only for non-reimagined colors? Or always?
     if not getElementEnabled(element) then
-        return true
+        if not isReimagined then
+            return true
+        end
     end
 
     local current = getElementColor(element, isReimagined)
@@ -543,26 +462,36 @@ local function isElementDefaultColorOrDisabled(element, isReimagined)
 end
 
 --- Checks if the current warning color of a given UI element matches its default reimagined warning color.
--- Compares the current color to the default color using the color equality method.
--- @param element string The name/key of the UI element to check
--- @return boolean True if the current color equals the default color, false otherwise
--- local function isElementDefaultReimaginedColor(element)
---     local current = isElementDefaultReimaginedColor(element)
---     local default = getDefaultColor(element, true)
+--- Compares the current color to the default color using the color equality method.
+--- @param element string The name/key of the UI element to check
+--- @return boolean True if the current color equals the default color, false otherwise
+local function isElementDefaultReimaginedColor(element)
+    local current = getElementColor(element, true)
+    local default = getDefaultColor(element, true)
 
---     return current:IsEqual(default)
--- end
+    if (CruxCounterR.settings and CruxCounterR.settings.debugLevel or 0) >= 2 then
+        CruxCounterR.PrintColor("Current Color", current)
+        CruxCounterR.PrintColor("Default Color", default)
+    end
+
+    -- Safety check if either is nil
+    if not current or not default then return false end
+
+    return current:IsEqual(default)
+end
 
 --- Reset an element to its default color
 --- @param element string Name of the element
 --- @return nil
-local function setToDefaultColor(element)
-    setElementColor(element, getDefaultColor(element))
+local function setToDefaultColor(element, isReimagined)
+    isReimagined = isReimagined or false
+
+    setElementColor(element, getDefaultColor(element, isReimagined), isReimagined)
 end
 
 --- Sets the warning color of a specified UI element to its default reimagined color.
--- Fetches the default color for the element and applies it using the setter function.
--- @param element string The name/key of the UI element whose warning color should be reset
+--- Fetches the default color for the element and applies it using the setter function.
+--- @param element string The name/key of the UI element whose warning color should be reset
 local function setToDefaultReimaginedWarnColor(element)
     local defaultColor = getDefaultColor(element, true)
 
@@ -608,97 +537,97 @@ local function setRotationSpeed(value)
     CC.Debug:Trace(3, "Value: <<1>>, Speed: <<2>>", value, speed)
 end
 
--- Retrieves the total duration of the crux effect in seconds.
--- Falls back to default if not explicitly set in current settings.
--- @return number duration in seconds
+--- Retrieves the total duration of the crux effect in seconds.
+--- Falls back to default if not explicitly set in current settings.
+--- @return number duration in seconds
 local function getCruxDuration()
     return M.settings.reimagined.cruxDuration or M.defaults.reimagined.cruxDuration
 end
 
--- Sets the total duration of the crux effect in seconds.
--- @param value number The new crux duration in seconds
+--- Sets the total duration of the crux effect in seconds.
+--- @param value number The new crux duration in seconds
 local function setCruxDuration(value)
     M.settings.reimagined.cruxDuration = value
 end
 
--- Retrieves the warning threshold (time before crux expiration to start warning) in seconds.
--- Falls back to default if not set.
--- @return number threshold in seconds
+--- Retrieves the warning threshold (time before crux expiration to start warning) in seconds.
+--- Falls back to default if not set.
+--- @return number threshold in seconds
 local function getExpireWarnThreshold()
-    return M.settings.reimagined.elements.runes.expireWarning.threshold or M.defaults.reimagined.elements.runes.expireWarning.threshold
+    return M.settings.reimagined.expireWarning.threshold or M.defaults.reimagined.expireWarning.threshold
 end
 
--- Sets the warning threshold time (seconds before expiration to warn).
--- @param value number Warning threshold in seconds
+--- Sets the warning threshold time (seconds before expiration to warn).
+--- @param value number Warning threshold in seconds
 local function setExpireWarnThreshold(value)
-    M.settings.reimagined.elements.runes.expireWarning.threshold = value
+    M.settings.reimagined.expireWarning.threshold = value
 end
 
--- Retrieves the color used for expire warning on runes.
--- Tries to return unpacked RGBA values for convenience.
--- Supports saved ZO_ColorDef objects or simple tables {r, g, b, a}.
--- Returns default red (1,0,0,1) if no color found.
--- @return number r, g, b, a Color channels as floats from 0 to 1
-local function getExpireRuneWarnColor()
-    local color = M.settings.reimagined.elements.runes.expireWarning.color or M.defaults.reimagined.elements.runes.expireWarning.color
+--- Retrieves the color used for expire warning on runes.
+--- Tries to return unpacked RGBA values for convenience.
+--- Supports saved ZO_ColorDef objects or simple tables {r, g, b, a}.
+--- Returns default red (1,0,0,1) if no color found.
+--- @return number r, g, b, a Color channels as floats from 0 to 1
+-- local function getExpireRuneWarnColor()
+--     local color = M.settings.reimagined.elements.runes.expireWarning.color or M.defaults.reimagined.elements.runes.expireWarning.color
 
-    if type(color) == "table" and color.UnpackRGBA then
-        return color:UnpackRGBA()
-    elseif type(color) == "table" then
-        -- Fallback if saved as a simple table {r,g,b,a}
-        return color.r or 1, color.g or 0, color.b or 0, color.a or 1
-    else
-        return 1, 0, 0, 1 -- fallback red
-    end
-end
+--     if type(color) == "table" and color.UnpackRGBA then
+--         return color:UnpackRGBA()
+--     elseif type(color) == "table" then
+--         -- Fallback if saved as a simple table {r,g,b,a}
+--         return color.r or 1, color.g or 0, color.b or 0, color.a or 1
+--     else
+--         return 1, 0, 0, 1 -- fallback red
+--     end
+-- end
 
--- Sets the expire warning color for runes.
--- Constructs a ZO_ColorDef object from RGBA floats.
--- @param r number Red channel (0-1)
--- @param g number Green channel (0-1)
--- @param b number Blue channel (0-1)
--- @param a number Alpha channel (0-1)
-local function setExpireRuneWarnColor(r, g, b, a)
-    M.settings.reimagined.elements.runes.expireWarning.color = ZO_ColorDef:New(r, g, b, a)
-end
+--- Sets the expire warning color for runes.
+--- Constructs a ZO_ColorDef object from RGBA floats.
+--- @param r number Red channel (0-1)
+--- @param g number Green channel (0-1)
+--- @param b number Blue channel (0-1)
+--- @param a number Alpha channel (0-1)
+-- local function setExpireRuneWarnColor(r, g, b, a)
+--     M.settings.reimagined.elements.runes.expireWarning.color = ZO_ColorDef:New(r, g, b, a)
+-- end
 
--- Retrieves the color used for expire warning on the background.
--- Supports same formats and fallback as getExpireRuneWarnColor.
--- @return number r, g, b, a Color channels as floats from 0 to 1
-local function getExpireBackgroundWarnColor()
-    local color = M.settings.reimagined.elements.background.expireWarning.color or M.defaults.reimagined.elements.background.expireWarning.color
+--- Retrieves the color used for expire warning on the background.
+--- Supports same formats and fallback as getExpireRuneWarnColor.
+--- @return number r, g, b, a Color channels as floats from 0 to 1
+-- local function getExpireBackgroundWarnColor()
+--     local color = M.settings.reimagined.elements.background.expireWarning.color or M.defaults.reimagined.elements.background.expireWarning.color
 
-    if type(color) == "table" and color.UnpackRGBA then
-        return color:UnpackRGBA()
-    elseif type(color) == "table" then
-        -- Fallback if saved as a simple table {r,g,b,a}
-        return color.r or 1, color.g or 0, color.b or 0, color.a or 1
-    else
-        return 1, 0, 0, 1 -- fallback red
-    end
-end
+--     if type(color) == "table" and color.UnpackRGBA then
+--         return color:UnpackRGBA()
+--     elseif type(color) == "table" then
+--         -- Fallback if saved as a simple table {r,g,b,a}
+--         return color.r or 1, color.g or 0, color.b or 0, color.a or 1
+--     else
+--         return 1, 0, 0, 1 -- fallback red
+--     end
+-- end
 
--- Sets the expire warning color for the background.
--- @param r number Red channel (0-1)
--- @param g number Green channel (0-1)
--- @param b number Blue channel (0-1)
--- @param a number Alpha channel (0-1)
-local function setExpireBackgroundWarnColor(r, g, b, a)
-    M.settings.reimagined.elements.background.expireWarning.color = ZO_ColorDef:New(r, g, b, a)
-end
+--- Sets the expire warning color for the background.
+--- @param r number Red channel (0-1)
+--- @param g number Green channel (0-1)
+--- @param b number Blue channel (0-1)
+--- @param a number Alpha channel (0-1)
+-- local function setExpireBackgroundWarnColor(r, g, b, a)
+--     M.settings.reimagined.elements.background.expireWarning.color = ZO_ColorDef:New(r, g, b, a)
+-- end
 
--- Retrieves the polling interval (in milliseconds) for checking expire warnings.
--- Used to control how often color updates occur as expiration nears.
--- Falls back to default if unset.
--- @return number Polling interval in milliseconds
+--- Retrieves the polling interval (in milliseconds) for checking expire warnings.
+--- Used to control how often color updates occur as expiration nears.
+--- Falls back to default if unset.
+--- @return number Polling interval in milliseconds
 local function getExpireWarnPollingInterval()
-    return M.settings.reimagined.elements.runes.expireWarning.pollingInterval or M.defaults.reimagined.elements.runes.expireWarning.pollingInterval
+    return M.settings.reimagined.expireWarning.pollingInterval or M.defaults.reimagined.expireWarning.pollingInterval
 end
 
--- Sets the polling interval (milliseconds) for expire warning updates.
--- @param value number Polling interval in milliseconds
+--- Sets the polling interval (milliseconds) for expire warning updates.
+--- @param value number Polling interval in milliseconds
 local function setExpireWarnPollingInterval(value)
-    M.settings.reimagined.elements.runes.expireWarning.pollingInterval = value
+    M.settings.reimagined.expireWarning.pollingInterval = value
 end
 
 --- Retrieves the rune-related settings table with defaults as fallback.
@@ -733,7 +662,7 @@ local function GetRuneSettings()
     return setmetatable(runes, { __index = defaultRunes })
 end
 
--- Export the GetRuneSettings function to the module table M
+--- Export the GetRuneSettings function to the module table M
 M.GetRuneSettings = GetRuneSettings
 
 --- @type table Options for Style settings
@@ -1065,19 +994,84 @@ local styleOptions = {
     {
         type = "colorpicker",
         name = function()
+            return CC.Language:GetString("SETTINGS_STYLE_NUMBER_WARN_COLOR")
+        end,
+        tooltip = function()
+            return CC.Language:GetString("SETTINGS_STYLE_NUMBER_WARN_COLOR_DESC")
+        end,
+        getFunc = function()
+            local color = getElementColor("number", true)  -- reimagined color
+            return color:UnpackRGBA()
+        end,
+        setFunc = function(r, g, b, a)
+            local newColor = ZO_ColorDef:New(r, g, b, a)
+            if newColor then
+                setElementColor("number", newColor, true)  -- update reimagined color
+            end
+        end,
+        default = getDefaultColor("number", true),
+        disabled = function()
+            return not getElementEnabled("number")
+        end,
+        width = "full",
+    },
+    {
+        type = "button",
+        name = function()
+            return CC.Language:GetString("SETTINGS_STYLE_NUMBER_WARN_COLOR_RESET")
+        end,
+        tooltip = function()
+            return CC.Language:GetString("SETTINGS_STYLE_NUMBER_WARN_COLOR_RESET_DESC")
+        end,
+        func = function()
+            local ok, err = pcall(function()
+                setToDefaultColor("number", true)
+            end)
+
+            if not ok then d("Button func error: " .. tostring(err)) end
+        end,
+        disabled = function()
+            local status = isElementDefaultReimaginedColor("number")
+
+            if type(status) ~= "boolean" then
+                CC.Debug:Trace(2, "WARNING: disabled callback returned non-boolean: <<1>>", tostring(status))
+
+                return false
+            end
+
+            return status
+        end,
+        width = "full",
+    },
+
+
+
+
+
+
+
+    {
+        type = "colorpicker",
+        name = function()
             return CC.Language:GetString("SETTINGS_STYLE_CRUX_WARN_COLOR")
         end,
         tooltip = function()
             return CC.Language:GetString("SETTINGS_STYLE_CRUX_WARN_COLOR_DESC")
         end,
-        getFunc = getExpireRuneWarnColor,
-        setFunc = setExpireRuneWarnColor,
-        default = function()
-            local c = M.defaults.reimagined.expireWarning.elements.runes.color
-            return c:UnpackRGBA()
+        getFunc = function()
+            local color = getElementColor("runes", true)  -- reimagined color
+            return color:UnpackRGBA()
+        end,
+        setFunc = function(r, g, b, a)
+            local newColor = ZO_ColorDef:New(r, g, b, a)
+            if newColor then
+                setElementColor("runes", newColor, true)  -- update reimagined color
+            end
         end,
         default = getDefaultColor("runes", true),
-        disabled = function() return not getElementEnabled("runes") end,
+        disabled = function()
+            return not getElementEnabled("runes")
+        end,
         width = "full",
     },
     {
@@ -1090,14 +1084,23 @@ local styleOptions = {
         end,
         func = function()
             local ok, err = pcall(function()
-                setToDefaultReimaginedWarnColor("runes")
+                setToDefaultColor("runes", true)
             end)
+
             if not ok then d("Button func error: " .. tostring(err)) end
         end,
-        width = "half",
         disabled = function()
-            return isElementDefaultColorOrDisabled("runes")
+            local status = isElementDefaultReimaginedColor("runes")
+
+            if type(status) ~= "boolean" then
+                CC.Debug:Trace(2, "WARNING: disabled callback returned non-boolean: <<1>>", tostring(status))
+
+                return false
+            end
+
+            return status
         end,
+        width = "full",
     },
     {
         type = "colorpicker",
@@ -1107,17 +1110,50 @@ local styleOptions = {
         tooltip = function()
             return CC.Language:GetString("SETTINGS_STYLE_BACKGROUND_WARN_COLOR_DESC")
         end,
-        getFunc = getExpireBackgroundWarnColor,
-        setFunc = setExpireBackgroundWarnColor,
-        default = function()
-            local c = M.defaults.reimagined.expireWarning.elements.background.color
-            return c:UnpackRGBA()
+        getFunc = function()
+            local color = getElementColor("background", true)  -- reimagined color
+            return color:UnpackRGBA()
+        end,
+        setFunc = function(r, g, b, a)
+            local newColor = ZO_ColorDef:New(r, g, b, a)
+
+            if newColor then
+                setElementColor("background", newColor, true)  -- update reimagined color
+            end
         end,
         default = getDefaultColor("background", true),
-        disabled = function() return not getElementEnabled("background") end,
+        disabled = function()
+            return not getElementEnabled("background")
+        end,
         width = "full",
     },
+    {
+        type = "button",
+        name = function()
+            return CC.Language:GetString("SETTINGS_STYLE_BACKGROUND_WARN_COLOR_RESET")
+        end,
+        tooltip = function()
+            return CC.Language:GetString("SETTINGS_STYLE_BACKGROUND_WARN_COLOR_RESET_DESC")
+        end,
+        func = function()
+            local ok, err = pcall(function()
+                setToDefaultColor("background", true)
+            end)
 
+            if not ok then d("Button func error: " .. tostring(err)) end
+        end,
+        disabled = function()
+            local status = isElementDefaultReimaginedColor("background")
+
+            if type(status) ~= "boolean" then
+                CC.Debug:Trace(2, "WARNING: disabled callback returned non-boolean: <<1>>", tostring(status))
+                return false
+            end
+
+            return status
+        end,
+        width = "full",
+    },
 
 }
 
