@@ -5,6 +5,9 @@
 local CC     = CruxCounterR
 local EM     = EVENT_MANAGER
 
+-- Initialize  global state container
+CC.Global = CC.Global or {}
+
 --- @type string Namespace for addon init event
 local initNs = CC.Addon.name .. "_Init"
 
@@ -26,20 +29,14 @@ local function init(_, addonName)
     CC.settings = CC.Settings.settings
 
     CC.Debug:Trace(1, "[Crux Counter Reimagined] CC.settings initialized: " .. tostring(CC.settings))
+
+    -- Initialize the warn state flag
+    CC.Global.WarnState = false
     
     CruxCounterR_Display:ApplySettings()
 
     -- Initialize rune display
     CC.Display:Initialize()
-
-    -- Reset ring color on load if stacks are zero or nil
-    -- local currentStacks = (CC.State and CC.State.stacks) or 0
-    -- if currentStacks == 0 then
-    --     if CC.Display and CC.Display.ResetRingColor then
-    --         CC.Display:ResetRingColor()
-    --         CC.Debug:Trace(1, "[Crux Counter Reimagined] Reset ring color on init due to zero stacks")
-    --     end
-    -- end
 
     -- Defer RegisterEvents until after player is in-world
     EM:RegisterForEvent("CruxCounterR_InitPlayerActivated", EVENT_PLAYER_ACTIVATED, function()

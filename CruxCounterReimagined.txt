@@ -3,7 +3,7 @@
 ## SavedVariables: CruxCounterReimaginedData
 ## Description: Crux Counter reimagined with new features and support!
 ## Version: 1.0.3b
-## AddOnVersion: 010003.01
+## AddOnVersion: 1.0.3.02
 ## Author: |c4cdcb2Dim|r (@xDiminish) (NA)
 ## DependsOn: LibAddonMenu-2.0>=40
 
@@ -19,6 +19,7 @@ src/Interface.lua
 src/State.lua
 src/Events.lua
 src/Init.lua
+src/Utils.lua
 
 src/elements/Ring.lua
 src/elements/Rune.lua

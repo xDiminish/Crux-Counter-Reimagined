@@ -18,6 +18,40 @@ local wasArcanist = nil
 --- @type integer Crux ability ID
 M.abilityId = 184220
 
+-- Warn State Configuration
+local elementHandlers = {
+    runes = function(elapsedSec, baseSettings)
+        for _, rune in ipairs(CC.Display.runes or {}) do
+            if rune then
+                CC.Utils.CheckWarnState(elapsedSec, baseSettings, "runes", function(color)
+                    rune:SetColor(color)
+                end)
+            end
+        end
+    end,
+
+    background = function(elapsedSec, baseSettings)
+        local ring = CC.Display.ring
+        if ring then
+            CC.Utils.CheckWarnState(elapsedSec, baseSettings, "background", function(color)
+                ring:SetColor(color)
+            end)
+        end
+    end,
+
+    number = function(elapsedSec, baseSettings)
+        local stackCount = CC.State and CC.State.stacks or 0
+        if stackCount == 0 then
+            local baseColor = CC.UI:GetEnsuredColor(baseSettings.elements.number.color)
+            CruxCounterR_Display:SetNumberColor(baseColor)
+        else
+            CC.Utils.CheckWarnState(elapsedSec, baseSettings, "number", function(color)
+                CruxCounterR_Display:SetNumberColor(color)
+            end)
+        end
+    end,
+}
+
 --- Build namespace for events
 --- @param event string Name of the event
 --- @return string namespace Addon-specific event namespace
@@ -33,6 +67,7 @@ end
 local function onEffectChanged(_, changeType, _, _, _, _, _, stackCount)
     if changeType == EFFECT_RESULT_FADED then
         CC.State:ClearStacks()
+        CC.Global.WarnState = false
         return
     end
 
@@ -112,34 +147,26 @@ function M:UpdateWarnState()
 
     local cruxCount = CC.State:GetCruxCount()
 
-    CC.Debug:Trace(3, "Current Crux Count: <<1>>", tostring(cruxCount))
+    CC.Debug:Trace(2, "Current Crux Count: <<1>>", tostring(cruxCount))
 
     if cruxCount == 0 then
-        CC.Debug:Trace(3, "Resetting all colors due to zero crux count...")
+        CC.Debug:Trace(2, "Resetting all colors due to zero crux count...")
 
         -- reset all control colors to help prevent color flicker on initial crux gain
         CC.Display:ResetAllColors()
+
+        -- Reset warn state
+        CC.Global.WarnState = false
+        d("Warn State: " .. tostring(CC.Global.WarnState))
 
         -- Still schedule next update to keep checking for changes
         zo_callLater(function() self:UpdateWarnState() end, pollingInterval)
         return
     end
 
-    -- Update runes color as crux nears expiration
-    for _, rune in ipairs(CC.Display.runes or {}) do
-        if rune and rune.UpdateColorBasedOnElapsed then
-            rune:UpdateColorBasedOnElapsed(elapsedSec, baseSettings)
-        end
-    end
-
-    -- Update ring color as crux nears expiration
-    if CC.Display.ring and CC.Display.ring.UpdateColorBasedOnElapsed then
-        CC.Display.ring:UpdateColorBasedOnElapsed(elapsedSec, baseSettings)
-    end
-
-    -- -- Update number color as crux nears expiration
-    if CruxCounterR_Display and CruxCounterR_Display.UpdateColorBasedOnElapsed then
-        CruxCounterR_Display:UpdateColorBasedOnElapsed(elapsedSec, baseSettings)
+    -- -- Iterate over the UI elements and update their warn start
+    for _, element in ipairs({ "runes", "background", "number" }) do
+        elementHandlers[element](elapsedSec, baseSettings)
     end
 
     zo_callLater(function() self:UpdateWarnState() end, pollingInterval)

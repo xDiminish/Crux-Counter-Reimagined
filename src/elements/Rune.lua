@@ -19,6 +19,9 @@ function CruxCounterR_Rune:Initialize(control, num)
     self.number = num
     self.startingRotation = 360 - (360 / num)
 
+    --local cruxCount = CC.State:GetCruxCount()
+    --self.startingRotation = (360 / 2) * (num - 1)
+
     self.smoke = {
         control = self.control:GetNamedChild("Smoke"),
         timeline = AM:CreateTimelineFromVirtual("CruxCounterR_CruxSmokeDontBreatheThis",
@@ -26,6 +29,21 @@ function CruxCounterR_Rune:Initialize(control, num)
     }
     self.glow = self.control:GetNamedChild("Glow")
     self.rune = self.control:GetNamedChild("Rune")
+
+    -- Create a flash overlay texture control as a child of self.control
+    -- local flashName = self.control:GetName() .. "FlashOverlay"
+    -- local existingFlash = self.control:GetNamedChild("FlashOverlay")
+    -- if existingFlash then
+    --     self.flashOverlay = existingFlash
+    -- else
+    --     self.flashOverlay = CreateControl(flashName, self.control, CT_TEXTURE)
+    --     self.flashOverlay:SetTexture("/path/to/your/flash_texture.dds")
+    --     self.flashOverlay:SetDrawLayer(DL_OVERLAY)
+    --     self.flashOverlay:SetAnchorFill(self.control)
+    --     self.flashOverlay:SetHidden(true)
+    -- end
+
+
 
     self:SetRotation2D(self.startingRotation)
 
@@ -72,24 +90,30 @@ function CruxCounterR_Rune:Initialize(control, num)
         -- Assign spinTimeline based on rune number
         if num % 2 == 1 then
             -- Odd runes: clockwise
-            self.spinTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CruxCounterR_SpinRuneCW", self.rune)
+            self.spinTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CruxCounterR_SpinCruxCW", self.rune)
         else
             -- Even runes: counterclockwise
-            self.spinTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CruxCounterR_SpinRuneCCW", self.rune)
+            self.spinTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CruxCounterR_SpinCruxCCW", self.rune)
         end
     else
         CC.Debug:Trace(2, "WARNING: Rune control not found for Crux: <<1>>", tostring(num))
     end
+
+    -- Create the flash timeline, but don't play it yet
+    self.flashTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CruxCounterR_Flash", self.control)
+    -- self.flashTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CruxCounterR_Flash", self.flashOverlay)
+
+    
 end
 
 --- Starts the rune spin animation with a staggered delay based on the rune's index.
 --- @return nil
 function CruxCounterR_Rune:PlaySpin()
+    if not CC.Settings:getRuneSpinAnimationEnabled() then return end
+
     if self.spinTimeline then
-        local delay = (self.number - 1) * 100  -- stagger by 100ms per rune
-        zo_callLater(function()
-            self.spinTimeline:PlayFromStart()
-        end, delay)
+        self.spinTimeline:Stop() -- stop first in case it's mid-spin
+        self.spinTimeline:PlayFromStart()
     end
 end
 
@@ -97,9 +121,42 @@ end
 --- @return nil
 function CruxCounterR_Rune:StopSpin()
     if self.spinTimeline then
+        self.spinTimeline:PlayInstantlyToStart()
         self.spinTimeline:Stop()
     end
 end
+
+
+function CruxCounterR_Rune:PlayFlash()
+    if self.flashTimeline then
+        self.flashTimeline:PlayFromStart()
+    end
+end
+
+function CruxCounterR_Rune:StopFlash()
+    if self.flashTimeline then
+        self.flashTimeline:Stop()
+        -- reset alpha so control isn't left translucent
+        self.control:SetAlpha(1)
+    end
+end
+-- function CruxCounterR_Rune:PlayFlash()
+--     if self.flashTimeline then
+--         self.flashOverlay:SetHidden(false)
+--         self.flashTimeline:PlayFromStart()
+--     end
+-- end
+
+-- function CruxCounterR_Rune:StopFlash()
+--     if self.flashTimeline then
+--         self.flashTimeline:Stop()
+--         self.flashOverlay:SetHidden(true)
+--         -- Reset alpha just in case
+--         self.flashOverlay:SetAlpha(1)
+--     end
+-- end
+
+
 
 --- Set the color of the Rune elements
 --- @param color ZO_ColorDef
@@ -178,44 +235,12 @@ function CruxCounterR_Rune:IsShowing()
     return self.control:GetAlpha() == 1
 end
 
---- Updates the color of the runes based on how much time has elapsed.
----
---- If the elapsed time is within the "expire warning" threshold, the rune colors
---- switch to the defined warning color. Otherwise, it uses the base rune color.
----
---- @param elapsedSec number Time in seconds that has passed since the Crux was gained.
---- @param baseSettings table The full SavedVariables settings table containing color 
---- definitions and warning thresholds under `.elements.runes and `.reimagined.expireWarning`.
----
---- @return nil
+--- Update rune color based on elapsed time
+--- @param self any
+--- @param elapsedSec number
+--- @param baseSettings table
 function CruxCounterR_Rune:UpdateColorBasedOnElapsed(elapsedSec, baseSettings)
-    -- Clamp elapsed time to 0
-    if elapsedSec < 0 then elapsedSec = 0 end
-
-    if not baseSettings then
-        CC.Debug:Trace(3, "[Crux Counter Reimagined] ERROR: baseSettings is nil")
-        return
-    end
-
-    local reimaginedSettings = baseSettings.reimagined or {}
-    if not reimaginedSettings then
-        CC.Debug:Trace(3, "[Crux Counter Reimagined] ERROR: reimaginedSettings is nil")
-        return
-    end
-
-    -- Get base and warning colors for runes 
-    local baseColor = CruxCounterR.UI:GetEnsuredColor(baseSettings.elements.runes.color)
-    local warnColor = CruxCounterR.UI:GetEnsuredColor(reimaginedSettings.expireWarning.elements.runes.color, ZO_ColorDef:New(1, 0, 0, 1))
-
-    local totalDurationSec              = reimaginedSettings.cruxDuration or 30
-    local warningThresholdRemainingSec  = reimaginedSettings.expireWarning.threshold or 25
-    local warningElapsedSec             = totalDurationSec - warningThresholdRemainingSec
-    local epsilon                       = 0.1 -- 100 ms margin
-
-    if elapsedSec + epsilon >= warningElapsedSec - 1 then
-        self:SetColor(warnColor)
-    else
-        self:SetColor(baseColor)
-    end
+    CruxCounterR.Utils.UpdateColorBasedOnElapsed(elapsedSec, baseSettings, "runes", function(color)
+        self:SetColor(color)
+    end)
 end
-

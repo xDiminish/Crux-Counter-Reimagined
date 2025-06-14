@@ -85,7 +85,8 @@ M.defaults       = {
                     color = brightRed,
                 }
             }
-        }
+        },
+        runeSpinAnimation = true,
     }
 }
 
@@ -563,59 +564,6 @@ local function setExpireWarnThreshold(value)
     M.settings.reimagined.expireWarning.threshold = value
 end
 
---- Retrieves the color used for expire warning on runes.
---- Tries to return unpacked RGBA values for convenience.
---- Supports saved ZO_ColorDef objects or simple tables {r, g, b, a}.
---- Returns default red (1,0,0,1) if no color found.
---- @return number r, g, b, a Color channels as floats from 0 to 1
--- local function getExpireRuneWarnColor()
---     local color = M.settings.reimagined.elements.runes.expireWarning.color or M.defaults.reimagined.elements.runes.expireWarning.color
-
---     if type(color) == "table" and color.UnpackRGBA then
---         return color:UnpackRGBA()
---     elseif type(color) == "table" then
---         -- Fallback if saved as a simple table {r,g,b,a}
---         return color.r or 1, color.g or 0, color.b or 0, color.a or 1
---     else
---         return 1, 0, 0, 1 -- fallback red
---     end
--- end
-
---- Sets the expire warning color for runes.
---- Constructs a ZO_ColorDef object from RGBA floats.
---- @param r number Red channel (0-1)
---- @param g number Green channel (0-1)
---- @param b number Blue channel (0-1)
---- @param a number Alpha channel (0-1)
--- local function setExpireRuneWarnColor(r, g, b, a)
---     M.settings.reimagined.elements.runes.expireWarning.color = ZO_ColorDef:New(r, g, b, a)
--- end
-
---- Retrieves the color used for expire warning on the background.
---- Supports same formats and fallback as getExpireRuneWarnColor.
---- @return number r, g, b, a Color channels as floats from 0 to 1
--- local function getExpireBackgroundWarnColor()
---     local color = M.settings.reimagined.elements.background.expireWarning.color or M.defaults.reimagined.elements.background.expireWarning.color
-
---     if type(color) == "table" and color.UnpackRGBA then
---         return color:UnpackRGBA()
---     elseif type(color) == "table" then
---         -- Fallback if saved as a simple table {r,g,b,a}
---         return color.r or 1, color.g or 0, color.b or 0, color.a or 1
---     else
---         return 1, 0, 0, 1 -- fallback red
---     end
--- end
-
---- Sets the expire warning color for the background.
---- @param r number Red channel (0-1)
---- @param g number Green channel (0-1)
---- @param b number Blue channel (0-1)
---- @param a number Alpha channel (0-1)
--- local function setExpireBackgroundWarnColor(r, g, b, a)
---     M.settings.reimagined.elements.background.expireWarning.color = ZO_ColorDef:New(r, g, b, a)
--- end
-
 --- Retrieves the polling interval (in milliseconds) for checking expire warnings.
 --- Used to control how often color updates occur as expiration nears.
 --- Falls back to default if unset.
@@ -628,6 +576,45 @@ end
 --- @param value number Polling interval in milliseconds
 local function setExpireWarnPollingInterval(value)
     M.settings.reimagined.expireWarning.pollingInterval = value
+end
+
+--- Gets whether the rune spin animation is enabled.
+--- @return boolean
+function M:getRuneSpinAnimationEnabled()
+    -- if not self.settings or not self.settings.reimagined then
+    --     -- fallback to default safely if settings are not ready yet
+    --     return self.defaults.reimagined.runeSpinAnimation
+    -- end
+
+    -- if self.settings.reimagined.runeSpinAnimation == nil then
+    --     return self.defaults.reimagined.runeSpinAnimation
+    -- else
+    --     return self.settings.reimagined.runeSpinAnimation
+    -- end
+    return self.values
+       and self.values.reimagined
+       and self.values.reimagined.runeSpinAnimation
+       or false
+end
+
+--- Sets whether the rune spin animation is enabled.
+--- @param value boolean
+function M:setRuneSpinAnimationEnabled(value)
+    d("setRuneSpinAnimationEnabled called with value: " .. tostring(value))
+
+    self.values = self.values or {}
+    self.values.reimagined = self.values.reimagined or {}
+
+    self.values.reimagined.runeSpinAnimation = value
+
+    -- Update orbit behavior if it exists
+    if CruxCounterR_Display and CruxCounterR_Display.orbit then
+        d("Calling CruxCounterR_Display.orbit:UpdateSpinAnimations(" .. tostring(value) .. ")")
+        -- CC.orbit:UpdateSpinAnimations(value)
+        CruxCounterR_Display.orbit:UpdateSpinAnimations(value)
+    else
+        d("Warning: CruxCounterR_Display.orbit is nil!")
+    end
 end
 
 --- Retrieves the rune-related settings table with defaults as fallback.
@@ -1043,13 +1030,6 @@ local styleOptions = {
         end,
         width = "full",
     },
-
-
-
-
-
-
-
     {
         type = "colorpicker",
         name = function()
@@ -1151,6 +1131,22 @@ local styleOptions = {
             end
 
             return status
+        end,
+        width = "full",
+    },
+    {
+        -- Enable/Disable spin animation on runes
+        type = "checkbox",
+        name = function()
+            return CC.Language:GetString("SETTINGS_STYLE_CRUX_SPIN_ANIMATION")
+        end,
+        tooltip = function()
+            return CC.Language:GetString("SETTINGS_STYLE_CRUX_SPIN_ANIMATION_DESC")
+        end,
+        getFunc = function() return CC.Settings:getRuneSpinAnimationEnabled() end,
+        setFunc = function(value) 
+            d("Checkbox setFunc called with value: " .. tostring(value))
+            CC.Settings:setRuneSpinAnimationEnabled(value) 
         end,
         width = "full",
     },
@@ -1494,16 +1490,16 @@ end
 --- If no such key exists, get the default value
 --- @param element string Element setting to get
 --- @return table elementSetting Settings for the element
-function M:GetReimaginedElement(element)
-    local elements = self:Get("reimagined")
-    local selection = reimagined[element] or nil
+-- function M:GetReimaginedElement(element)
+--     local elements = self:Get("reimagined")
+--     local selection = reimagined[element] or nil
 
-    -- Bad and weird
-    assert(selection ~= nil,
-        zo_strformat("No loaded settings for element '<<1>>' found and no default settings exist", element))
+--     -- Bad and weird
+--     assert(selection ~= nil,
+--         zo_strformat("No loaded settings for element '<<1>>' found and no default settings exist", element))
 
-    return selection
-end
+--     return selection
+-- end
 
 --- Setup settings
 --- @return nil

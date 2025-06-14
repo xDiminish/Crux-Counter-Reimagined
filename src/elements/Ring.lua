@@ -145,39 +145,12 @@ function CruxCounterR_Ring:UpdateCount(count)
     end
 end
 
---- Updates the color of the ring based on how much time has elapsed.
----
---- If the elapsed time is within the "expire warning" threshold, the ring color
---- switches to the defined warning color. Otherwise, it uses the base background color.
----
---- @param elapsedSec number Time in seconds that has passed since the Crux was gained.
---- @param baseSettings table The full SavedVariables settings table containing color 
---- definitions and warning thresholds under `.elements.background` and `.reimagined.expireWarning`.
----
---- @return nil
+--- Update ring color based on elapsed time
+--- @param self any
+--- @param elapsedSec number
+--- @param baseSettings table
 function CruxCounterR_Ring:UpdateColorBasedOnElapsed(elapsedSec, baseSettings)
-    if not baseSettings then
-        CC.Debug:Trace(3, "[Crux Counter Reimagined] ERROR: baseSettings is nil")
-        return
-    end
-
-    local reimaginedSettings = baseSettings.reimagined or {}
-    if not reimaginedSettings then
-        CC.Debug:Trace(3, "[Crux Counter Reimagined] ERROR: reimaginedSettings is nil")
-        return
-    end
-
-    local baseColor = CruxCounterR.UI:GetEnsuredColor(baseSettings.elements.background.color)
-    local warnColor = CruxCounterR.UI:GetEnsuredColor(reimaginedSettings.expireWarning.elements.background.color, ZO_ColorDef:New(1, 0, 0, 1))
-
-    local totalDurationSec              = reimaginedSettings.cruxDuration or 30
-    local warningThresholdRemainingSec  = reimaginedSettings.expireWarning.threshold or 25
-    local warningElapsedSec             = totalDurationSec - warningThresholdRemainingSec
-
-    local epsilon = 0.1 -- 100 ms margin
-    if elapsedSec + epsilon >= warningElapsedSec - 1 then
-        self:SetColor(warnColor)
-    else
-        self:SetColor(baseColor)
-    end
+    CruxCounterR.Utils.UpdateColorBasedOnElapsed(elapsedSec, baseSettings, "background", function(color)
+        self:SetColor(color)
+    end)
 end

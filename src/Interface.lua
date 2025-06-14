@@ -183,8 +183,6 @@ end
 --- Calls `SetNumberColor` on the display if available.
 --- @return nil
 function CC.Display:ResetNumberColor()
-    d("- ResetNumberColor")
-
     if CruxCounterR_Display and CruxCounterR_Display.SetNumberColor then
         local baseSettings      = CC.settings or {}
        

@@ -177,3 +177,17 @@ function CruxCounterR_Orbit:InitializeRunes()
         self.runes[i] = Rune:New(child, i)
     end
 end
+
+--- Enable or disable spinning animations for all runes in the orbit
+--- @param enabled boolean
+function CruxCounterR_Orbit:UpdateSpinAnimations(enabled)
+    d("UpdateSpinAnimations: enabled=" .. tostring(enabled))
+    self:ForRunes(function(index, rune)
+        d("Rune " .. tostring(index) .. ": PlaySpin=" .. tostring(enabled))
+        if enabled then
+            rune:PlaySpin()
+        else
+            rune:StopSpin()
+        end
+    end)
+end

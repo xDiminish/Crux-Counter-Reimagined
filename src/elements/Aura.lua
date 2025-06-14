@@ -240,54 +240,19 @@ function CruxCounterR_Aura_OnMoveStop(self)
     self.OnMoveStop()
 end
 
---- Updates the color of the number display based on elapsed time.
----
---- When the elapsed time passes the warning threshold (close to expiry), the
---- number color switches to the configured warning color. Otherwise, it uses
---- the base (normal) color.
----
---- @param elapsedSec number Time in seconds since the Crux was gained.
---- @param baseSettings table SavedVariables settings containing color configs
----        and expire warning thresholds under .elements.number and
----        .reimagined.expireWarning.elements.number.
----
---- @return nil
+--- Update aura number color based on elapsed time
+--- @param self any
+--- @param elapsedSec number
+--- @param baseSettings table
 function CruxCounterR_Aura:UpdateColorBasedOnElapsed(elapsedSec, baseSettings)
-    -- Clamp elapsed time to 0
-    if elapsedSec < 0 then elapsedSec = 0 end
-
-    if not baseSettings then
-        CC.Debug:Trace(3, "[Crux Counter Reimagined] ERROR: baseSettings is nil")
-        return
-    end
-
-    local reimaginedSettings = baseSettings.reimagined or {}
-    if not reimaginedSettings then
-        CC.Debug:Trace(3, "[Crux Counter Reimagined] ERROR: reimaginedSettings is nil")
-        return
-    end
-
-    -- Check current stack count and set the base color if they are 0
-    local currentStacks = CC.State and CC.State.stacks or 0
+    local currentStacks = CruxCounterR.State and CruxCounterR.State.stacks or 0
     if currentStacks == 0 then
-        -- No stacks, always use baseColor, no warning color
         local baseColor = CruxCounterR.UI:GetEnsuredColor(baseSettings.elements.number.color)
         CruxCounterR_Display:SetNumberColor(baseColor)
         return
     end
 
-    -- Get base and warning colors for number 
-    local baseColor = CruxCounterR.UI:GetEnsuredColor(baseSettings.elements.number.color)
-    local warnColor = CruxCounterR.UI:GetEnsuredColor(reimaginedSettings.expireWarning.elements.number.color, ZO_ColorDef:New(1, 1, 1, 1))
-
-    local totalDurationSec              = reimaginedSettings.cruxDuration or 30
-    local warningThresholdRemainingSec  = reimaginedSettings.expireWarning.threshold or 25
-    local warningElapsedSec             = totalDurationSec - warningThresholdRemainingSec
-    local epsilon                       = 0.1 -- 100ms margin
-
-    if elapsedSec + epsilon >= warningElapsedSec - 1 then
-        CruxCounterR_Display:SetNumberColor(warnColor)
-    else
-        CruxCounterR_Display:SetNumberColor(baseColor)
-    end
+    CruxCounterR.Utils.UpdateColorBasedOnElapsed(elapsedSec, baseSettings, "number", function(color)
+        CruxCounterR_Display:SetNumberColor(color)
+    end)
 end

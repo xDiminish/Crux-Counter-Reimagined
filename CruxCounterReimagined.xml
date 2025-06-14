@@ -50,27 +50,33 @@ CruxCounterReimagined.xml
                 <TextureAnimation cellsHigh="6" cellsWide="6" framerate="30" />
             </Animations>
         </AnimationTimeline>
-        <AnimationTimeline name="CruxCounterR_SpinRuneCCW" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+        <AnimationTimeline name="CruxCounterR_SpinCruxCCW" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
                 <TransformRotationAnimation duration="6000" startZ="0" endZ="ZO_TWO_PI" />
             </Animations>
         </AnimationTimeline>
-        <AnimationTimeline name="CruxCounterR_SpinRuneCW" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+        <AnimationTimeline name="CruxCounterR_SpinCruxCW" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
                 <TransformRotationAnimation duration="6000" startZ="ZO_TWO_PI" endZ="0" />
             </Animations>
         </AnimationTimeline>
-        <!-- <AnimationTimeline name="CruxCounterR_Flash" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+        <AnimationTimeline name="CruxCounterR_Flash" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
                 <AlphaAnimation duration="1000" startAlpha="1" endAlpha="0.3" />
             </Animations>
-        </AnimationTimeline> -->
-        <AnimationTimeline name="CruxCounterR_Flash" playbackType="ONE_SHOT">
+        </AnimationTimeline>
+        <!-- <AnimationTimeline name="CruxCounterR_Flash" playbackType="ONE_SHOT">
             <Animations>
                 <AlphaAnimation duration="500" startAlpha="1" endAlpha="0.3" />
                 <AlphaAnimation delay="500" duration="500" startAlpha="0.3" endAlpha="1" />
             </Animations>
-        </AnimationTimeline>
+        </AnimationTimeline> -->
+        <!-- <AnimationTimeline name="CruxCounterR_Flash" playbackType="ONE_SHOT">
+            <Animations>
+                <AlphaAnimation duration="500" startAlpha="1" endAlpha="0.3" easingType="smoothStep" />
+                <AlphaAnimation delay="500" duration="500" startAlpha="0.3" endAlpha="1" easingType="smoothStep" />
+            </Animations>
+        </AnimationTimeline> -->
     </Animations>
 
     <Controls>
