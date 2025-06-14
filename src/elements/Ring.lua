@@ -85,11 +85,11 @@ end
 --- @return nil
 function CruxCounterR_Ring:SetColor(color)
     if not self.control then
-        CC.Debug:Trace(3, "[Crux Counter Reimagined Ring] ERROR: self.control is nil")
+        CC.Debug:Trace(3, "[CruxCounterR_Ring] ERROR: self.control is nil")
         return
     end
 
-    CC.Debug:Trace(3, string.format("[Crux Counter Reimagined] Ring SetColor called with RGBA = %.2f, %.2f, %.2f, %.2f", color:UnpackRGBA()))
+    CC.Debug:Trace(3, string.format("Ring SetColor called with RGBA = %.2f, %.2f, %.2f, %.2f", color:UnpackRGBA()))
 
     self.control:SetColor(color:UnpackRGBA())
 end

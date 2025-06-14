@@ -52,7 +52,7 @@ function CC.Utils.CheckWarnState(elapsedSec, baseSettings, elementType, setColor
         setColorFunc(inWarn and warnColor or baseColor)
     end
 
-    d("Warn State: " .. tostring(CC.Global.WarnState))
+    CC.Debug:Trace(2, "Current Warn State: <<1>>", CC.Global.WarnState)
 
     return inWarn
 end

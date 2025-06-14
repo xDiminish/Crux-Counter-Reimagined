@@ -40,6 +40,7 @@ end
 --- @return ZO_ColorDef|nil The resulting ZO_ColorDef object or nil if input invalid
 function M:EnsureColorDef(color)
     if not color then return nil end
+
     if color.UnpackRGBA then
         return color  -- already ZO_ColorDef
     elseif type(color) == "table" then
@@ -60,8 +61,43 @@ end
 --- @param fallback ZO_ColorDef|nil Optional fallback color if color is invalid or nil
 --- @return ZO_ColorDef
 function M:GetEnsuredColor(color, fallback)
-    fallback = fallback or ZO_ColorDef:New(0.7176, 1, 0.4862, 1) -- your default green
+    fallback = fallback or ZO_ColorDef:New(0.7176, 1, 0.4862, 1) -- default green
+
     local safeColor = self:EnsureColorDef(color)
+
+    return safeColor or fallback
+end
+
+--- Applies a repeating color pattern to each character of the given text.
+--- @param text string The text to colorize.
+--- @param palette string[] A list of 6-character hex color codes (e.g. {"FF0000", "00FF00"}).
+--- @return string The colorized text.
+function M:ColorizeTextWithPalette(text, palette)
+    if not palette or #palette == 0 then
+        return text -- fallback to uncolored text if no palette provided
+    end
+
+    local colored = ""
+    local count = #palette
+
+    for i = 1, #text do
+        local char = text:sub(i, i)
+        local color = palette[((i - 1) % count) + 1]
+        colored = colored .. "|c" .. color .. char .. "|r"
+    end
+
+    return colored
+end
+
+--- Wraps a string in rainbow colors using ColorizedText, or returns a fallback ZO_ColorDef.
+--- @param color string The text to colorize.
+--- @param fallback ZO_ColorDef|nil A fallback ZO_ColorDef if the operation fails.
+--- @return string|ZO_ColorDef Colored text string or fallback color object.
+function M:GetColorizeTextWithPalette(text, palette, fallback)
+    fallback = fallback or ZO_NORMAL_TEXT -- default menu color fallback
+
+    local safeColor = self:ColorizeTextWithPalette(text, palette)
+
     return safeColor or fallback
 end
 
@@ -73,7 +109,7 @@ end
 function CC.Display:Initialize()
     local baseSettings = CC.settings
     if not baseSettings then
-        CC.Debug:Trace(3, "[Crux Counter Reimagined] INITIALIZATION ERROR: baseSettings is nil")
+        CC.Debug:Trace(3, "INITIALIZATION ERROR: baseSettings is nil")
         return
     end
 
@@ -99,10 +135,10 @@ function CC.Display:Initialize()
             if rune and rune.SetColor then
                 rune:SetColor(runeColor)
             else
-                CC.Debug:Trace(2, string.format("[Crux Counter Reimagined] Rune %d missing SetColor!", i))
+                CC.Debug:Trace(2, string.format("Rune %d missing SetColor!", i))
             end
         else
-            CC.Debug:Trace(2, string.format("[Crux Counter Reimagined] Rune control %d is missing!", i))
+            CC.Debug:Trace(2, string.format("Rune control %d is missing!", i))
         end
     end
 
@@ -115,17 +151,17 @@ function CC.Display:Initialize()
         if self.ring.SetColor then
             self.ring:SetColor(ringColor)
         else
-            CC.Debug:Trace(2, "[Crux Counter Reimagined] Ring is missing SetColor!")
+            CC.Debug:Trace(2, "Ring is missing SetColor!")
         end
     else
-        CC.Debug:Trace(2, "[Crux Counter Reimagined] Ring control is missing!")
+        CC.Debug:Trace(2, "Ring control is missing!")
     end
 
     -- Initialize number color
     if self.SetNumberColor then
         self:SetNumberColor(numberColor)
     else
-        CC.Debug:Trace(2, "[Crux Counter Reimagined] Display missing SetNumberColor method!")
+        CC.Debug:Trace(2, "Display missing SetNumberColor method!")
     end
 end
 
@@ -153,7 +189,7 @@ function CC.Display:ResetRuneColors()
 
             rune:SetColor(runeColor)
         else
-            CC.Debug:Trace(2, "[Crux Counter Reimagined] ResetRingColor: rune or SetColor is nil")
+            CC.Debug:Trace(2, "ResetRingColor: rune or SetColor is nil")
         end
     end
 end
@@ -175,7 +211,7 @@ function CC.Display:ResetRingColor()
 
         self.ring:SetColor(color)
     else
-        CC.Debug:Trace(2, "[Crux Counter Reimagined] ResetRingColor: ring or SetColor is nil")
+        CC.Debug:Trace(2, "ResetRingColor: ring or SetColor is nil")
     end
 end
 
@@ -196,7 +232,7 @@ function CC.Display:ResetNumberColor()
         CruxCounterR.PrintColor("Current Color", color)        
         CruxCounterR_Display:SetNumberColor(color)
     else
-        CC.Debug:Trace(2, "[Crux Counter Reimagined] ResetRingColor: aura or SetNumberColor is nil")
+        CC.Debug:Trace(2, "[CC.Display:ResetNumberColor] ERROR: aura or SetNumberColor is nil")
     end
 end
 
@@ -234,17 +270,19 @@ function CC.Display:UpdateElementColor(elapsedSec, baseSettings, currentStacks, 
     end
 end
 
-function M:ResetAllColors()
+function M:ResetUI()
     local baseSettings = CC.settings
 
     if not baseSettings then return end
 
-    for _, rune in ipairs(CC.Display.runes or {}) do
-        if rune and rune.SetColor then
-            local baseColor = CruxCounterR.UI:GetEnsuredColor(baseSettings.elements.runes.color)
-            rune:SetColor(baseColor)
+    zo_callLater(function()
+        for _, rune in ipairs(CC.Display.runes or {}) do
+            if rune and rune.SetColor then
+                local baseColor = CruxCounterR.UI:GetEnsuredColor(baseSettings.elements.runes.color)
+                rune:SetColor(baseColor)
+            end
         end
-    end
+    end, 500) -- slight delay to account for slight color shift sync with other controls
 
     if CC.Display.ring and CC.Display.ring.SetColor then
         local baseColor = CruxCounterR.UI:GetEnsuredColor(baseSettings.elements.background.color)

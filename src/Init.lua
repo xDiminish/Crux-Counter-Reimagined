@@ -28,7 +28,7 @@ local function init(_, addonName)
     CC.Settings:Setup()
     CC.settings = CC.Settings.settings
 
-    CC.Debug:Trace(1, "[Crux Counter Reimagined] CC.settings initialized: " .. tostring(CC.settings))
+    CC.Debug:Trace(1, "CC.settings initialized: " .. tostring(CC.settings))
 
     -- Initialize the warn state flag
     CC.Global.WarnState = false
@@ -44,7 +44,7 @@ local function init(_, addonName)
         CC.Events:RegisterEvents()
 
         -- Start polling for updates to the warn state
-        CC.Events:PollUpdateWarnState()
+        --CC.Events:PollUpdateWarnState()
     end)
 end
 

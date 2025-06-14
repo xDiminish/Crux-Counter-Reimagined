@@ -57,4 +57,26 @@ function M:PrintColor(label, color)
     self:Trace(2, "%s: r=%.2f g=%.2f b=%.2f a=%.2f", label, r, g, b, a)
 end
 
+--- Converts all arguments to strings, replacing any `nil` with the string "nil".
+--- Useful for safely printing or passing values into formatted debug/log output
+--- without causing errors due to unexpected `nil` values.
+---
+--- @vararg any The list of arguments to convert to strings
+--- @return ... The converted arguments as strings, unpacked in order
+function M:PrintSafe(...)
+    local out = {}
+
+    for i = 1, select("#", ...) do
+        local val = select(i, ...)
+
+        if val == nil or val == "" then
+            out[i] = "nil"
+        else
+            out[i] = tostring(val)
+        end
+    end
+
+    return unpack(out)
+end
+
 CC.Debug = M

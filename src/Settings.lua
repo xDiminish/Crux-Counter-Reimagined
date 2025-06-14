@@ -2,25 +2,23 @@
 -- Settings.lua
 -- -----------------------------------------------------------------------------
 
-local CC                  = CruxCounterR
-local LAM                 = LibAddonMenu2
-local M                   = {}
-
-local gameSounds          = SOUNDS
-local sounds              = {}
-
-local rotationSpeedFactor = 24000
+local CC                    = CruxCounterR
+local LAM                   = LibAddonMenu2
+local M                     = {}
+local gameSounds            = SOUNDS
+local sounds                = {}
+local rotationSpeedFactor   = 24000
 
 -- Colors
--- B7FFC6
-local veryLightGreen      = ZO_ColorDef:New(0.7176470588, 1, 0.7764705882, 1)
--- B7FF7C
-local lightGreen          = ZO_ColorDef:New(0.7176470588, 1, 0.4862745098, 1)
--- ADF573
-local mediumGreen         = ZO_ColorDef:New(0.6784313725, 0.9607843137, 0.4509803921, 1)
--- FF3333
-local brightRed           = ZO_ColorDef:New(1, 0.2, 0.2, 1)
-
+local veryLightGreen        = ZO_ColorDef:New(0.7176470588, 1, 0.7764705882, 1)             -- B7FFC6
+local lightGreen            = ZO_ColorDef:New(0.7176470588, 1, 0.4862745098, 1)             -- B7FF7C
+local mediumGreen           = ZO_ColorDef:New(0.6784313725, 0.9607843137, 0.4509803921, 1)  -- ADF573
+local white                 = ZO_ColorDef:New(1, 1, 1, 1)                                   -- FFFFFF
+local red                   = ZO_ColorDef:New(1, 0.2, 0.2, 1)                               -- FF3333
+local orange                = ZO_ColorDef:New(0.98, 0.58, 0.02, 1)                          -- FA9405
+local brightRed             = ZO_ColorDef:New(0.96, 0.04, 0.25, 1)                          -- F50A41
+local mintGreen             = ZO_ColorDef:New(0.0353, 0.7373, 0.5647, 1)                    -- 09BD90
+local brightMagenta         = ZO_ColorDef:New(0.980, 0.020, 0.388, 1)                       -- FA0563
 
 -- Defaults/Settings Storage
 M.settings       = {}
@@ -79,10 +77,10 @@ M.defaults       = {
                     color = brightRed,
                 },
                 runes = {
-                    color = brightRed,
+                    color = brightMagenta,
                 },
                 background = {
-                    color = brightRed,
+                    color = white,
                 }
             }
         },
@@ -250,7 +248,14 @@ local displayOptions = {
     {
         -- Display
         type = "header",
-        name = function() return CC.Language:GetString("SETTINGS_DISPLAY_HEADER") end,
+        name = function() 
+            local colorPalette = {"72b007"}
+
+            return CruxCounterR.UI:GetColorizeTextWithPalette(
+                CC.Language:GetString("SETTINGS_DISPLAY_HEADER"),
+                colorPalette
+            )
+        end,
         width = "full",
     },
     {
@@ -581,39 +586,18 @@ end
 --- Gets whether the rune spin animation is enabled.
 --- @return boolean
 function M:getRuneSpinAnimationEnabled()
-    -- if not self.settings or not self.settings.reimagined then
-    --     -- fallback to default safely if settings are not ready yet
-    --     return self.defaults.reimagined.runeSpinAnimation
-    -- end
-
-    -- if self.settings.reimagined.runeSpinAnimation == nil then
-    --     return self.defaults.reimagined.runeSpinAnimation
-    -- else
-    --     return self.settings.reimagined.runeSpinAnimation
-    -- end
-    return self.values
-       and self.values.reimagined
-       and self.values.reimagined.runeSpinAnimation
-       or false
+    return M.settings.reimagined.runeSpinAnimation
 end
 
 --- Sets whether the rune spin animation is enabled.
 --- @param value boolean
 function M:setRuneSpinAnimationEnabled(value)
-    d("setRuneSpinAnimationEnabled called with value: " .. tostring(value))
+    M.settings.reimagined.runeSpinAnimation = value
 
-    self.values = self.values or {}
-    self.values.reimagined = self.values.reimagined or {}
-
-    self.values.reimagined.runeSpinAnimation = value
-
-    -- Update orbit behavior if it exists
     if CruxCounterR_Display and CruxCounterR_Display.orbit then
-        d("Calling CruxCounterR_Display.orbit:UpdateSpinAnimations(" .. tostring(value) .. ")")
-        -- CC.orbit:UpdateSpinAnimations(value)
         CruxCounterR_Display.orbit:UpdateSpinAnimations(value)
     else
-        d("Warning: CruxCounterR_Display.orbit is nil!")
+        CC.Debug:Trace(2, "[setRuneSpinAnimationEnabled] orbit is nil")
     end
 end
 
@@ -628,19 +612,18 @@ local function GetRuneSettings()
     local settings          = M.settings or {}                      -- Get current saved settings or empty table if missing
     local elements          = settings.reimagined.elements or {}    -- Access the 'elements' subtable in the 'reimagined' settings or fallback to empty table
     local runes             = elements.runes or {}                  -- Attempt to get runes settings from 'elements', but this line has a bug (should be 'elements' not 'reimagined')
-    -- local runes             = reimagined.elements.runes or {}       -- Attempt to get runes settings from 'elements', but this line has a bug (should be 'elements' not 'reimagined')
     local defaults          = M.defaults or {}                      -- Get defaults or empty table if missing
     local defaultElements   = defaults.reimagined.elements or {}    -- Access default 'elements' in 'reimagined' or fallback to empty table
     local defaultRunes      = defaultElements.runes or {}           -- Get default rune settings from defaultElements or empty table
 
     -- Debug print keys of current rune settings table
-    CC.Debug:Trace(2, "[Crux Counter Reimagined] runes table keys:")
+    CC.Debug:Trace(2, "runes table keys:")
     for k, v in pairs(runes) do
         CC.Debug:Trace(2, "  " .. tostring(k) .. " = " .. tostring(v))
     end
 
     -- Debug print keys of default rune settings table
-    CC.Debug:Trace(2, "[Crux Counter Reimagined] defaultRunes table keys:")
+    CC.Debug:Trace(2, "defaultRunes table keys:")
     for k, v in pairs(defaultRunes) do
         CC.Debug:Trace(2, "  " .. tostring(k) .. " = " .. tostring(v))
     end
@@ -657,7 +640,12 @@ local styleOptions = {
     {
         type = "header",
         name = function()
-            return CC.Language:GetString("SETTINGS_STYLE_HEADER")
+            local colorPalette = {"72b007"}
+
+            return CruxCounterR.UI:GetColorizeTextWithPalette(
+                CC.Language:GetString("SETTINGS_STYLE_HEADER"),
+                colorPalette
+            )
         end,
         width = "full",
     },
@@ -925,7 +913,12 @@ local styleOptions = {
     {
         type = "header",
         name = function()
-            return CC.Language:GetString("SETTINGS_STYLE_REIMAGINED_HEADER")
+            local colorPalette = {"ffffff", "ffffff", "59b8a9", "4da99a", "3c9588", "2f877b", "26776c", "1f6c61", "188074", "0e7362"}
+
+            return CruxCounterR.UI:GetColorizeTextWithPalette(
+                CC.Language:GetString("SETTINGS_STYLE_REIMAGINED_HEADER"),
+                colorPalette
+            )
         end,
         width = "full",
     },
@@ -977,6 +970,9 @@ local styleOptions = {
         default = M.defaults.reimagined.expireWarning.threshold,
         width = "full",
         disabled = function() return not getElementEnabled("runes") end,
+    },
+    {
+        type = "divider",
     },
     {
         type = "colorpicker",
@@ -1044,6 +1040,7 @@ local styleOptions = {
         end,
         setFunc = function(r, g, b, a)
             local newColor = ZO_ColorDef:New(r, g, b, a)
+
             if newColor then
                 setElementColor("runes", newColor, true)  -- update reimagined color
             end
@@ -1145,9 +1142,9 @@ local styleOptions = {
         end,
         getFunc = function() return CC.Settings:getRuneSpinAnimationEnabled() end,
         setFunc = function(value) 
-            d("Checkbox setFunc called with value: " .. tostring(value))
             CC.Settings:setRuneSpinAnimationEnabled(value) 
         end,
+        default = M.defaults.reimagined.runeSpinAnimation,
         width = "full",
     },
 
@@ -1208,7 +1205,12 @@ local soundOptions = {
         -- Sounds
         type = "header",
         name = function()
-            return CC.Language:GetString("SETTINGS_SOUNDS_HEADER")
+            local colorPalette = {"72b007"}
+
+            return CruxCounterR.UI:GetColorizeTextWithPalette(
+                CC.Language:GetString("SETTINGS_SOUNDS_HEADER"),
+                colorPalette
+            )
         end,
         width = "full",
     },
@@ -1486,21 +1488,6 @@ function M:GetElement(element)
     return selection
 end
 
---- Get setting by key
---- If no such key exists, get the default value
---- @param element string Element setting to get
---- @return table elementSetting Settings for the element
--- function M:GetReimaginedElement(element)
---     local elements = self:Get("reimagined")
---     local selection = reimagined[element] or nil
-
---     -- Bad and weird
---     assert(selection ~= nil,
---         zo_strformat("No loaded settings for element '<<1>>' found and no default settings exist", element))
-
---     return selection
--- end
-
 --- Setup settings
 --- @return nil
 function M:Setup()
@@ -1515,8 +1502,8 @@ function M:Setup()
 
     LAM:RegisterAddonPanel(addon.name, {
         type               = "panel",
-        name               = "Crux Counter (Reimagined)",
-        displayName        = "Crux Counter (Reimagined)",
+        name               = "Crux Counter (reIMAGINED)",
+        displayName        = "Crux Counter (reIMAGINED)",
         author             = "Dim (@xDiminish)",
         version            = addon.version,
         registerForRefresh = true,

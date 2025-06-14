@@ -18,8 +18,15 @@ local wasArcanist = nil
 --- @type integer Crux ability ID
 M.abilityId = 184220
 
--- Warn State Configuration
+--- UI element update logic based on Crux duration warning state.
+--- Called by `UpdateWarnState()` to apply warn color changes to:
+--- - Runes (crux)
+--- - Background ring texture
+--- - Number (aura stack count)
 local elementHandlers = {
+    --- Handles Crux rune coloring.
+    --- @param elapsedSec number Seconds since last Crux gain
+    --- @param baseSettings table The settings table containing color and threshold config
     runes = function(elapsedSec, baseSettings)
         for _, rune in ipairs(CC.Display.runes or {}) do
             if rune then
@@ -30,6 +37,9 @@ local elementHandlers = {
         end
     end,
 
+    --- Handles ring (background) coloring.
+    --- @param elapsedSec number Seconds since last Crux gain
+    --- @param baseSettings table The settings table containing color and threshold config
     background = function(elapsedSec, baseSettings)
         local ring = CC.Display.ring
         if ring then
@@ -39,6 +49,10 @@ local elementHandlers = {
         end
     end,
 
+    --- Handles number (Crux count text) coloring.
+    --- Resets to base color if Crux count is 0.
+    --- @param elapsedSec number Seconds since last Crux gain
+    --- @param baseSettings table The settings table containing color and threshold config
     number = function(elapsedSec, baseSettings)
         local stackCount = CC.State and CC.State.stacks or 0
         if stackCount == 0 then
@@ -59,19 +73,105 @@ local function getEventNamespace(event)
     return CC.Addon.name .. event
 end
 
---- Respond to effect changes.
+--- Handles effect changes for a specific ability and manages visual updates.
+--- Tracks the remaining time of the buff, updates Crux stack state, and starts/stops a timer for UI warnings.
+---
 --- @see EVENT_EFFECT_CHANGED
---- @param changeType integer Type of effect change, see EffectResult enum for possible values
---- @param stackCount integer Number of stacks at the time of the event
+--- @param eventCode integer Event identifier (unused)
+--- @param changeType integer Type of effect change (e.g., EFFECT_RESULT_GAINED, EFFECT_RESULT_FADED)
+--- @param effectSlot integer Slot ID for the effect (unused)
+--- @param effectName string Localized name of the effect (unused)
+--- @param unitTag string Unit the effect was applied to (e.g., "player", "reticleover")
+--- @param beginTime number Game time in seconds when the effect began
+--- @param endTime number Game time in seconds when the effect is expected to end
+--- @param stackCount integer Number of Crux stacks (1 to 3 typically)
+--- @param iconName string Icon path for the effect (unused)
+--- @param buffType integer Type of buff (unused)
+--- @param effectType integer Type of effect (unused)
+--- @param abilityType integer Type of ability (unused)
+--- @param statusEffectType integer Type of status effect (unused)
+--- @param abilityId integer Unique identifier for the ability applied
 --- @return nil
-local function onEffectChanged(_, changeType, _, _, _, _, _, stackCount)
+local function onEffectChanged(eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, abilityId)
+    -- Debug
+    local args = { CC.Debug:PrintSafe(eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, abilityId) }
+    local output =
+        "eventCode: "           .. args[1]  ..
+        ", changeType: "        .. args[2]  ..
+        ", effectSlot: "        .. args[3]  ..
+        ", effectName: "        .. args[4]  ..
+        ", unitTag: "           .. args[5]  ..
+        ", beginTime: "         .. args[6]  ..
+        ", endTime: "           .. args[7]  ..
+        ", stackCount: "        .. args[8]  ..
+        ", iconName: "          .. args[9]  ..
+        ", buffType: "          .. args[10] ..
+        ", effectType: "        .. args[11] ..
+        ", abilityType: "       .. args[12] ..
+        ", statusEffectType: "  .. args[13] ..
+        ", abilityId: "         .. args[14]
+
+    CC.Debug:Trace(2, output)
+
+    -- Check if the crux buff has ended
     if changeType == EFFECT_RESULT_FADED then
         CC.State:ClearStacks()
+
         CC.Global.WarnState = false
+        
+        EVENT_MANAGER:UnregisterForUpdate("CruxTracker_Countdown")
         return
     end
 
     CC.State:SetStacks(stackCount)
+
+    if endTime and endTime > 0 then
+        local baseSettings        = CC.settings or {}
+        local reimaginedSettings  = baseSettings.reimagined or {}
+        local pollingInterval     = (reimaginedSettings.expireWarning and reimaginedSettings.expireWarning.pollingInterval) or 200
+
+        EVENT_MANAGER:UnregisterForUpdate("CruxTracker_Countdown")
+        EVENT_MANAGER:RegisterForUpdate("CruxTracker_Countdown", pollingInterval, function()
+            local now         = GetGameTimeMilliseconds()
+            local endTimeMs   = endTime * 1000
+            local remainingMs = endTimeMs - now
+
+            -- Check if the crux buff has expired
+            if remainingMs <= 0 then
+                CC.Debug:Trace(2, "Effect expired: <<1>>", effectName)
+
+                CC.State:ClearStacks()
+
+                -- Update global warn state
+                CC.Global.WarnState = false
+
+                EVENT_MANAGER:UnregisterForUpdate("CruxTracker_Countdown")
+                return
+            end
+
+            local lastGainMs = CC.State.lastCruxGainTime
+            if not lastGainMs then
+                return  -- nothing to update
+            end
+
+            local elapsedSec    = (now - lastGainMs) / 1000
+            local cruxCount     = CC.State:GetCruxCount()
+
+            CC.Debug:Trace(2, "Current Crux Count: <<1>>", tostring(cruxCount))
+
+            if cruxCount == 0 then
+                CC.Debug:Trace(2, "Resetting all colors due to zero crux count...")
+
+                -- Update global warn state
+                CC.Global.WarnState = false
+                return
+            end
+
+            for _, element in ipairs({ "runes", "background", "number" }) do
+                elementHandlers[element](elapsedSec, baseSettings)
+            end
+        end)
+    end
 end
 
 --- Update combat state
@@ -106,82 +206,6 @@ local function onPlayerChanged()
         -- No Crux buff found
         CC.State:SetStacks(0, false)
     end)
-end
-
---- Periodically checks the time since the last Crux gain and updates rune and ring colors
---- based on whether the Crux is nearing expiration. Continues polling at a defined interval.
---- 
---- Uses settings from `CC.settings.reimagined.expireWarning` to determine:
---- - `pollingInterval` (in ms)
---- - `threshold` (in sec) for expiration warning
---- - `color` settings for both runes and background ring
----
---- @return nil
-function M:UpdateWarnState()
-    local currentTimeMs     = GetGameTimeMilliseconds()
-    local lastGainMs        = CC.State.lastCruxGainTime
-
-    local baseSettings = CC.settings
-    if not baseSettings then
-        CC.Debug:Trace(3, "[Crux Counter Reimagined] ERROR: baseSettings is nil")
-        return
-    end
-
-    local reimaginedSettings    = baseSettings.reimagined or {}
-    local pollingInterval       = (reimaginedSettings.expireWarning and reimaginedSettings.expireWarning.pollingInterval) or 200
-
-    if not lastGainMs then
-        zo_callLater(function() self:UpdateWarnState() end, pollingInterval)
-        return
-    end
-
-    local elapsedSec = (currentTimeMs - lastGainMs) / 1000  -- convert ms to seconds
-
-    if not CC.State.GetCruxCount then
-        CC.Debug:Trace(3, "ERROR: GetCruxCount is nil, retrying later")
-
-        zo_callLater(function() self:UpdateWarnState() end, pollingInterval)
-
-        return
-    end
-
-    local cruxCount = CC.State:GetCruxCount()
-
-    CC.Debug:Trace(2, "Current Crux Count: <<1>>", tostring(cruxCount))
-
-    if cruxCount == 0 then
-        CC.Debug:Trace(2, "Resetting all colors due to zero crux count...")
-
-        -- reset all control colors to help prevent color flicker on initial crux gain
-        CC.Display:ResetAllColors()
-
-        -- Reset warn state
-        CC.Global.WarnState = false
-        d("Warn State: " .. tostring(CC.Global.WarnState))
-
-        -- Still schedule next update to keep checking for changes
-        zo_callLater(function() self:UpdateWarnState() end, pollingInterval)
-        return
-    end
-
-    -- -- Iterate over the UI elements and update their warn start
-    for _, element in ipairs({ "runes", "background", "number" }) do
-        elementHandlers[element](elapsedSec, baseSettings)
-    end
-
-    zo_callLater(function() self:UpdateWarnState() end, pollingInterval)
-end
-
---- Starts the periodic loop to monitor Crux expiration and update visuals.
---- Calls `UpdateWarnState()` once, which schedules itself repeatedly.
---- @return nil
-function M:PollUpdateWarnState()
-    if not CC.State or not CC.State.GetCruxCount then
-        CC.Debug:Trace(1, "[CruxCounterReimagined] WARN: CC.State or GetCruxCount not ready, retrying later")
-        zo_callLater(function() self:PollUpdateWarnState() end, 100)
-        return
-    end
-    self:UpdateWarnState()
 end
 
 -- When stack count increases, save start time
@@ -328,7 +352,6 @@ function M:RegisterEvents()
     CC.Debug:Trace(2, "Registering events...")
 
     -- Ability updates
-    -- self:Listen("EffectChanged", EVENT_EFFECT_CHANGED, onEffectChanged)
     self:Listen("EffectChanged", EVENT_EFFECT_CHANGED, function(eventCode, ...)
         return onEffectChanged(eventCode, ...)
     end)
@@ -338,7 +361,7 @@ function M:RegisterEvents()
         REGISTER_FILTER_ABILITY_ID, self.abilityId,
         REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER
     )
-
+ 
     -- Life or death
     self:Listen("PlayerDead", EVENT_PLAYER_DEAD, onPlayerChanged)
     self:Listen("PlayerAlive", EVENT_PLAYER_ALIVE, onPlayerChanged)

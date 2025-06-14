@@ -46,9 +46,13 @@ function M:SetStacks(count, playSound)
 
     local cruxGainedOrRefreshed = isGainedOrRefreshed()
 
-    if cruxGainedOrRefreshed then
+    -- if cruxGainedOrRefreshed then
+    --     CC.State.lastCruxGainTime = GetGameTimeMilliseconds()
+    -- end
+    if cruxGainedOrRefreshed or (count == previousStacks and count > 0) then
         CC.State.lastCruxGainTime = GetGameTimeMilliseconds()
     end
+
 
     if count ~= previousStacks then
         CC.Debug:Trace(2, "Updating Crux: <<1>> -> <<2>>", previousStacks, count)

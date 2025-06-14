@@ -67,7 +67,12 @@ function CruxCounterR_Rune:Initialize(control, num)
     self.timelines.fadeOut:SetHandler("OnStop", function()
         self:SetRotation2D(self.startingRotation)
         self.smoke.timeline:Stop()
+        
+        -- Stop spin animatation
         self:StopSpin()
+
+        -- Reset colors after fading out
+        CC.Display:ResetUI()
     end)
 
     self.timelines.fadeIn:SetHandler("OnPlay", function()
@@ -163,11 +168,11 @@ end
 --- @return nil
 function CruxCounterR_Rune:SetColor(color)
     if not self.rune or not self.glow or not self.smoke or not self.smoke.control then
-        CC.Debug:Trace(3, "[Crux Counter Reimagined Rune] ERROR: one or more controls are nil in SetColor")
+        CC.Debug:Trace(3, "[CruxCounterR_Rune] ERROR: one or more controls are nil in SetColor")
         return
     end
 
-    CC.Debug:Trace(3, string.format("[Crux Counter Reimagined] Rune SetColor called with RGBA = %.2f, %.2f, %.2f, %.2f", color:UnpackRGBA()))
+    CC.Debug:Trace(3, string.format("Rune SetColor called with RGBA = %.2f, %.2f, %.2f, %.2f", color:UnpackRGBA()))
 
     self.rune:SetColor(color:UnpackRGBA())
     self.glow:SetColor(color:UnpackRGBA())

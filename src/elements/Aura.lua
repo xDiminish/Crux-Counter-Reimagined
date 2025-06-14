@@ -45,6 +45,13 @@ end
 --- @param color ZO_ColorDef
 --- @return nil
 function CruxCounterR_Aura:SetNumberColor(color)
+    if not self.control then
+        CC.Debug:Trace(3, "[CruxCounterR_Aura] ERROR: self.control is nil")
+        return
+    end
+
+    CC.Debug:Trace(3, string.format("Aura SetNumberColor called with RGBA = %.2f, %.2f, %.2f, %.2f", color:UnpackRGBA()))
+
     self.count:SetColor(color:UnpackRGBA())
 end
 
@@ -105,13 +112,6 @@ function CruxCounterR_Aura:SetVisible(isVisible)
         end
         
         self.control:SetHidden(true)
-
-        -- Reset colors after hiding, with a small delay to allow transitions to finish
-        if CC.Display and CC.Display.ResetAllColors then
-            zo_callLater(function()
-                CC.Display:ResetAllColors()
-            end, 2000)
-        end
     end
 
     -- Debug
