@@ -47,7 +47,7 @@ Created by **Dim** (`@xDiminish`) [PCNA]
 
 ---
 
-## 🔢 Dependencies
+## 🧩 Dependencies
 
 **LibAddonMenu-2.0>=r40**
 [https://www.esoui.com/downloads/info7-LibAddonMenu-2.0.html](https://www.esoui.com/downloads/info7-LibAddonMenu-2.0.html)
