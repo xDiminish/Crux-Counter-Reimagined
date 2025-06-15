@@ -32,6 +32,7 @@ local function init(_, addonName)
 
     -- Initialize the warn state flag
     CC.Global.WarnState = false
+    CC.Global.isFlashing = false
     
     CruxCounterR_Display:ApplySettings()
 

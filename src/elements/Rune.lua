@@ -30,21 +30,6 @@ function CruxCounterR_Rune:Initialize(control, num)
     self.glow = self.control:GetNamedChild("Glow")
     self.rune = self.control:GetNamedChild("Rune")
 
-    -- Create a flash overlay texture control as a child of self.control
-    -- local flashName = self.control:GetName() .. "FlashOverlay"
-    -- local existingFlash = self.control:GetNamedChild("FlashOverlay")
-    -- if existingFlash then
-    --     self.flashOverlay = existingFlash
-    -- else
-    --     self.flashOverlay = CreateControl(flashName, self.control, CT_TEXTURE)
-    --     self.flashOverlay:SetTexture("/path/to/your/flash_texture.dds")
-    --     self.flashOverlay:SetDrawLayer(DL_OVERLAY)
-    --     self.flashOverlay:SetAnchorFill(self.control)
-    --     self.flashOverlay:SetHidden(true)
-    -- end
-
-
-
     self:SetRotation2D(self.startingRotation)
 
     local swoopAnimation, swoopTimeline = CreateSimpleAnimation(ANIMATION_CUSTOM, self.control)
@@ -58,9 +43,9 @@ function CruxCounterR_Rune:Initialize(control, num)
     end
 
     self.timelines = {
-        fadeIn   = AM:CreateTimelineFromVirtual("CruxCounterR_CruxFadeIn", self.control),
-        fadeOut  = AM:CreateTimelineFromVirtual("CruxCounterR_CruxFadeOut", self.control),
-        rotation = AM:CreateTimelineFromVirtual("CruxCounterR_RotateControlCW", self.control),
+        fadeIn      = AM:CreateTimelineFromVirtual("CruxCounterR_CruxFadeIn", self.control),
+        fadeOut     = AM:CreateTimelineFromVirtual("CruxCounterR_CruxFadeOut", self.control),
+        rotation    = AM:CreateTimelineFromVirtual("CruxCounterR_RotateControlCW", self.control),
         swoop    = swoopTimeline,
     }
 
@@ -88,8 +73,9 @@ function CruxCounterR_Rune:Initialize(control, num)
         self.smoke.timeline:PlayFromStart()
     end
 
-    self.spinTimeline = nil
-    local runeControl = self.rune
+    self.spinTimeline   = nil
+    self.flashTimeline  = nil
+    local runeControl   = self.rune
 
     if runeControl then
         -- Assign spinTimeline based on rune number
@@ -100,13 +86,13 @@ function CruxCounterR_Rune:Initialize(control, num)
             -- Even runes: counterclockwise
             self.spinTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CruxCounterR_SpinCruxCCW", self.rune)
         end
+
+        self.flashTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CruxCounterR_Flash", self.rune)
+        --d("Flash animation timeline created!")
     else
         CC.Debug:Trace(2, "WARNING: Rune control not found for Crux: <<1>>", tostring(num))
     end
 
-    -- Create the flash timeline, but don't play it yet
-    self.flashTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CruxCounterR_Flash", self.control)
-    -- self.flashTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CruxCounterR_Flash", self.flashOverlay)
 
     
 end
@@ -131,37 +117,29 @@ function CruxCounterR_Rune:StopSpin()
     end
 end
 
-
 function CruxCounterR_Rune:PlayFlash()
     if self.flashTimeline then
+        if not CC.Global.isFlashing then
+            CC.Global.isFlashing = true
+            d("Flash: On")
+        end
+
+        self.rune:SetAlpha(1)
         self.flashTimeline:PlayFromStart()
     end
 end
 
 function CruxCounterR_Rune:StopFlash()
     if self.flashTimeline then
+        if CC.Global.isFlashing then
+            CC.Global.isFlashing = false
+            d("Flash: Off")
+        end
+
         self.flashTimeline:Stop()
-        -- reset alpha so control isn't left translucent
-        self.control:SetAlpha(1)
+        --self.control:SetAlpha(1) -- ensure full visibility when stopped
     end
 end
--- function CruxCounterR_Rune:PlayFlash()
---     if self.flashTimeline then
---         self.flashOverlay:SetHidden(false)
---         self.flashTimeline:PlayFromStart()
---     end
--- end
-
--- function CruxCounterR_Rune:StopFlash()
---     if self.flashTimeline then
---         self.flashTimeline:Stop()
---         self.flashOverlay:SetHidden(true)
---         -- Reset alpha just in case
---         self.flashOverlay:SetAlpha(1)
---     end
--- end
-
-
 
 --- Set the color of the Rune elements
 --- @param color ZO_ColorDef
@@ -237,6 +215,7 @@ end
 --- Is the Rune element showing?
 --- @return boolean showing True when the Rune is showing
 function CruxCounterR_Rune:IsShowing()
+    d("alpha: " .. self.control:GetAlpha())
     return self.control:GetAlpha() == 1
 end
 
@@ -248,4 +227,20 @@ function CruxCounterR_Rune:UpdateColorBasedOnElapsed(elapsedSec, baseSettings)
     CruxCounterR.Utils.UpdateColorBasedOnElapsed(elapsedSec, baseSettings, "runes", function(color)
         self:SetColor(color)
     end)
+end
+
+--- Enable or disable warning flash effect
+--- @param state boolean True to start flashing, false to stop
+function CruxCounterR_Rune:SetWarnState(state)
+    if state then
+        d("Setting state to true")
+        if self.flashTimeline and not self.flashTimeline:IsPlaying() then
+            self:PlayFlash()
+        end
+    else
+        d("Setting state to false")
+        if self.flashTimeline and self.flashTimeline:IsPlaying() then
+            self:StopFlash()
+        end
+    end
 end

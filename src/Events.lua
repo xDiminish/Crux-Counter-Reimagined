@@ -31,8 +31,11 @@ local elementHandlers = {
         for _, rune in ipairs(CC.Display.runes or {}) do
             if rune then
                 CC.Utils.CheckWarnState(elapsedSec, baseSettings, "runes", function(color)
-                    rune:SetColor(color)
-                end)
+                        rune:SetColor(color)
+                        rune:SetWarnState(CC.Global.WarnState)
+                    end,
+                    rune
+                )
             end
         end
     end,
@@ -44,8 +47,10 @@ local elementHandlers = {
         local ring = CC.Display.ring
         if ring then
             CC.Utils.CheckWarnState(elapsedSec, baseSettings, "background", function(color)
-                ring:SetColor(color)
-            end)
+                    ring:SetColor(color)
+                end,
+                ring
+            )
         end
     end,
 
@@ -60,8 +65,10 @@ local elementHandlers = {
             CruxCounterR_Display:SetNumberColor(baseColor)
         else
             CC.Utils.CheckWarnState(elapsedSec, baseSettings, "number", function(color)
-                CruxCounterR_Display:SetNumberColor(color)
-            end)
+                    CruxCounterR_Display:SetNumberColor(color)
+                end,
+                self
+            )
         end
     end,
 }
@@ -145,6 +152,10 @@ local function onEffectChanged(eventCode, changeType, effectSlot, effectName, un
                 -- Update global warn state
                 CC.Global.WarnState = false
 
+                for _, rune in ipairs(CC.Display.runes or {}) do
+                    rune:SetWarnState(false)
+                end
+
                 EVENT_MANAGER:UnregisterForUpdate("CruxTracker_Countdown")
                 return
             end
@@ -164,6 +175,11 @@ local function onEffectChanged(eventCode, changeType, effectSlot, effectName, un
 
                 -- Update global warn state
                 CC.Global.WarnState = false
+
+                for _, rune in ipairs(CC.Display.runes or {}) do
+                    rune:SetWarnState(false)
+                end
+
                 return
             end
 

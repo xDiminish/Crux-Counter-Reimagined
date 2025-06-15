@@ -4,32 +4,27 @@ CruxCounterReimagined.xml
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="https://in.imic.us/schema/esoui/101039/guixml.xsd">
     <Animations>
-        <AnimationTimeline name="CruxCounterR_RotateTextureCW" playbackType="LOOP"
-            loopCount="LOOP_INDEFINITELY">
+        <AnimationTimeline name="CruxCounterR_RotateTextureCW" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
                 <TextureRotateAnimation duration="6000" startRotation="ZO_TWO_PI" endRotation="0" />
             </Animations>
         </AnimationTimeline>
-        <AnimationTimeline name="CruxCounterR_RotateTextureCCW" playbackType="LOOP"
-            loopCount="LOOP_INDEFINITELY">
+        <AnimationTimeline name="CruxCounterR_RotateTextureCCW" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
                 <TextureRotateAnimation duration="6000" startRotation="0" endRotation="-ZO_TWO_PI" />
             </Animations>
         </AnimationTimeline>
-        <AnimationTimeline name="CruxCounterR_RotateControlCCW" playbackType="LOOP"
-            loopCount="LOOP_INDEFINITELY">
+        <AnimationTimeline name="CruxCounterR_RotateControlCCW" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
                 <TransformRotationAnimation duration="6000" startZ="0" endZ="ZO_TWO_PI" />
             </Animations>
         </AnimationTimeline>
-        <AnimationTimeline name="CruxCounterR_RotateControlCW" playbackType="LOOP"
-            loopCount="LOOP_INDEFINITELY">
+        <AnimationTimeline name="CruxCounterR_RotateControlCW" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
                 <TransformRotationAnimation duration="6000" startZ="ZO_TWO_PI" endZ="0" />
             </Animations>
         </AnimationTimeline>
-        <AnimationTimeline name="CruxCounterR_RotateBG" playbackType="LOOP"
-            loopCount="LOOP_INDEFINITELY">
+        <AnimationTimeline name="CruxCounterR_RotateBG" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
                 <TransformRotationAnimation duration="25000" startZ="ZO_TWO_PI" endZ="0" />
             </Animations>
@@ -44,8 +39,7 @@ CruxCounterReimagined.xml
                 <AlphaAnimation duration="150" startAlpha="1.0" endAlpha="0.0" />
             </Animations>
         </AnimationTimeline>
-        <AnimationTimeline name="CruxCounterR_CruxSmokeDontBreatheThis" playbackType="LOOP"
-            loopCount="LOOP_INDEFINITELY">
+        <AnimationTimeline name="CruxCounterR_CruxSmokeDontBreatheThis" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
                 <TextureAnimation cellsHigh="6" cellsWide="6" framerate="30" />
             </Animations>
@@ -60,11 +54,24 @@ CruxCounterReimagined.xml
                 <TransformRotationAnimation duration="6000" startZ="ZO_TWO_PI" endZ="0" />
             </Animations>
         </AnimationTimeline>
-        <AnimationTimeline name="CruxCounterR_Flash" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
+        <!-- <AnimationTimeline name="CruxCounterR_Flash" playbackType="LOOP" loopCount="LOOP_INDEFINITELY">
             <Animations>
-                <AlphaAnimation duration="1000" startAlpha="1" endAlpha="0.3" />
+                <AlphaAnimation duration="500" startAlpha="1" endAlpha="0.1" />
+                <AlphaAnimation delay="500" duration="500" startAlpha="0.1" endAlpha="1" />
+            </Animations>
+        </AnimationTimeline> -->
+        <AnimationTimeline name="CruxCounterR_Flash" playbackType="ONE_SHOT">
+            <Animations>
+                <AlphaAnimation delay="200" duration="500" startAlpha="1" endAlpha="0" easingType="smoothStep" />
+                <AlphaAnimation delay="700" duration="500" startAlpha="0" endAlpha="1" easingType="smoothStep" />
+                <AlphaAnimation delay="200" duration="500" startAlpha="1" endAlpha="0" easingType="smoothStep" control="Glow" />
+                <AlphaAnimation delay="700" duration="500" startAlpha="0" endAlpha="1" easingType="smoothStep" control="Glow" />
+                <AlphaAnimation delay="200" duration="500" startAlpha="1" endAlpha="0" easingType="smoothStep" control="Smoke" />
+                <AlphaAnimation delay="700" duration="500" startAlpha="0" endAlpha="1" easingType="smoothStep" control="Smoke" />
             </Animations>
         </AnimationTimeline>
+
+
         <!-- <AnimationTimeline name="CruxCounterR_Flash" playbackType="ONE_SHOT">
             <Animations>
                 <AlphaAnimation duration="500" startAlpha="1" endAlpha="0.3" />

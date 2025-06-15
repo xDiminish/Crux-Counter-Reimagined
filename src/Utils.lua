@@ -6,12 +6,18 @@ local CC = CruxCounterR
 
 CC.Utils = {}
 
+CC.Global.PreviousWarnState = CC.Global.PreviousWarnState or {
+    runes       = false,
+    background  = false,
+    number      = false,
+}
+
 --- Shared logic to update color based on elapsed time and warn threshold
 --- @param elapsedSec number Time since crux gain
 --- @param baseSettings table Saved settings (with .reimagined subtable)
 --- @param elementType string One of: "runes", "background", "number"
 --- @param setColorFunc function Function that takes a ZO_ColorDef and applies it to the UI
-function CC.Utils.CheckWarnState(elapsedSec, baseSettings, elementType, setColorFunc)
+function CC.Utils.CheckWarnState(elapsedSec, baseSettings, elementType, setColorFunc, controlObj)
     if elapsedSec < 0 then elapsedSec = 0 end
 
     if not baseSettings then
@@ -50,6 +56,17 @@ function CC.Utils.CheckWarnState(elapsedSec, baseSettings, elementType, setColor
 
     if setColorFunc and type(setColorFunc) == "function" then
         setColorFunc(inWarn and warnColor or baseColor)
+
+        -- Only trigger play/stop when the warn state *changes*
+        local prevState = CC.Global.PreviousWarnState[elementType]
+        if prevState ~= inWarn and controlObj and controlObj.PlayFlash then
+            if inWarn then
+                controlObj:PlayFlash()
+            else
+                controlObj:StopFlash()
+            end
+            CC.Global.PreviousWarnState[elementType] = inWarn
+        end
     end
 
     CC.Debug:Trace(2, "Current Warn State: <<1>>", CC.Global.WarnState)
