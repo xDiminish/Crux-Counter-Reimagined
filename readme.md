@@ -47,6 +47,13 @@ Created by **Dim** (`@xDiminish`) [PCNA]
 
 ---
 
+## 🔢 Dependencies
+
+**LibAddonMenu-2.0>=r40**
+[https://www.esoui.com/downloads/info7-LibAddonMenu-2.0.html](https://www.esoui.com/downloads/info7-LibAddonMenu-2.0.html)
+
+---
+
 ## 📜 Disclaimer
 
 This addon is an updated version of **Crux Counter v1.3.0** created by `@g4rr3t`.  
