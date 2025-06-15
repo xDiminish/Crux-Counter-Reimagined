@@ -1,103 +1,77 @@
 -- -----------------------------------------------------------------------------
 -- lang/ko.lua
 -- -----------------------------------------------------------------------------
-
 local M = {}
-local CC = CruxCounterR
+local CC = CruxCounterR--- Setup translation strings
 
---- Setup translation strings
 --- @return nil
 function M.Setup()
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK", "잠금")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_UNLOCK", "잠금 해제")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK_DESC", "카운터 표시 잠금/해제를 전환하여 위치를 조정합니다.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_DISPLAY_HEADER", "표시")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK_TO_RETICLE_WARNING", "이 설정을 변경하려면 조준선 잠금을 해제하세요.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_MOVE_TO_CENTER", "중앙으로 이동")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_MOVE_TO_CENTER_DESC", "화면 중앙으로 표시를 이동합니다. 사라졌을 때 유용합니다.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK_TO_RETICLE", "조준선에 고정")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK_TO_RETICLE_DESC", "조준선 십자선 위 화면 중앙에 위치시킵니다.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_HIDE_OUT_OF_COMBAT", "비전투 시 숨기기")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_HIDE_OUT_OF_COMBAT_DESC", "비전투 상태일 때 모든 표시를 숨깁니다.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SIZE", "크기")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SIZE_DESC", "카운터 표시 크기입니다.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_HEADER", "스타일")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_ROTATE", "회전")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER", "숫자")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_DESC", "활성 크럭스 수 표시를 켜거나 끕니다.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_COLOR", "색상")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_COLOR_DESC", "활성 크럭스 수 표시 색상입니다.")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_COLOR_RESET", "색상 초기화")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_COLOR_RESET_DESC", "숫자 색상을 기본값으로 초기화합니다.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES", "크럭스 룬")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES_DESC", "크럭스 룬 텍스처 표시를 켜거나 끕니다.")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES_ROTATE_DESC", "크럭스 룬 텍스처 회전을 켜거나 끕니다.")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES_ROTATION_SPEED", "속도")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES_ROTATION_SPEED_DESC", "크럭스 룬 텍스처 회전 속도입니다. 값이 클수록 빠릅니다.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_COLOR", "색상")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_COLOR_DESC", "크럭스 룬 텍스처 색상입니다.")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_COLOR_RESET", "색상 초기화")
-	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_COLOR_RESET_DESC", "룬 텍스처 색상을 기본값으로 초기화합니다.")
-
+	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_COLOR_RESET_DESC", "룬 텍스처 색상을 기본값으로 초기화합니다.")	
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND", "배경")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_DESC", "카운터 배경 텍스처 표시를 켜거나 끕니다.")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_ROTATE", "회전 켜기/끄기")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_HIDE_ZERO_CRUX", "크럭스 없을 때 숨기기")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_HIDE_ZERO_CRUX_DESC", "활성 크럭스가 없을 때 배경을 숨깁니다.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_COLOR", "색상")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_COLOR_DESC", "카운터 배경 텍스처 색상입니다.")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_COLOR_RESET", "색상 초기화")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_COLOR_RESET_DESC", "카운터 배경 텍스처 색상을 기본값으로 초기화합니다.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_HEADER", "사운드")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_PLAY", "재생")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_CRUX_GAINED", "크럭스 획득")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_CRUX_GAINED_DESC", "크럭스를 획득할 때 사운드를 재생합니다.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_MAXIMUM_CRUX", "최대 크럭스")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_MAXIMUM_CRUX_DESC", "최대 크럭스에 도달했을 때 사운드를 재생합니다.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_CRUX_LOST", "크럭스 소멸")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_CRUX_LOST_DESC", "크럭스를 잃을 때 사운드를 재생합니다.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_REIMAGINED_HEADER", "재구상")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_DURATION", "크럭스 지속시간")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_DURATION_DESC", "크럭스 버프 총 지속시간(초)")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_THRESHOLD", "만료 경고 임계값")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_THRESHOLD_DESC", "룬 색상 변경을 트리거할 임계값으로, 설정한 만료 경고 색상으로 변경됩니다.")
-
-	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR", "만료 경고 텍스트 색상")
+	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR", "만료 경고 오라 색상")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR_DESC", "만료 직전 활성 크럭스 수 텍스트 색상입니다.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR_RESET", "색상 초기화")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR_RESET_DESC", "만료 경고 텍스트 색상을 기본값으로 초기화합니다.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR", "만료 경고 룬 색상")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR_DESC", "만료 직전 활성 룬의 색상입니다.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR_RESET", "색상 초기화")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR_RESET_DESC", "만료 경고 룬 색상을 기본값으로 초기화합니다.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_POLLING_INTERVAL", "만료 경고 폴링 간격")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_POLLING_INTERVAL_DESC", "크럭스 버프 만료 전 남은 시간을 확인하는 폴링 주기(밀리초)")
-
+	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_SPIN_ANIMATION", "크럭스 회전 애니메이션")
+	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_SPIN_ANIMATION_DESC", "크럭스 회전 애니메이션을 활성화합니다.")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR", "만료 경고 배경 색상")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR_DESC", "룬 만료 직전 배경 텍스처 색상입니다.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR_RESET", "색상 초기화")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR_RESET_DESC", "만료 경고 배경 색상을 기본값으로 초기화합니다.")
 end

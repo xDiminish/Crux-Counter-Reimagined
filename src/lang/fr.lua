@@ -1,112 +1,77 @@
 -- -----------------------------------------------------------------------------
 -- lang/fr.lua
 -- -----------------------------------------------------------------------------
-
 local M = {}
-local CC = CruxCounterR
+local CC = CruxCounterR--- Setup translation strings
 
---- Setup translation strings
 --- @return nil
 function M.Setup()
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK", "Verrouiller")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_UNLOCK", "Déverrouiller")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK_DESC",
-        "Basculer l'état verrouillé/déverrouillé de l'affichage du compteur pour le repositionnement.")
-
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK_DESC", "Basculer l'état verrouillé/déverrouillé de l'affichage du compteur pour le repositionnement.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_DISPLAY_HEADER", "Affichage")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK_TO_RETICLE_WARNING",
-        "Désactivez le verrouillage sur le réticule pour changer ce paramètre.")
-
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK_TO_RETICLE_WARNING", "Désactivez le verrouillage sur le réticule pour changer ce paramètre.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_MOVE_TO_CENTER", "Déplacer au centre")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_MOVE_TO_CENTER_DESC",
-        "Centre l'affichage au milieu de l'écran. Utile s'il a disparu.")
-
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_MOVE_TO_CENTER_DESC", "Centre l'affichage au milieu de l'écran. Utile s'il a disparu.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK_TO_RETICLE", "Verrouiller sur le réticule")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK_TO_RETICLE_DESC",
-        "Positionne l'affichage au centre de l'écran sur le réticule de ciblage.")
-
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK_TO_RETICLE_DESC", "Positionne l'affichage au centre de l'écran sur le réticule de ciblage.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_HIDE_OUT_OF_COMBAT", "Masquer hors combat")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_HIDE_OUT_OF_COMBAT_DESC", "Masque tout lorsqu'hors combat.")
-
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SIZE", "Taille")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SIZE_DESC", "Taille de l'affichage du compteur.")
-
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_HEADER", "Style")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_ROTATE", "Rotation")
-
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER", "Nombre")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_DESC",
-        "Afficher ou masquer l'affichage du nombre d'Interprétations actives.")
-
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_DESC", "Afficher ou masquer l'affichage du nombre d'Interprétations actives.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_COLOR", "Couleur")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_COLOR_DESC",
-        "Couleur de l'affichage du nombre d'Interprétations actives.")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_COLOR_DESC", "Couleur de l'affichage du nombre d'Interprétations actives.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_COLOR_RESET", "Réinitialiser la Couleur")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_COLOR_RESET_DESC",
-        "Réinitialiser la couleur du nombre par défaut.")
-
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_COLOR_RESET_DESC", "Réinitialiser la couleur du nombre par défaut.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES", "Runes d'Interprétation")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES_DESC",
-        "Afficher ou masquer l'affichage des textures de Rune d'Interprétation.")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES_ROTATE_DESC",
-        "Activer ou désactiver la rotation des textures de Rune d'Interprétation.")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES_DESC", "Afficher ou masquer l'affichage des textures de Rune d'Interprétation.")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES_ROTATE_DESC", "Activer ou désactiver la rotation des textures de Rune d'Interprétation.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES_ROTATION_SPEED", "Vitesse")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES_ROTATION_SPEED_DESC",
-        "Vitesse de rotation des textures des Interprétations. Plus la valeur est élevée, plus la rotation est rapide.")
-
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES_ROTATION_SPEED_DESC", "Vitesse de rotation des textures des Interprétations. Plus la valeur est élevée, plus la rotation est rapide.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_COLOR", "Couleur")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_COLOR_DESC", "Couleur des textures d'Interprétation.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_COLOR_RESET", "Réinitialiser la Couleur")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_COLOR_RESET_DESC",
-        "Réinitialiser la couleur de la texture d'Interprétation par défaut.")
-
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_COLOR_RESET_DESC", "Réinitialiser la couleur de la texture d'Interprétation par défaut.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND", "Fond")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_DESC",
-        "Afficher ou masquer l'affichage de la texture de fond du compteur.")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_ROTATE",
-        "Activer ou désactiver la rotation de la texture de fond du compteur.")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_DESC", "Afficher ou masquer l'affichage de la texture de fond du compteur.")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_ROTATE", "Activer ou désactiver la rotation de la texture de fond du compteur.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_HIDE_ZERO_CRUX", "Masquer sans Interprétation")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_HIDE_ZERO_CRUX_DESC",
-        "Masquer l'arrière-plan lorsqu'il n'y a pas d'Interprétation active.")
-
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_HIDE_ZERO_CRUX_DESC", "Masquer l'arrière-plan lorsqu'il n'y a pas d'Interprétation active.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_COLOR", "Couleur")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_COLOR_DESC", "Couleur de la texture de fond du compteur.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_COLOR_RESET", "Réinitialiser la Couleur")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_COLOR_RESET_DESC",
-        "Réinitialiser la couleur de la texture de fond du compteur par défaut.")
-
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_COLOR_RESET_DESC", "Réinitialiser la couleur de la texture de fond du compteur par défaut.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_HEADER", "Sons")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_PLAY", "Jouer")
-
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_CRUX_GAINED", "Interprétation obtenue")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_CRUX_GAINED_DESC",
-        "Jouer un son lorsqu'une Interprétation est obtenue.")
-
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_CRUX_GAINED_DESC", "Jouer un son lorsqu'une Interprétation est obtenue.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_MAXIMUM_CRUX", "Interprétations maximales")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_MAXIMUM_CRUX_DESC",
-        "Jouer un son lorsqu'on atteint le maximum d'Interprétation.")
-
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_MAXIMUM_CRUX_DESC", "Jouer un son lorsqu'on atteint le maximum d'Interprétation.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_CRUX_LOST", "Perte d'Interprétation")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_CRUX_LOST_DESC", "Jouer un son lorsqu'on perd de l'Interprétation.")
-
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR", "Couleur du texte d'avertissement d'expiration")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_REIMAGINED_HEADER", "Réimaginé")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_DURATION", "Durée du Crux")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_DURATION_DESC", "Durée totale du bonus Crux (en secondes).")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_THRESHOLD", "Seuil d'avertissement d'expiration")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_THRESHOLD_DESC", "Déclenche un changement de couleur de la rune à ce seuil pour utiliser la couleur d'avertissement d'expiration définie.")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR", "Couleur d'aura d'avertissement d'expiration")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR_DESC", "La couleur du nombre de Crux actif lorsqu'il est sur le point d'expirer.")
-
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR_RESET", "Réinitialiser la couleur")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR_RESET_DESC", "Réinitialise la couleur du texte d'avertissement d'expiration du Crux à la valeur par défaut.")
-
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR", "Couleur de la rune d'avertissement d'expiration")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR_DESC", "La couleur des runes actives lorsqu'elles sont sur le point d'expirer.")
-
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR_RESET", "Réinitialiser la couleur")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR_RESET_DESC", "Réinitialise la couleur d'avertissement d'expiration des runes à la valeur par défaut.")
-
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_POLLING_INTERVAL", "Intervalle de vérification d'expiration")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_POLLING_INTERVAL_DESC", "Fréquence à laquelle la durée restante avant l'expiration du bonus Crux est vérifiée (en millisecondes).")
-
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_SPIN_ANIMATION", "Animation de rotation du Crux")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_SPIN_ANIMATION_DESC", "Active l’animation de rotation du Crux.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR", "Couleur d'arrière-plan d'avertissement d'expiration")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR_DESC", "La couleur de la texture d'arrière-plan lorsque les runes sont sur le point d'expirer.")
-
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR_RESET", "Réinitialiser la couleur")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR_RESET_DESC", "Réinitialise la couleur d'arrière-plan d'avertissement d'expiration du Crux à la valeur par défaut.")
 end

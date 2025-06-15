@@ -1,107 +1,77 @@
 -- -----------------------------------------------------------------------------
 -- lang/ru.lua
 -- -----------------------------------------------------------------------------
-
 local M = {}
-local CC = CruxCounterR
+local CC = CruxCounterR--- Setup translation strings
 
---- Setup translation strings
 --- @return nil
 function M.Setup()
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK", "Заблокировать")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_UNLOCK", "Разблокировать")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK_DESC", "Вкл/выкл возможность перемещения счётчика.")
-
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_DISPLAY_HEADER", "Отображение")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK_TO_RETICLE_WARNING",
-        "Отключите 'Закрепить на метке' для изменения этой настройки.")
-
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK_TO_RETICLE_WARNING", "Отключите 'Закрепить на метке' для изменения этой настройки.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_MOVE_TO_CENTER", "Переместить в центр")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_MOVE_TO_CENTER_DESC",
-        "Отцентровать отображение по середине экрана. Полезно, если отображение потерялось.")
-
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_MOVE_TO_CENTER_DESC", "Отцентровать отображение по середине экрана. Полезно, если отображение потерялось.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK_TO_RETICLE", "Закрепить на метке")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK_TO_RETICLE_DESC",
-        "Расположить отображение по центру экрана над меткой в виде перекрестья.")
-
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK_TO_RETICLE_DESC", "Расположить отображение по центру экрана над меткой в виде перекрестья.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_HIDE_OUT_OF_COMBAT", "Скрыть вне боя")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_HIDE_OUT_OF_COMBAT_DESC", "Скрыть все, когда вы не в бою.")
-
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SIZE", "Размер")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SIZE_DESC", "Размер отображения счетчика.")
-
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_HEADER", "Стиль")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_ROTATE", "Поворот")
-
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER", "Номер")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_DESC",
-        "Показать или скрыть отображение количества активных Знаков.")
-
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_DESC", "Показать или скрыть отображение количества активных Знаков.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_COLOR", "Цвет")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_COLOR_DESC", "Цвет отображения числа активных Крукс.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_COLOR_RESET", "Сбросить Цвет")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_COLOR_RESET_DESC", "Сбросить цвет числа на стандартный.")
-
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES", "Знаки Ключа")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES_DESC",
-        "Показать или скрыть отображение текстур Знаков Ключа.")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES_ROTATE_DESC",
-        "Включить или выключить вращение текстур Знаков Ключа.")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES_DESC", "Показать или скрыть отображение текстур Знаков Ключа.")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES_ROTATE_DESC", "Включить или выключить вращение текстур Знаков Ключа.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES_ROTATION_SPEED", "Скорость")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES_ROTATION_SPEED_DESC",
-        "Скорость вращения текстур рун Силовой Оси. Чем выше значение, тем быстрее.")
-
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES_ROTATION_SPEED_DESC", "Скорость вращения текстур рун Силовой Оси. Чем выше значение, тем быстрее.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_COLOR", "Цвет")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_COLOR_DESC", "Цвет текстур Крукс.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_COLOR_RESET", "Сбросить Цвет")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_COLOR_RESET_DESC", "Сбросить цвет текстуры Крукс на стандартный.")
-
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND", "Фон")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_DESC",
-        "Показать или скрыть отображение текстуры фона счетчика.")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_ROTATE",
-        "Включить или выключить вращение текстуры фона счетчика.")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_DESC", "Показать или скрыть отображение текстуры фона счетчика.")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_ROTATE", "Включить или выключить вращение текстуры фона счетчика.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_HIDE_ZERO_CRUX", "Скрыть без Круксов")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_HIDE_ZERO_CRUX_DESC",
-        "Скрывать фон, когда нет активных Круксов.")
-
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_HIDE_ZERO_CRUX_DESC", "Скрывать фон, когда нет активных Круксов.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_COLOR", "Цвет")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_COLOR_DESC", "Цвет текстуры фона счетчика.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_COLOR_RESET", "Сбросить Цвет")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_COLOR_RESET_DESC",
-        "Сбросить цвет текстуры фона счетчика на стандартный.")
-
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_COLOR_RESET_DESC", "Сбросить цвет текстуры фона счетчика на стандартный.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_HEADER", "Звуки")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_PLAY", "Воспроизведение")
-
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_CRUX_GAINED", "Получение Знака")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_CRUX_GAINED_DESC", "Воспроизвести звук при получении кристалла.")
-
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_MAXIMUM_CRUX", "Максимальный Знак")
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_MAXIMUM_CRUX_DESC",
-        "Воспроизвести звук при достижении максимального Знака.")
-
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_MAXIMUM_CRUX_DESC", "Воспроизвести звук при достижении максимального Знака.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_CRUX_LOST", "Потеря Знака")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_CRUX_LOST_DESC", "Воспроизвести звук при потере Знака.")
-
-    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR", "Цвет текста предупреждения об истечении")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_REIMAGINED_HEADER", "Переосмыслено")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_DURATION", "Длительность Crux")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_DURATION_DESC", "Общая длительность эффекта Crux (в секундах).")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_THRESHOLD", "Порог предупреждения об окончании")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_THRESHOLD_DESC", "При достижении этого порога цвет руны изменяется на заданный цвет предупреждения об окончании.")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR", "Цвет ауры предупреждения об окончании")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR_DESC", "Цвет количества активных Крукс перед их исчезновением.")
-
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR_RESET", "Сбросить цвет")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR_RESET_DESC", "Сбросить цвет текста предупреждения об истечении Крукс до значения по умолчанию.")
-
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR", "Цвет рун предупреждения об истечении")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR_DESC", "Цвет активных рун перед их исчезновением.")
-
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR_RESET", "Сбросить цвет")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR_RESET_DESC", "Сбросить цвет предупреждения об истечении рун до значения по умолчанию.")
-
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_POLLING_INTERVAL", "Интервал проверки истечения")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_POLLING_INTERVAL_DESC", "Как часто проверяется оставшееся время до исчезновения эффекта Крукс (в миллисекундах).")
-
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_SPIN_ANIMATION", "Анимация вращения Crux")
+    ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_SPIN_ANIMATION_DESC", "Включает анимацию вращения Crux.")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR", "Цвет фона предупреждения об истечении")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR_DESC", "Цвет фоновой текстуры, когда руны собираются исчезнуть.")
-
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR_RESET", "Сбросить цвет")
     ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR_RESET_DESC", "Сбросить цвет фона предупреждения об истечении Крукс до значения по умолчанию.")
 end

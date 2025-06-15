@@ -1,103 +1,77 @@
 -- -----------------------------------------------------------------------------
 -- lang/tr.lua
 -- -----------------------------------------------------------------------------
-
 local M = {}
-local CC = CruxCounterR
+local CC = CruxCounterR--- Setup translation strings
 
---- Setup translation strings
 --- @return nil
 function M.Setup()
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK", "Kilitle")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_UNLOCK", "Kilidi Aç")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK_DESC", "Sayaç görüntüsünün yeniden konumlandırılması için kilit/kilit açma durumunu değiştirin.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_DISPLAY_HEADER", "Görüntüleme")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK_TO_RETICLE_WARNING", "Bu ayarı değiştirmek için Nişangaha Kilitle'yi kapatın.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_MOVE_TO_CENTER", "Ortaya Taşı")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_MOVE_TO_CENTER_DESC", "Görüntüyü ekranın ortasına getir. Kayıpsa kullanışlıdır.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK_TO_RETICLE", "Nişangaha Kilitle")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_LOCK_TO_RETICLE_DESC", "Pozisyonu ekranın ortasında nişangahın üzerine kilitle.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_HIDE_OUT_OF_COMBAT", "Savaş Dışında Gizle")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_HIDE_OUT_OF_COMBAT_DESC", "Savaş dışında her şeyi gizle.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SIZE", "Boyut")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SIZE_DESC", "Sayaç görüntü boyutu.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_HEADER", "Stil")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_ROTATE", "Döndür")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER", "Sayı")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_DESC", "Aktif Crux sayısını göster veya gizle.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_COLOR", "Renk")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_COLOR_DESC", "Aktif Crux sayısının görüntü rengi.")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_COLOR_RESET", "Rengi Sıfırla")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_COLOR_RESET_DESC", "Crux sayısı rengini varsayılan değere sıfırla.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES", "Crux Rünleri")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES_DESC", "Crux rün dokularının görüntülenmesini aç veya kapat.")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES_ROTATE_DESC", "Crux rün dokularının dönmesini aç veya kapat.")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES_ROTATION_SPEED", "Hız")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_RUNES_ROTATION_SPEED_DESC", "Crux rün dokularının dönme hızı. Daha yüksek daha hızlıdır.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_COLOR", "Renk")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_COLOR_DESC", "Crux rün dokularının rengi.")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_COLOR_RESET", "Rengi Sıfırla")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_COLOR_RESET_DESC", "Rün dokusu rengini varsayılan değere sıfırla.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND", "Arka Plan")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_DESC", "Sayaç arka plan dokusunun görüntülenmesini aç veya kapat.")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_ROTATE", "Sayaç arka plan dokusunun dönmesini aç veya kapat.")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_HIDE_ZERO_CRUX", "Crux Yokken Gizle")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_HIDE_ZERO_CRUX_DESC", "Aktif Crux yokken arka planı gizle.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_COLOR", "Renk")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_COLOR_DESC", "Sayaç arka plan dokusunun rengi.")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_COLOR_RESET", "Rengi Sıfırla")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_COLOR_RESET_DESC", "Sayaç arka plan dokusu rengini varsayılan değere sıfırla.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_HEADER", "Sesler")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_PLAY", "Çal")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_CRUX_GAINED", "Crux Kazanıldı")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_CRUX_GAINED_DESC", "Crux kazanıldığında ses çal.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_MAXIMUM_CRUX", "Maksimum Crux")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_MAXIMUM_CRUX_DESC", "Maksimum Crux sayısına ulaşıldığında ses çal.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_CRUX_LOST", "Crux Kaybedildi")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_SOUNDS_CRUX_LOST_DESC", "Crux kaybedildiğinde ses çal.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_REIMAGINED_HEADER", "Yeniden Tasarlandı")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_DURATION", "Crux Süresi")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_DURATION_DESC", "Crux buffının toplam süresi (saniye).")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_THRESHOLD", "Bitiş Uyarı Eşiği")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_THRESHOLD_DESC", "Rün rengini, tanımladığınız bitiş uyarı rengine ayarlamak için bu eşikte değiştirin.")
-
-	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR", "Bitiş Uyarı Metin Rengi")
+	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR", "Süre Uyarısı Aura Rengi")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR_DESC", "Aktif Crux sayısının bitmek üzereyken rengi.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR_RESET", "Rengi Sıfırla")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_NUMBER_WARN_COLOR_RESET_DESC", "Crux bitiş uyarı metin rengini varsayılan değere sıfırla.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR", "Bitiş Uyarı Rün Rengi")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR_DESC", "Aktif rünlerin bitmek üzereyken rengi.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR_RESET", "Rengi Sıfırla")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_COLOR_RESET_DESC", "Crux bitiş uyarı rengini varsayılan değere sıfırla.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_POLLING_INTERVAL", "Bitiş Uyarı Sorgulama Aralığı")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_WARN_POLLING_INTERVAL_DESC", "Crux buffı kaybolmadan önce kalan zamanı kontrol etmek için sorgulamanın ne sıklıkta yapıldığı (milisaniye).")
-
+	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_SPIN_ANIMATION", "Crux Dönme Animasyonu")
+	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_CRUX_SPIN_ANIMATION_DESC", "Crux dönme animasyonunu etkinleştirir.")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR", "Bitiş Uyarı Arka Plan Rengi")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR_DESC", "Rünlerin bitmek üzereyken arka plan dokusunun rengi.")
-
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR_RESET", "Rengi Sıfırla")
 	ZO_CreateStringId("CRUX_COUNTER_SETTINGS_STYLE_BACKGROUND_WARN_COLOR_RESET_DESC", "Crux bitiş uyarı arka plan rengini varsayılan değere sıfırla.")
 end
