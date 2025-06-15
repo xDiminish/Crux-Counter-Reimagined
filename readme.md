@@ -2,8 +2,9 @@
 
 An updated build of the original Crux Counter ESO addon by @g4rr3t, redesigned to integrate new features and improved functionality.
 
-![Addon Preview](img/ccr1.jpg)
+![Addon Preview](img/ccr1.jpg)	
 ![Addon Preview](img/ccr2.jpg)
+
 ![Addon Preview](img/ccr3.jpg)
 
 ---
