@@ -13,7 +13,7 @@ An updated build of the original Crux Counter ESO addon by @g4rr3t, redesigned t
 ## ✨ New Features
 
 - **Subclassing support**  
-  Fully supports the Arcanist subclass and future subclass mechanics.
+  Fully supports the Arcanist subclass and subclassing. When you add any Arcanist skill lines the add-on will be visible to that character. Upon removing Arcanist subclassed skill lines the addon will no longer appear for that character. As long as the addon is enabled in your addons menu, you do not need to reload the addon each time you add or remove Arcanist skill lines; it will automatically detect these changes with zero player input required.
 
 - **Crux expiration warning system**  
   Customize a threshold in seconds at which the Crux buff is considered "about to expire". When that threshold is reached:
@@ -22,7 +22,7 @@ An updated build of the original Crux Counter ESO addon by @g4rr3t, redesigned t
   - The aura (crux count) color updates to the Expiry Warn Aura Color specified in the addon settings
 
 - **UI and performance improvements**  
-  Code refactoring, visual polish, and efficiency gains.
+  Includes code refactoring, visual polish, and optimzation of the original Crux Counter addon.
 
 ---
 
@@ -43,7 +43,7 @@ Created by **Dim** (`@xDiminish`) [PCNA]
 
 ## 🔢 Version
 
-**1.0.3**
+**1.0.4**
 
 ---
 
