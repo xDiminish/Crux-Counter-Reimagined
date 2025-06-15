@@ -4,7 +4,7 @@ An updated build of the original Crux Counter ESO addon by @g4rr3t, redesigned t
 
 
 
-![Addon Preview](img/ccr_preview.jpg)	
+![Addon Preview](img/ccr_preview.jpg) 
 
 
 
@@ -49,14 +49,14 @@ Created by **Dim** (`@xDiminish`) [PCNA]
 
 ## 🧩 Dependencies
 
-**LibAddonMenu-2.0>=r40**
-[https://www.esoui.com/downloads/info7-LibAddonMenu-2.0.html](https://www.esoui.com/downloads/info7-LibAddonMenu-2.0.html)
+[https://www.esoui.com/downloads/info7-LibAddonMenu-2.0.html]LibAddonMenu-2.0>=r40
+
 
 ---
 
 ## 📜 Disclaimer
 
-This addon is an updated version of **Crux Counter v1.3.0** created by `@g4rr3t`.  
+This addon is an updated version of [https://github.com/inimicus/CruxCounter](Crux Counter v1.3.0) created by `@g4rr3t`.  
 With the exception of original Crux Counter code, the original author is not affiliated with this project.
 
 This AddOn is not created by, affiliated with, or sponsored by ZeniMax Media Inc. or its affiliates.  
