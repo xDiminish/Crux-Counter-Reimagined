@@ -3,7 +3,7 @@
 ## SavedVariables: CruxCounterReimaginedData
 ## Description: Crux Counter reimagined with new features and support!
 ## Version: 1.0.3b
-## AddOnVersion: 1.0.3.05
+## AddOnVersion: 1.0.3.06
 ## Author: |c4cdcb2Dim|r (@xDiminish) (NA)
 ## DependsOn: LibAddonMenu-2.0>=40
 
