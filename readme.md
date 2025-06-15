@@ -31,7 +31,7 @@ An updated build of the original Crux Counter ESO addon by @g4rr3t, redesigned t
 1. Extract into your AddOns directory:  
    `C:\Users\<YourUser>\Documents\Elder Scrolls Online\live\AddOns`
 2. Enable the addon in the ESO AddOn menu.
-3. Reload the UI with `/reloadui`.
+3. If the game is already launched, simply reload the UI with `/reloadui`.
 
 ---
 
