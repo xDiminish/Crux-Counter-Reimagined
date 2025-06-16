@@ -60,22 +60,35 @@ CruxCounterReimagined.xml
                 <AlphaAnimation delay="500" duration="500" startAlpha="0.1" endAlpha="1" />
             </Animations>
         </AnimationTimeline> -->
+        
+
+
         <AnimationTimeline name="CruxCounterR_Flash" playbackType="ONE_SHOT">
             <Animations>
-                <!-- Fade Out All -->
                 <AlphaAnimation delay="0" duration="200" startAlpha="1" endAlpha="0" easingType="smoothStep" />
                 <AlphaAnimation delay="0" duration="200" startAlpha="1" endAlpha="0" easingType="smoothStep" control="Glow" />
                 <AlphaAnimation delay="0" duration="200" startAlpha="1" endAlpha="0" easingType="smoothStep" control="Smoke" />
-
-                <!-- Pause while invisible -->
-                <!-- No animation between delay -->
-
-                <!-- Fade In All -->
                 <AlphaAnimation delay="700" duration="200" startAlpha="0" endAlpha="1" easingType="smoothStep" />
                 <AlphaAnimation delay="700" duration="200" startAlpha="0" endAlpha="1" easingType="smoothStep" control="Glow" />
                 <AlphaAnimation delay="700" duration="200" startAlpha="0" endAlpha="1" easingType="smoothStep" control="Smoke" />
             </Animations>
         </AnimationTimeline>
+
+        <!-- <AnimationTimeline name="CruxCounterR_Flash" playbackType="ONE_SHOT">
+            <Animations>
+                <AlphaAnimation delay="0" duration="200" startAlpha="1" endAlpha="0" easingType="smoothStep" />
+                <AlphaAnimation delay="0" duration="200" startAlpha="1" endAlpha="0" easingType="smoothStep" control="Glow" />
+                <AlphaAnimation delay="0" duration="200" startAlpha="1" endAlpha="0" easingType="smoothStep" control="Smoke" />
+
+                <AlphaAnimation delay="700" duration="200" startAlpha="0" endAlpha="1" easingType="smoothStep" />
+                <AlphaAnimation delay="700" duration="200" startAlpha="0" endAlpha="1" easingType="smoothStep" control="Glow" />
+                <AlphaAnimation delay="700" duration="200" startAlpha="0" endAlpha="1" easingType="smoothStep" control="Smoke" />
+
+                <AlphaAnimation delay="900" duration="200" startAlpha="1" endAlpha="0" easingType="smoothStep" />
+                <AlphaAnimation delay="900" duration="200" startAlpha="1" endAlpha="0" easingType="smoothStep" control="Glow" />
+                <AlphaAnimation delay="900" duration="200" startAlpha="1" endAlpha="0" easingType="smoothStep" control="Smoke" />
+            </Animations>
+        </AnimationTimeline> -->
 
          <AnimationTimeline name="CruxCounterR_FlashOut" playbackType="ONE_SHOT">
             <Animations>

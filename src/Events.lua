@@ -91,6 +91,8 @@ local function handleCruxExpired(effectName)
     -- Reset Crux stacks
     CC.State:ClearStacks()
 
+    CC.Display:ResetRunes()
+
     -- Reset warning color state
     CC.Global.WarnState = false
 

@@ -335,4 +335,23 @@ function M:ResetUI()
     end
 end
 
+function CC.Display:ResetRunes()
+    for _, rune in ipairs(self.runes or {}) do
+        if rune and rune.Reset then
+            rune:Reset()
+        end
+    end
+
+    if self.ring and self.ring.Reset then
+        self.ring:Reset()
+    end
+
+    -- If your aura/number also needs resetting:
+    if self.aura and self.aura.Reset then
+        self.aura:Reset()
+    end
+end
+
+
+
 CC.UI = M

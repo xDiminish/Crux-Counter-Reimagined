@@ -105,34 +105,59 @@ end
 --- Update the Crux count
 --- @param count number Number of Crux active
 --- @return nil
+-- function CruxCounterR_Orbit:UpdateCount(count)
+--     if count == 0 then
+--         -- Fade out all
+--         self:ForRunes(function(_, rune)
+--             if rune:IsShowing() then
+--                 rune:Hide()
+--             else
+--                 rune:HideInstantly()
+--             end
+--         end)
+
+--         return
+--     end
+
+--     -- Make sure to show as many as there are stacks
+--     for i = 1, count, 1 do
+--         local rune = self.runes[i]
+--         if not rune:IsShowing() then
+--             rune:Show()
+--         end
+--     end
+
+--     -- Move 2nd rune to make room for the third
+--     if count == 3 then
+--         local rune = self.runes[2]
+--         rune:PlayPositionShift()
+--     end
+-- end
 function CruxCounterR_Orbit:UpdateCount(count)
     if count == 0 then
-        -- Fade out all
+        -- Force hide all runes
         self:ForRunes(function(_, rune)
-            if rune:IsShowing() then
-                rune:Hide()
-            else
-                rune:HideInstantly()
-            end
+            rune:HideInstantly()
         end)
-
         return
     end
 
-    -- Make sure to show as many as there are stacks
-    for i = 1, count, 1 do
+    -- Show only as many runes as count allows
+    for i = 1, #self.runes do
         local rune = self.runes[i]
-        if not rune:IsShowing() then
+        if i <= count then
             rune:Show()
+        else
+            rune:HideInstantly()
         end
     end
 
-    -- Move 2nd rune to make room for the third
     if count == 3 then
         local rune = self.runes[2]
         rune:PlayPositionShift()
     end
 end
+
 
 --- Set the Orbit rotation animation duration
 --- @param duration number Milliseconds for a full rotation
