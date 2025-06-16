@@ -134,29 +134,26 @@ end
 --     end
 -- end
 function CruxCounterR_Orbit:UpdateCount(count)
-    if count == 0 then
-        -- Force hide all runes
-        self:ForRunes(function(_, rune)
-            rune:HideInstantly()
-        end)
-        return
-    end
+    self.activeCount = count -- Optional: track it if useful elsewhere
 
-    -- Show only as many runes as count allows
     for i = 1, #self.runes do
         local rune = self.runes[i]
-        if i <= count then
-            rune:Show()
-        else
-            rune:HideInstantly()
-        end
+
+        -- Update internal logic for RefreshVisibility to use
+        rune.index = i
+        rune.shouldBeVisible = (i <= count)
+
+        -- Use centralized logic
+        rune:RefreshVisibility()
     end
 
+    -- Special case: trigger position shift for the 2nd rune if all 3 are active
     if count == 3 then
         local rune = self.runes[2]
         rune:PlayPositionShift()
     end
 end
+
 
 
 --- Set the Orbit rotation animation duration
