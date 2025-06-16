@@ -591,38 +591,35 @@ end
 
 
 
+
+
 function M:getFlashOutDuration()
-    return self.settings.reimagined.flash.outDuration or self.defaults.reimagined.flash.outDuration
+    return M.settings.reimagined.flash.outDuration
 end
-
-function M:setFlashOutDuration(value)
-    self.settings.reimagined.flash.outDuration = value
-    CC.Display:ApplyFlashTimingToRunes()
-end
-
-
-function M:getFlashInDelay()
-    return self.settings.reimagined.flash.inDelay or self.defaults.reimagined.flash.inDelay
-end
-
-function M:setFlashInDelay(value)
-    self.settings.reimagined.flash.inDelay = value
-   CC.Display:ApplyFlashTimingToRunes()
-end
-
 
 function M:getFlashInDuration()
-    return self.settings.reimagined.flash.inDuration or self.defaults.reimagined.flash.inDuration
+    return M.settings.reimagined.flash.inDuration
 end
 
-function M:setFlashInDuration(value)
-    self.settings.reimagined.flash.inDuration = value
-    CC.Display:ApplyFlashTimingToRunes()
+function M:getFlashInDelay()
+    return M.settings.reimagined.flash.inDelay
+end
+
+function M:applyAllFlashTimings(outDuration, inDuration, inDelay)
+    self.settings.reimagined.flash.outDuration = outDuration
+    self.settings.reimagined.flash.inDuration  = inDuration
+    self.settings.reimagined.flash.inDelay     = inDelay
+
+    if CruxCounterR_Display and CruxCounterR_Display.orbit then
+        CruxCounterR_Display.orbit:ApplyFlashTimingToRunes(outDuration, inDuration, inDelay)
+    end
 end
 
 function M:getFlashTotalDuration()
-    return self:getFlashOutDuration() + self:getFlashInDelay() + self:getFlashInDuration()
+    return self:getFlashOutDuration() + self:getFlashInDuration() + self:getFlashInDelay()
 end
+
+
 
 
 
@@ -645,6 +642,13 @@ function M:setRuneSpinAnimationEnabled(value)
     end
 end
 
+
+
+
+
+
+
+
 function M:GetFlashTiming()
     local flash = M.settings and M.settings.reimagined and M.settings.reimagined.flash or {}
 
@@ -654,7 +658,6 @@ function M:GetFlashTiming()
         inDuration  = flash.inDuration or M.defaults.reimagined.flash.inDuration,
     }
 end
-
 
 --- Retrieves the rune-related settings table with defaults as fallback.
 --- This function accesses the current saved settings and their defaults,
@@ -1202,8 +1205,6 @@ local styleOptions = {
         default = M.defaults.reimagined.runeSpinAnimation,
         width = "full",
     },
-
-
     {
         type = "submenu",
         name = "Flash Animation Timing",
@@ -1215,20 +1216,15 @@ local styleOptions = {
                 min = 50,
                 max = 1000,
                 step = 10,
-                getFunc = function() return CC.Settings:getFlashOutDuration() * 1000 end,  -- stored in seconds, show ms
-                setFunc = function(value) CC.Settings:setFlashOutDuration(value / 1000) end, -- convert ms to seconds on set
-                default = M.defaults.reimagined.flash.outDuration,
-            },
-            {
-                type = "slider",
-                name = "Flash In Delay (ms)",
-                tooltip = "Delay before flashing back in.",
-                min = 0,
-                max = 1500,
-                step = 50,
-                getFunc = function() return CC.Settings:getFlashInDelay() * 1000 end,  -- stored in seconds, show ms
-                setFunc = function(value) CC.Settings:setFlashInDelay(value / 1000) end, -- convert ms to seconds on set
-                default = M.defaults.reimagined.flash.inDelay,
+                getFunc = function() return CC.Settings:getFlashOutDuration() * 1000 end,       -- stored in seconds, show ms
+                setFunc = function(valueMs)
+                    local outDuration   = valueMs / 1000
+                    local inDuration    = CC.Settings:getFlashInDuration()
+                    local inDelay       = CC.Settings:getFlashInDelay()
+
+                    CC.Settings:applyAllFlashTimings(outDuration, inDuration, inDelay)
+                end,
+                default = M.defaults.reimagined.flash.outDuration * 1000,
             },
             {
                 type = "slider",
@@ -1237,17 +1233,42 @@ local styleOptions = {
                 min = 50,
                 max = 1000,
                 step = 10,
-                getFunc = function() return CC.Settings:getFlashInDuration() * 1000 end,  -- stored in seconds, show ms
-                setFunc = function(value) CC.Settings:setFlashInDuration(value / 1000) end, -- convert ms to seconds on set
-                default = M.defaults.reimagined.flash.inDuration,
+                getFunc = function() return CC.Settings:getFlashInDuration() * 1000 end,        -- stored in seconds, show ms
+                setFunc = function(valueMs)
+                    local outDuration   = CC.Settings:getFlashOutDuration()
+                    local inDuration    = valueMs / 1000
+                    local inDelay       = CC.Settings:getFlashInDelay()
+
+                    CC.Settings:applyAllFlashTimings(outDuration, inDuration, inDelay)
+                end,
+                default = M.defaults.reimagined.flash.inDuration * 1000,
+            },
+            {
+                type = "slider",
+                name = "Flash In Delay (ms)",
+                tooltip = "Delay before flashing back in.",
+                min = 0,
+                max = 1500,
+                step = 50,
+                getFunc = function() return CC.Settings:getFlashInDelay() * 1000 end,           -- stored in seconds, show ms
+                setFunc = function(valueMs)
+                    local outDuration   = CC.Settings:getFlashOutDuration()
+                    local inDuration    = CC.Settings:getFlashInDuration()
+                    local inDelay       = valueMs / 1000
+
+                    CC.Settings:applyAllFlashTimings(outDuration, inDuration, inDelay)
+                end,
+                default = M.defaults.reimagined.flash.inDelay * 1000,
             },
             {
                 type = "button",
                 name = "Reset Flash Timings to Default",
                 func = function()
-                    CC.Settings:setFlashOutDuration(M.defaults.reimagined.flash.outDuration)
-                    CC.Settings:setFlashInDelay(M.defaults.reimagined.flash.inDelay)
-                    CC.Settings:setFlashInDuration(M.defaults.reimagined.flash.inDuration)
+                    local outDuration   = M.defaults.reimagined.flash.outDuration
+                    local inDuration    = M.defaults.reimagined.flash.inDuration
+                    local inDelay       = M.defaults.reimagined.flash.inDelay
+
+                    CC.Settings:applyAllFlashTimings(outDuration, inDuration, inDelay)
                 end,
                 width = "full",
             },
@@ -1621,7 +1642,7 @@ function M:Setup()
     })
     LAM:RegisterOptionControls(addon.name, optionsData)
 
-    self:ApplyFlashTimingToRunes()
+    --CC.Display:ApplyFlashTimingToRunes()
 
     CC.Debug:Trace(2, "Finished InitSettings()")
 end

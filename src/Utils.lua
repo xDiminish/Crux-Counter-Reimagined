@@ -59,12 +59,8 @@ function CC.Utils.CheckWarnState(elapsedSec, baseSettings, elementType, setColor
 
         -- Only trigger play/stop when the warn state *changes*
         local prevState = CC.Global.PreviousWarnState[elementType]
+        
         if prevState ~= inWarn and controlObj and controlObj.PlayFlash then
-            -- if inWarn then
-            --     controlObj:PlayFlash()
-            -- else
-            --     controlObj:StopFlash()
-            -- end
             CC.Global.PreviousWarnState[elementType] = inWarn
         end
     end

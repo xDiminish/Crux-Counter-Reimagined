@@ -10,7 +10,17 @@ local orbitRadius       = 32
 --- @field New fun(self, control: any, index: number)
 CruxCounterR_Rune  = ZO_InitializingObject:Subclass()
 
---- Initialize the Aura
+local function CanPlayFullFlashAnimation()
+    local outDuration   = CC.Settings:getFlashOutDuration()
+    local inDuration    = CC.Settings:getFlashInDuration()
+    local inDelay       = CC.Settings:getFlashInDelay()
+    local remainingTime = CC.State:GetRemainingCruxTime()
+    local animationTime = outDuration + inDuration + inDelay 
+    
+    return remainingTime >= animationTime
+end
+
+--- Initialize the Rune
 --- @param control any Element control
 --- @param num number Rune index
 --- @return nil
@@ -88,13 +98,41 @@ function CruxCounterR_Rune:Initialize(control, num)
     end
 
     -- Setup flash timeline
-    self.flashTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CruxCounterR_Flash", self.control)
+    self.flashTimeline      = ANIMATION_MANAGER:CreateTimelineFromVirtual("CruxCounterR_Flash", self.control)
+    self.flashTimelineOut   = ANIMATION_MANAGER:CreateTimelineFromVirtual("CruxCounterR_FlashOut", self.control)
+    self.flashTimelineIn    = ANIMATION_MANAGER:CreateTimelineFromVirtual("CruxCounterR_FlashIn", self.control)
 
     self.flashTimeline:SetHandler("OnPlay", function()
         d("FlashTimeline is playing for rune " .. self.number)
     end)
     self.flashTimeline:SetHandler("OnStop", function()
         d("FlashTimeline is stopped for rune " .. self.number)
+    end)
+
+    self.flashTimelineOut:SetHandler("OnPlay", function()
+        d("flashTimelineOut is playing for rune " .. self.number)
+    end)
+    self.flashTimelineOut:SetHandler("OnStop", function()
+        d("flashTimelineOut is stopped for rune " .. self.number)
+
+        local inDelay       = CC.Settings:getFlashInDelay()
+        local inDuration    = CC.Settings:getFlashInDuration()
+        local remainingTime = CC.State:GetRemainingCruxTime()
+        local requiredTime  = inDelay + inDuration
+
+        if remainingTime >= requiredTime then
+            self:PlayFlashIn("CruxCounterR_Rune:SetWarnState")
+            self.flashEnabled = true
+        else
+            d(string.format("Skipping flashTimelineIn: remainingTime %.2f < requiredTime %.2f", remainingTime, requiredTime))
+        end
+    end)
+
+    self.flashTimelineIn:SetHandler("OnPlay", function()
+        d("flashTimelineIn is playing for rune " .. self.number)
+    end)
+    self.flashTimelineIn:SetHandler("OnStop", function()
+        d("flashTimelineIn is stopped for rune " .. self.number)
     end)
 end
 
@@ -118,34 +156,58 @@ function CruxCounterR_Rune:StopSpin()
     end
 end
 
+-- function CruxCounterR_Rune:PlayFlash(source)
+--     d("PlayFlash called" .. (source and (" from " .. source) or ""))
 
+--     if not self.flashEnabled or not self:IsShowing() then
+--         d(string.format("Skipping flash for rune %d — %s", self.number, not self.flashEnabled and "flash disabled" or "not visible"))
+--         return
+--     end
 
+--     if self.flashTimeline then
+--         if not CC.Global.isFlashing then
+--             CC.Global.isFlashing = true
+--             d("Flash: On")
+--         end
 
+--         self.rune:SetAlpha(1)
+--         self.flashTimeline:PlayFromStart()
+--     end
+-- end
 
+function CruxCounterR_Rune:PlayFlashOut(source)
+    d("PlayFlashOut called" .. (source and (" from " .. source) or ""))
 
+    -- if not self.flashEnabled or not self:IsShowing() then
+    --     d(string.format("Skipping flash out for rune %d — %s", self.number, not self.flashEnabled and "flash disabled" or "not visible"))
+    --     return
+    -- end
 
-
-
-
-
-function CruxCounterR_Rune:PlayFlash(source)
-    d("PlayFlash called" .. (source and (" from " .. source) or ""))
-
-    if not self.flashEnabled or not self:IsShowing() then
-        d(string.format("Skipping flash for rune %d — %s", self.number, not self.flashEnabled and "flash disabled" or "not visible"))
-        return
-    end
-
-    --d(string.format("Alpha before flash: %.2f", self.control:GetAlpha()))
-
-    if self.flashTimeline then
+    if self.flashTimelineOut then
         if not CC.Global.isFlashing then
             CC.Global.isFlashing = true
-            d("Flash: On")
         end
 
         self.rune:SetAlpha(1)
-        self.flashTimeline:PlayFromStart()
+        self.flashTimelineOut:PlayFromStart()
+    end
+end
+
+function CruxCounterR_Rune:PlayFlashIn(source)
+    d("PlayFlashIn called" .. (source and (" from " .. source) or ""))
+
+    -- if not self.flashEnabled or not self:IsShowing() then
+    --     d(string.format("Skipping flash in for rune %d — %s", self.number, not self.flashEnabled and "flash disabled" or "not visible"))
+    --     return
+    -- end
+
+    if self.flashTimelineIn then
+        if not CC.Global.isFlashing then
+            CC.Global.isFlashing = true
+        end
+
+        -- self.rune:SetAlpha(1)
+        self.flashTimelineIn:PlayFromStart()
     end
 end
 
@@ -239,60 +301,95 @@ function CruxCounterR_Rune:UpdateColorBasedOnElapsed(elapsedSec, baseSettings)
     end)
 end
 
-
-local function CanPlayFullFlashAnimation()
-    local flashOutDuration = CC.Settings:getFlashOutDuration()  -- already in seconds
-    local flashInDelay    = CC.Settings:getFlashInDelay()      -- already in seconds
-    local flashInDuration = CC.Settings:getFlashInDuration()   -- already in seconds
-
-    local totalAnimationTime = flashOutDuration + flashInDelay + flashInDuration
-    local remainingTime = CC.State:GetRemainingCruxTime()      -- also in seconds
-
-    return remainingTime >= totalAnimationTime
-end
-
-
 --- Enable or disable warning flash effect
 --- @param state boolean True to start flashing, false to stop
 -- function CruxCounterR_Rune:SetWarnState(state)
---     -- d("SetWarnState for rune " .. self.number)
-
+-- function CruxCounterR_Rune:SetWarnState(state)
 --     if state then
 --         if self.flashTimeline and not self.flashTimeline:IsPlaying() and self:IsShowing() then
---             --d("Setting state to true")
 --             local remaining = CC.State:GetRemainingCruxTime()
---             -- CC.Debug:Trace(2, "Remaining Crux Time: <<1>> seconds", string.format("%.2f", remaining))
 --             d("Remaining Crux Time: " .. string.format("%.2f", remaining) .. " seconds")
 
-
---             self:PlayFlash("CruxCounterR_Rune:SetWarnState")
---             self.flashEnabled = true
+--             -- Only play flash if there's enough time left for the full animation
+--             if CanPlayFullFlashAnimation() then
+--                 self:PlayFlash("CruxCounterR_Rune:SetWarnState")
+--                 self.flashEnabled = true
+--             else
+--                 d("Not enough buff time remaining to play full flash animation.")
+--             end
 --         end
 --     else
 --         if self.flashTimeline and self.flashTimeline:IsPlaying() then
---             d("Error: CruxCounterR_Rune:SetWarnState")
+--             d("Stopping flash animation because state is false")
+--             -- You can also stop or reset the animation here if needed
 --         end
 --     end
 -- end
-
 function CruxCounterR_Rune:SetWarnState(state)
     if state then
-        if self.flashTimeline and not self.flashTimeline:IsPlaying() and self:IsShowing() then
-            local remaining = CC.State:GetRemainingCruxTime()
-            d("Remaining Crux Time: " .. string.format("%.2f", remaining) .. " seconds")
+        local outInactive = self.flashTimelineOut and not self.flashTimelineOut:IsPlaying()
+        local inInactive  = self.flashTimelineIn and not self.flashTimelineIn:IsPlaying()
 
-            -- Only play flash if there's enough time left for the full animation
+        if (outInactive or inInactive) and self:IsShowing() then
+            local remaining = CC.State:GetRemainingCruxTime()
+
+            d(string.format("Remaining Crux Time: %.2f seconds", remaining))
+
             if CanPlayFullFlashAnimation() then
-                self:PlayFlash("CruxCounterR_Rune:SetWarnState")
+                self:PlayFlashOut("CruxCounterR_Rune:SetWarnState")
                 self.flashEnabled = true
             else
                 d("Not enough buff time remaining to play full flash animation.")
             end
         end
     else
-        if self.flashTimeline and self.flashTimeline:IsPlaying() then
+        local outPlaying = self.flashTimelineOut and self.flashTimelineOut:IsPlaying()
+        local inPlaying  = self.flashTimelineIn and self.flashTimelineIn:IsPlaying()
+
+        if outPlaying or inPlaying then
             d("Stopping flash animation because state is false")
-            -- You can also stop or reset the animation here if needed
+            -- Optional: Stop the timelines
+            -- self.flashTimelineOut:Stop()
+            -- self.flashTimelineIn:Stop()
+            --self.flashEnabled = false
         end
     end
+end
+
+--- Set delay and duration for all animations in a timeline
+--- @param timeline AnimationTimeline
+--- @param delay number
+--- @param duration number
+function CruxCounterR_Rune:SetTimelineAnimationTiming(timeline, duration, delay)
+    if not timeline then
+        d("[SetTimelineAnimationTiming] timeline is nil!")
+        return
+    end
+    local numAnimations = timeline:GetNumAnimations()
+    if numAnimations == 0 then
+        d("[SetTimelineAnimationTiming] timeline has zero animations")
+        return
+    end
+
+    for i = 1, numAnimations do
+        local anim = timeline:GetAnimation(i)
+        if anim then
+            if type(anim.SetDelay) == "function" and type(anim.SetDuration) == "function" then
+                anim:SetDelay(delay)
+                anim:SetDuration(duration)
+            else
+                d(string.format("[SetTimelineAnimationTiming] Animation %d missing SetDelay or SetDuration method", i))
+            end
+        else
+            d(string.format("[SetTimelineAnimationTiming] Animation %d is nil", i))
+        end
+    end
+end
+
+function CruxCounterR_Rune:SetFlashTiming(outDuration, inDuration, inDelay)
+    self:SetTimelineAnimationTiming(self.flashOutTimeline, 0, outDuration)
+    self:SetTimelineAnimationTiming(self.flashInTimeline, inDelay, inDuration)
+
+    -- Store for later use in zo_callLater
+    self.currentFlashInDelay = inDelay
 end

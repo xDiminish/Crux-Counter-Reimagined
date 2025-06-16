@@ -270,18 +270,6 @@ function CC.Display:UpdateElementColor(elapsedSec, baseSettings, currentStacks, 
     end
 end
 
-
--- function CC.Display:StartFlashForAllRunes()
---     for _, rune in pairs(self.runes) do
---         if rune.flashTimeline then
---             rune.flashTimeline:Stop()
---             rune.flashTimeline:PlayFromStart()
---         end
---     end
---     CC.Global.isFlashing = true
---     d("Flash: On (all runes)")
--- end
-
 function CC.Display:StartFlashForAllRunes()
     local flashOutDuration = CC.Settings:getFlashOutDuration() * 1000
     local flashInDelay     = CC.Settings:getFlashInDelay() * 1000
@@ -308,18 +296,12 @@ function CC.Display:StartFlashForAllRunes()
     end, flashOutDuration + flashInDelay + CC.Settings:getFlashInDuration() * 1000)
 end
 
-
-
-
-function CC.Display:ApplyFlashTimingToRunes()
-    local timing = CC.Settings:GetFlashTiming()
-    for _, rune in pairs(self.runes) do
-        rune:SetFlashTiming(timing.outDuration, timing.inDelay, timing.inDuration)
-    end
-end
-
-
-
+-- function CC.Display:ApplyFlashTimingToRunes()
+--     local timing = CC.Settings:GetFlashTiming()
+--     for _, rune in pairs(self.runes) do
+--         rune:SetFlashTiming(timing.outDuration, timing.inDelay, timing.inDuration)
+--     end
+-- end
 
 --- Reset all UI elements to their base color and stop any flashing animations.
 --- This is called, for example, after a rune fades out or the Crux count is reset.

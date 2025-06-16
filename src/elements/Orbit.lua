@@ -193,3 +193,13 @@ function CruxCounterR_Orbit:UpdateSpinAnimations(enabled)
         end
     end)
 end
+
+function CruxCounterR_Orbit:ApplyFlashTimingToRunes(outDuration, inDuration, inDelay)
+    CC.Debug:Trace(2, "ApplyFlashTimingToRunes: called")
+    
+    self:ForRunes(function(index, rune)
+        CC.Debug:Trace(2, "Rune <<1>>: outDuration = <<2>>, inDuration = <<3>>, inDelau = <<4>>", outDuration, inDuration, inDelay)
+
+        rune:SetFlashTiming(outDuration, inDuration, inDelay)
+    end)
+end
