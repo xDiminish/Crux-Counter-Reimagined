@@ -43,9 +43,6 @@ local function init(_, addonName)
     EM:RegisterForEvent("CruxCounterR_InitPlayerActivated", EVENT_PLAYER_ACTIVATED, function()
         EM:UnregisterForEvent("CruxCounterR_InitPlayerActivated", EVENT_PLAYER_ACTIVATED)
         CC.Events:RegisterEvents()
-
-        -- Start polling for updates to the warn state
-        --CC.Events:PollUpdateWarnState()
     end)
 end
 

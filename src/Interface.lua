@@ -270,25 +270,83 @@ function CC.Display:UpdateElementColor(elapsedSec, baseSettings, currentStacks, 
     end
 end
 
-function M:ResetUI()
-    local baseSettings = CC.settings
 
-    if not baseSettings then return end
+-- function CC.Display:StartFlashForAllRunes()
+--     for _, rune in pairs(self.runes) do
+--         if rune.flashTimeline then
+--             rune.flashTimeline:Stop()
+--             rune.flashTimeline:PlayFromStart()
+--         end
+--     end
+--     CC.Global.isFlashing = true
+--     d("Flash: On (all runes)")
+-- end
+
+function CC.Display:StartFlashForAllRunes()
+    local flashOutDuration = CC.Settings:getFlashOutDuration() * 1000
+    local flashInDelay     = CC.Settings:getFlashInDelay() * 1000
+
+    for _, rune in pairs(self.runes) do
+        if rune:IsShowing() and rune.flashOutTimeline and rune.flashInTimeline then
+            rune.flashOutTimeline:Stop()
+            rune.flashInTimeline:Stop()
+
+            -- Play flash-out immediately
+            rune.flashOutTimeline:PlayFromStart()
+            d("Playing flash-out for rune " .. rune.number)
+        else
+            d("Rune " .. tostring(rune.number) .. " not flashing (not visible or missing timeline)")
+        end
+    end
+
+    CC.Global.isFlashing = true
+    d("Flash: On (all runes)")
 
     zo_callLater(function()
+        CC.Global.isFlashing = false
+        d("Flash: Reset")
+    end, flashOutDuration + flashInDelay + CC.Settings:getFlashInDuration() * 1000)
+end
+
+
+
+
+function CC.Display:ApplyFlashTimingToRunes()
+    local timing = CC.Settings:GetFlashTiming()
+    for _, rune in pairs(self.runes) do
+        rune:SetFlashTiming(timing.outDuration, timing.inDelay, timing.inDuration)
+    end
+end
+
+
+
+
+--- Reset all UI elements to their base color and stop any flashing animations.
+--- This is called, for example, after a rune fades out or the Crux count is reset.
+--- It waits briefly before applying rune color resets to allow other animations to settle.
+--- @return nil
+function M:ResetUI()
+    local baseSettings = CC.settings
+    if not baseSettings then return end
+
+    -- Wait 500ms before applying color reset (gives other effects time to finish)
+    zo_callLater(function()
         for _, rune in ipairs(CC.Display.runes or {}) do
+            -- Reset the rune color to base color
             if rune and rune.SetColor then
                 local baseColor = CruxCounterR.UI:GetEnsuredColor(baseSettings.elements.runes.color)
                 rune:SetColor(baseColor)
             end
         end
-    end, 500) -- slight delay to account for slight color shift sync with other controls
+    end, 500)
 
+    -- Reset ring (background) color
     if CC.Display.ring and CC.Display.ring.SetColor then
         local baseColor = CruxCounterR.UI:GetEnsuredColor(baseSettings.elements.background.color)
         CC.Display.ring:SetColor(baseColor)
     end
 
+    -- Reset number (aura) color
     if CruxCounterR_Display and CruxCounterR_Display.SetNumberColor then
         local baseColor = CruxCounterR.UI:GetEnsuredColor(baseSettings.elements.number.color)
         CruxCounterR_Display:SetNumberColor(baseColor)

@@ -80,6 +80,24 @@ local function getEventNamespace(event)
     return CC.Addon.name .. event
 end
 
+--- Handles cleanup when the Crux buff expires.
+--- Clears stack state, disables warning effects, and stops the countdown update.
+--- @param effectName string The name of the expired buff effect (for debugging)
+--- @return nil
+local function handleCruxExpired(effectName)
+    d("effect expired")
+    CC.Debug:Trace(2, "Effect expired: <<1>>", effectName)
+
+    -- Reset Crux stacks
+    CC.State:ClearStacks()
+
+    -- Reset warning color state
+    CC.Global.WarnState = false
+
+    -- Stop polling loop
+    EVENT_MANAGER:UnregisterForUpdate("CruxTracker_Countdown")
+end
+
 --- Handles effect changes for a specific ability and manages visual updates.
 --- Tracks the remaining time of the buff, updates Crux stack state, and starts/stops a timer for UI warnings.
 ---
@@ -120,17 +138,23 @@ local function onEffectChanged(eventCode, changeType, effectSlot, effectName, un
 
     CC.Debug:Trace(2, output)
 
+    -- Only continue if this is the player's Crux buff 
+    --if unitTag ~= "player" or abilityId ~= M.abilityId then
+    --    return
+    --end
+
+    CC.State.cruxBuffEndTime = endTime * 1000
+
     -- Check if the crux buff has ended
     if changeType == EFFECT_RESULT_FADED then
-        CC.State:ClearStacks()
-
-        CC.Global.WarnState = false
-        
-        EVENT_MANAGER:UnregisterForUpdate("CruxTracker_Countdown")
+        handleCruxExpired(effectName)
         return
     end
 
-    CC.State:SetStacks(stackCount)
+    -- Only update stacks if stackCount > 0
+    if stackCount and stackCount > 0 then
+        CC.State:SetStacks(stackCount)
+    end
 
     if endTime and endTime > 0 then
         local baseSettings        = CC.settings or {}
@@ -139,24 +163,13 @@ local function onEffectChanged(eventCode, changeType, effectSlot, effectName, un
 
         EVENT_MANAGER:UnregisterForUpdate("CruxTracker_Countdown")
         EVENT_MANAGER:RegisterForUpdate("CruxTracker_Countdown", pollingInterval, function()
-            local now         = GetGameTimeMilliseconds()
-            local endTimeMs   = endTime * 1000
-            local remainingMs = endTimeMs - now
+            local now                   = GetGameTimeMilliseconds()
+            local buffEndTimeMs         = CC.State.cruxBuffEndTime
+            local buffRemainingTimeMs   = buffEndTimeMs - now
 
             -- Check if the crux buff has expired
-            if remainingMs <= 0 then
-                CC.Debug:Trace(2, "Effect expired: <<1>>", effectName)
-
-                CC.State:ClearStacks()
-
-                -- Update global warn state
-                CC.Global.WarnState = false
-
-                for _, rune in ipairs(CC.Display.runes or {}) do
-                    rune:SetWarnState(false)
-                end
-
-                EVENT_MANAGER:UnregisterForUpdate("CruxTracker_Countdown")
+            if buffRemainingTimeMs <= 0 then
+                handleCruxExpired(effectName)
                 return
             end
 
@@ -176,15 +189,14 @@ local function onEffectChanged(eventCode, changeType, effectSlot, effectName, un
                 -- Update global warn state
                 CC.Global.WarnState = false
 
-                for _, rune in ipairs(CC.Display.runes or {}) do
-                    rune:SetWarnState(false)
-                end
-
                 return
             end
 
             for _, element in ipairs({ "runes", "background", "number" }) do
-                elementHandlers[element](elapsedSec, baseSettings)
+                local handler = elementHandlers[element]
+                if handler then
+                    handler(elapsedSec, baseSettings)
+                end
             end
         end)
     end

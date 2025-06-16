@@ -88,6 +88,17 @@ function M:ClearStacks()
     self.lastCruxGainTime = 0
 end
 
+--- Returns the remaining Crux buff duration in seconds (or 0 if expired)
+--- @return number
+function M:GetRemainingCruxTime()
+    if not self.cruxBuffEndTime then return 0 end
+
+    local now       = GetGameTimeMilliseconds()
+    local remaining = self.cruxBuffEndTime - now
+
+    return math.max(remaining / 1000, 0)
+end
+
 -- -----------------------------------------------------------------------------
 -- Combat State
 -- -----------------------------------------------------------------------------

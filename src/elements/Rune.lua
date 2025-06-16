@@ -19,9 +19,6 @@ function CruxCounterR_Rune:Initialize(control, num)
     self.number = num
     self.startingRotation = 360 - (360 / num)
 
-    --local cruxCount = CC.State:GetCruxCount()
-    --self.startingRotation = (360 / 2) * (num - 1)
-
     self.smoke = {
         control = self.control:GetNamedChild("Smoke"),
         timeline = AM:CreateTimelineFromVirtual("CruxCounterR_CruxSmokeDontBreatheThis",
@@ -86,15 +83,19 @@ function CruxCounterR_Rune:Initialize(control, num)
             -- Even runes: counterclockwise
             self.spinTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CruxCounterR_SpinCruxCCW", self.rune)
         end
-
-        self.flashTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CruxCounterR_Flash", self.rune)
-        --d("Flash animation timeline created!")
     else
         CC.Debug:Trace(2, "WARNING: Rune control not found for Crux: <<1>>", tostring(num))
     end
 
+    -- Setup flash timeline
+    self.flashTimeline = ANIMATION_MANAGER:CreateTimelineFromVirtual("CruxCounterR_Flash", self.control)
 
-    
+    self.flashTimeline:SetHandler("OnPlay", function()
+        d("FlashTimeline is playing for rune " .. self.number)
+    end)
+    self.flashTimeline:SetHandler("OnStop", function()
+        d("FlashTimeline is stopped for rune " .. self.number)
+    end)
 end
 
 --- Starts the rune spin animation with a staggered delay based on the rune's index.
@@ -117,7 +118,26 @@ function CruxCounterR_Rune:StopSpin()
     end
 end
 
-function CruxCounterR_Rune:PlayFlash()
+
+
+
+
+
+
+
+
+
+
+function CruxCounterR_Rune:PlayFlash(source)
+    d("PlayFlash called" .. (source and (" from " .. source) or ""))
+
+    if not self.flashEnabled or not self:IsShowing() then
+        d(string.format("Skipping flash for rune %d — %s", self.number, not self.flashEnabled and "flash disabled" or "not visible"))
+        return
+    end
+
+    --d(string.format("Alpha before flash: %.2f", self.control:GetAlpha()))
+
     if self.flashTimeline then
         if not CC.Global.isFlashing then
             CC.Global.isFlashing = true
@@ -129,16 +149,8 @@ function CruxCounterR_Rune:PlayFlash()
     end
 end
 
-function CruxCounterR_Rune:StopFlash()
-    if self.flashTimeline then
-        if CC.Global.isFlashing then
-            CC.Global.isFlashing = false
-            d("Flash: Off")
-        end
-
-        self.flashTimeline:Stop()
-        --self.control:SetAlpha(1) -- ensure full visibility when stopped
-    end
+function CruxCounterR_Rune:StopFlash(source)
+    d("StopFlash called" .. (source and (" from " .. source) or ""))
 end
 
 --- Set the color of the Rune elements
@@ -178,17 +190,16 @@ end
 
 --- Hide the Rune via the fadeOut animation
 --- @return nil
-function CruxCounterR_Rune:Hide()
+function CruxCounterR_Rune:Hide(source)
     self.timelines.fadeOut:PlayFromStart()
+    d("hide called" .. (source and (" from " .. source) or ""))
 end
 
 --- Hide the Rune instantly via the fadeOut animation
 --- @return nil
--- function CruxCounterR_Rune:HideInstantly()
---     self.timelines.fadeOut:PlayInstantlyToEnd()
--- end
-function CruxCounterR_Rune:HideInstantly()
+function CruxCounterR_Rune:HideInstantly(source)
     self.timelines.fadeOut:PlayInstantlyToEnd()
+    d("hide instantly called" .. (source and (" from " .. source) or ""))
 end
 
 --- Play the position shift swoop animation
@@ -215,7 +226,6 @@ end
 --- Is the Rune element showing?
 --- @return boolean showing True when the Rune is showing
 function CruxCounterR_Rune:IsShowing()
-    d("alpha: " .. self.control:GetAlpha())
     return self.control:GetAlpha() == 1
 end
 
@@ -229,18 +239,60 @@ function CruxCounterR_Rune:UpdateColorBasedOnElapsed(elapsedSec, baseSettings)
     end)
 end
 
+
+local function CanPlayFullFlashAnimation()
+    local flashOutDuration = CC.Settings:getFlashOutDuration()  -- already in seconds
+    local flashInDelay    = CC.Settings:getFlashInDelay()      -- already in seconds
+    local flashInDuration = CC.Settings:getFlashInDuration()   -- already in seconds
+
+    local totalAnimationTime = flashOutDuration + flashInDelay + flashInDuration
+    local remainingTime = CC.State:GetRemainingCruxTime()      -- also in seconds
+
+    return remainingTime >= totalAnimationTime
+end
+
+
 --- Enable or disable warning flash effect
 --- @param state boolean True to start flashing, false to stop
+-- function CruxCounterR_Rune:SetWarnState(state)
+--     -- d("SetWarnState for rune " .. self.number)
+
+--     if state then
+--         if self.flashTimeline and not self.flashTimeline:IsPlaying() and self:IsShowing() then
+--             --d("Setting state to true")
+--             local remaining = CC.State:GetRemainingCruxTime()
+--             -- CC.Debug:Trace(2, "Remaining Crux Time: <<1>> seconds", string.format("%.2f", remaining))
+--             d("Remaining Crux Time: " .. string.format("%.2f", remaining) .. " seconds")
+
+
+--             self:PlayFlash("CruxCounterR_Rune:SetWarnState")
+--             self.flashEnabled = true
+--         end
+--     else
+--         if self.flashTimeline and self.flashTimeline:IsPlaying() then
+--             d("Error: CruxCounterR_Rune:SetWarnState")
+--         end
+--     end
+-- end
+
 function CruxCounterR_Rune:SetWarnState(state)
     if state then
-        d("Setting state to true")
-        if self.flashTimeline and not self.flashTimeline:IsPlaying() then
-            self:PlayFlash()
+        if self.flashTimeline and not self.flashTimeline:IsPlaying() and self:IsShowing() then
+            local remaining = CC.State:GetRemainingCruxTime()
+            d("Remaining Crux Time: " .. string.format("%.2f", remaining) .. " seconds")
+
+            -- Only play flash if there's enough time left for the full animation
+            if CanPlayFullFlashAnimation() then
+                self:PlayFlash("CruxCounterR_Rune:SetWarnState")
+                self.flashEnabled = true
+            else
+                d("Not enough buff time remaining to play full flash animation.")
+            end
         end
     else
-        d("Setting state to false")
         if self.flashTimeline and self.flashTimeline:IsPlaying() then
-            self:StopFlash()
+            d("Stopping flash animation because state is false")
+            -- You can also stop or reset the animation here if needed
         end
     end
 end

@@ -68,6 +68,7 @@ M.defaults       = {
     },
     reimagined = {
         cruxDuration = 30,
+        runeSpinAnimation = true,
         expireWarning = {
             threshold = 10,
             pollingInterval = 200,
@@ -84,7 +85,12 @@ M.defaults       = {
                 }
             }
         },
-        runeSpinAnimation = true,
+        flash = {
+            enabled     = true,
+            outDuration = 0.2,
+            inDuration  = 0.2,
+            inDelay     = 0.7,
+        },
     }
 }
 
@@ -583,6 +589,44 @@ local function setExpireWarnPollingInterval(value)
     M.settings.reimagined.expireWarning.pollingInterval = value
 end
 
+
+
+function M:getFlashOutDuration()
+    return self.settings.reimagined.flash.outDuration or self.defaults.reimagined.flash.outDuration
+end
+
+function M:setFlashOutDuration(value)
+    self.settings.reimagined.flash.outDuration = value
+    CC.Display:ApplyFlashTimingToRunes()
+end
+
+
+function M:getFlashInDelay()
+    return self.settings.reimagined.flash.inDelay or self.defaults.reimagined.flash.inDelay
+end
+
+function M:setFlashInDelay(value)
+    self.settings.reimagined.flash.inDelay = value
+   CC.Display:ApplyFlashTimingToRunes()
+end
+
+
+function M:getFlashInDuration()
+    return self.settings.reimagined.flash.inDuration or self.defaults.reimagined.flash.inDuration
+end
+
+function M:setFlashInDuration(value)
+    self.settings.reimagined.flash.inDuration = value
+    CC.Display:ApplyFlashTimingToRunes()
+end
+
+function M:getFlashTotalDuration()
+    return self:getFlashOutDuration() + self:getFlashInDelay() + self:getFlashInDuration()
+end
+
+
+
+
 --- Gets whether the rune spin animation is enabled.
 --- @return boolean
 function M:getRuneSpinAnimationEnabled()
@@ -600,6 +644,17 @@ function M:setRuneSpinAnimationEnabled(value)
         CC.Debug:Trace(2, "[setRuneSpinAnimationEnabled] orbit is nil")
     end
 end
+
+function M:GetFlashTiming()
+    local flash = M.settings and M.settings.reimagined and M.settings.reimagined.flash or {}
+
+    return {
+        outDuration = flash.outDuration or M.defaults.reimagined.flash.outDuration,
+        inDelay     = flash.inDelay or M.defaults.reimagined.flash.inDelay,
+        inDuration  = flash.inDuration or M.defaults.reimagined.flash.inDuration,
+    }
+end
+
 
 --- Retrieves the rune-related settings table with defaults as fallback.
 --- This function accesses the current saved settings and their defaults,
@@ -1148,6 +1203,56 @@ local styleOptions = {
         width = "full",
     },
 
+
+    {
+        type = "submenu",
+        name = "Flash Animation Timing",
+        controls = {
+            {
+                type = "slider",
+                name = "Flash Out Duration (ms)",
+                tooltip = "How long the rune fades out before flashing in again.",
+                min = 50,
+                max = 1000,
+                step = 10,
+                getFunc = function() return CC.Settings:getFlashOutDuration() * 1000 end,  -- stored in seconds, show ms
+                setFunc = function(value) CC.Settings:setFlashOutDuration(value / 1000) end, -- convert ms to seconds on set
+                default = M.defaults.reimagined.flash.outDuration,
+            },
+            {
+                type = "slider",
+                name = "Flash In Delay (ms)",
+                tooltip = "Delay before flashing back in.",
+                min = 0,
+                max = 1500,
+                step = 50,
+                getFunc = function() return CC.Settings:getFlashInDelay() * 1000 end,  -- stored in seconds, show ms
+                setFunc = function(value) CC.Settings:setFlashInDelay(value / 1000) end, -- convert ms to seconds on set
+                default = M.defaults.reimagined.flash.inDelay,
+            },
+            {
+                type = "slider",
+                name = "Flash In Duration (ms)",
+                tooltip = "How long it takes to fade back in.",
+                min = 50,
+                max = 1000,
+                step = 10,
+                getFunc = function() return CC.Settings:getFlashInDuration() * 1000 end,  -- stored in seconds, show ms
+                setFunc = function(value) CC.Settings:setFlashInDuration(value / 1000) end, -- convert ms to seconds on set
+                default = M.defaults.reimagined.flash.inDuration,
+            },
+            {
+                type = "button",
+                name = "Reset Flash Timings to Default",
+                func = function()
+                    CC.Settings:setFlashOutDuration(M.defaults.reimagined.flash.outDuration)
+                    CC.Settings:setFlashInDelay(M.defaults.reimagined.flash.inDelay)
+                    CC.Settings:setFlashInDuration(M.defaults.reimagined.flash.inDuration)
+                end,
+                width = "full",
+            },
+        },
+    },
 }
 
 -- -----------------------------------------------------------------------------
@@ -1491,8 +1596,13 @@ end
 --- Setup settings
 --- @return nil
 function M:Setup()
-    local addon   = CC.Addon
+    local addon = CC.Addon
+
     self.settings = ZO_SavedVars:NewAccountWide(self.savedVariables, self.dbVersion, nil, self.defaults)
+
+    -- Ensure nested tables exist to avoid nil errors
+    self.settings.reimagined        = self.settings.reimagined or {}
+    self.settings.reimagined.flash  = self.settings.reimagined.flash or {}
 
     populateSounds()
 
@@ -1510,6 +1620,8 @@ function M:Setup()
         slashCommand       = "/ccr",
     })
     LAM:RegisterOptionControls(addon.name, optionsData)
+
+    self:ApplyFlashTimingToRunes()
 
     CC.Debug:Trace(2, "Finished InitSettings()")
 end
