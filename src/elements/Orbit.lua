@@ -14,13 +14,13 @@ CruxCounterR_Orbit = ZO_InitializingObject:Subclass()
 --- @param control any Element control
 --- @return nil
 function CruxCounterR_Orbit:Initialize(control)
-    self.control = control
-    self.runes = {}
+    self.control    = control
+    self.runes      = {}
 
-    local settings = CC.Settings:GetElement("runes")
-    self.enabled = settings.enabled
-    self.rotationEnabled = settings.rotate
-    self.rotationSpeed = settings.rotationSpeed
+    local settings          = CC.Settings:GetElement("runes")
+    self.enabled            = settings.enabled
+    self.rotationEnabled    = settings.rotate
+    self.rotationSpeed      = settings.rotationSpeed
 
     self:InitializeRunes()
 
@@ -55,6 +55,7 @@ end
 --- @return nil
 function CruxCounterR_Orbit:SetEnabled(enabled)
     self.enabled = enabled
+
     self:SetHidden(not enabled)
 end
 
@@ -122,6 +123,7 @@ function CruxCounterR_Orbit:UpdateCount(count)
     -- Make sure to show as many as there are stacks
     for i = 1, count, 1 do
         local rune = self.runes[i]
+
         if not rune:IsShowing() then
             rune:Show()
         end
@@ -130,6 +132,7 @@ function CruxCounterR_Orbit:UpdateCount(count)
     -- Move 2nd rune to make room for the third
     if count == 3 then
         local rune = self.runes[2]
+
         rune:PlayPositionShift()
     end
 end

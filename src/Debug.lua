@@ -17,6 +17,7 @@ M.level  = 0
 --- @return nil
 function M:Say(...)
     local prefix = "[" .. CC.Addon.name .. "] "
+
     d(prefix .. zo_strformat(...))
 end
 
@@ -36,6 +37,7 @@ end
 --- @return nil
 function M:SayLater(delayMs, ...)
     local args = ...
+
     zo_callLater(function()
         self:Say(args)
     end, delayMs)
@@ -47,6 +49,7 @@ end
 function M:PrintColor(label, color)
     if not color then
         self:Trace(2, "%s: nil", label)
+        
         return
     end
 

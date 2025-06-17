@@ -65,18 +65,6 @@ CruxCounterReimagined.xml
                 <AlphaAnimation duration="1000" startAlpha="1" endAlpha="0.3" />
             </Animations>
         </AnimationTimeline>
-        <!-- <AnimationTimeline name="CruxCounterR_Flash" playbackType="ONE_SHOT">
-            <Animations>
-                <AlphaAnimation duration="500" startAlpha="1" endAlpha="0.3" />
-                <AlphaAnimation delay="500" duration="500" startAlpha="0.3" endAlpha="1" />
-            </Animations>
-        </AnimationTimeline> -->
-        <!-- <AnimationTimeline name="CruxCounterR_Flash" playbackType="ONE_SHOT">
-            <Animations>
-                <AlphaAnimation duration="500" startAlpha="1" endAlpha="0.3" easingType="smoothStep" />
-                <AlphaAnimation delay="500" duration="500" startAlpha="0.3" endAlpha="1" easingType="smoothStep" />
-            </Animations>
-        </AnimationTimeline> -->
     </Animations>
 
     <Controls>

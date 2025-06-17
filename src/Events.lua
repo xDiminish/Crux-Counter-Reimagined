@@ -15,6 +15,9 @@ local knownArcanistLines = {
 
 local wasArcanist = nil
 
+-- local flashToggle = false
+local flashPeriod = 0.5 -- seconds for full pulse cycle (fade in + fade out)
+
 --- @type integer Crux ability ID
 M.abilityId = 184220
 
@@ -132,44 +135,32 @@ local function onEffectChanged(eventCode, changeType, effectSlot, effectName, un
 
         EVENT_MANAGER:UnregisterForUpdate("CruxTracker_Countdown")
         EVENT_MANAGER:RegisterForUpdate("CruxTracker_Countdown", pollingInterval, function()
-            local now         = GetGameTimeMilliseconds()
-            local endTimeMs   = endTime * 1000
+            local now = GetGameTimeMilliseconds()
+            local endTimeMs = endTime * 1000
             local remainingMs = endTimeMs - now
 
-            -- Check if the crux buff has expired
             if remainingMs <= 0 then
-                CC.Debug:Trace(2, "Effect expired: <<1>>", effectName)
-
                 CC.State:ClearStacks()
-
-                -- Update global warn state
                 CC.Global.WarnState = false
-
                 EVENT_MANAGER:UnregisterForUpdate("CruxTracker_Countdown")
                 return
             end
 
             local lastGainMs = CC.State.lastCruxGainTime
-            if not lastGainMs then
-                return  -- nothing to update
-            end
+            if not lastGainMs then return end
 
-            local elapsedSec    = (now - lastGainMs) / 1000
-            local cruxCount     = CC.State:GetCruxCount()
-
-            CC.Debug:Trace(2, "Current Crux Count: <<1>>", tostring(cruxCount))
+            local elapsedSec = (now - lastGainMs) / 1000
+            local cruxCount = CC.State:GetCruxCount()
 
             if cruxCount == 0 then
-                CC.Debug:Trace(2, "Resetting all colors due to zero crux count...")
-
-                -- Update global warn state
                 CC.Global.WarnState = false
                 return
             end
 
-            for _, element in ipairs({ "runes", "background", "number" }) do
-                elementHandlers[element](elapsedSec, baseSettings)
-            end
+            local baseSettings = CC.settings or {}
+
+            -- Use the updated Utils function call here:
+            CC.Utils.UpdateCruxVisuals(elapsedSec, baseSettings)
         end)
     end
 end
@@ -355,6 +346,7 @@ function M:RegisterEvents()
     self:Listen("EffectChanged", EVENT_EFFECT_CHANGED, function(eventCode, ...)
         return onEffectChanged(eventCode, ...)
     end)
+
     self:AddFilter(
         "EffectChanged",
         EVENT_EFFECT_CHANGED,
@@ -367,7 +359,11 @@ function M:RegisterEvents()
     self:Listen("PlayerAlive", EVENT_PLAYER_ALIVE, onPlayerChanged)
 
     -- Zone change or load
-    self:Listen("PlayerActivated", EVENT_PLAYER_ACTIVATED, onPlayerChanged)
+    self:Listen("PlayerActivated", EVENT_PLAYER_ACTIVATED, function()
+        onPlayerChanged()
+        M:ReevaluateVisibility()
+    end)
+
     self:Listen("ZoneUpdated", EVENT_ZONE_UPDATE, onPlayerChanged)
 
     -- Skill line and subclass changes to reevaluate visibility
@@ -391,10 +387,6 @@ function M:RegisterEvents()
         zo_callLater(function()
             M:ReevaluateVisibility()
         end, 500)
-    end)
-
-    self:Listen("PlayerActivated", EVENT_PLAYER_ACTIVATED, function()
-        M.ReevaluateVisibility()
     end)
 
     -- Combat state

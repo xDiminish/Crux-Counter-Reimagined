@@ -10,83 +10,127 @@ local sounds                = {}
 local rotationSpeedFactor   = 24000
 
 -- Colors
-local veryLightGreen        = ZO_ColorDef:New(0.7176470588, 1, 0.7764705882, 1)             -- B7FFC6
-local lightGreen            = ZO_ColorDef:New(0.7176470588, 1, 0.4862745098, 1)             -- B7FF7C
-local mediumGreen           = ZO_ColorDef:New(0.6784313725, 0.9607843137, 0.4509803921, 1)  -- ADF573
-local white                 = ZO_ColorDef:New(1, 1, 1, 1)                                   -- FFFFFF
-local red                   = ZO_ColorDef:New(1, 0.2, 0.2, 1)                               -- FF3333
-local orange                = ZO_ColorDef:New(0.98, 0.58, 0.02, 1)                          -- FA9405
-local brightRed             = ZO_ColorDef:New(0.96, 0.04, 0.25, 1)                          -- F50A41
-local mintGreen             = ZO_ColorDef:New(0.0353, 0.7373, 0.5647, 1)                    -- 09BD90
-local brightMagenta         = ZO_ColorDef:New(0.980, 0.020, 0.388, 1)                       -- FA0563
+local veryLightGreen  = ZO_ColorDef:New(0.7176, 1.0, 0.7765, 1)    -- B7FFC6
+local lightGreen      = ZO_ColorDef:New(0.7176, 1.0, 0.4863, 1)    -- B7FF7C
+local mediumGreen     = ZO_ColorDef:New(0.6784, 0.9608, 0.4510, 1) -- ADF573
+local white           = ZO_ColorDef:New(1, 1, 1, 1)                -- FFFFFF
+local red             = ZO_ColorDef:New(1, 0.2, 0.2, 1)            -- FF3333
+local orange          = ZO_ColorDef:New(0.98, 0.58, 0.02, 1)       -- FA9405
+local brightRed       = ZO_ColorDef:New(0.96, 0.04, 0.25, 1)       -- F50A41
+local mintGreen       = ZO_ColorDef:New(0.0353, 0.7373, 0.5647, 1) -- 09BD90
+local brightMagenta   = ZO_ColorDef:New(0.98, 0.02, 0.388, 1)      -- FA0563
+local darkMagenta     = ZO_ColorDef:New(0.5, 0.0, 0.25, 1)         -- ~#800040
+local darkRed         = ZO_ColorDef:New(0.4, 0.1, 0.1, 1)          -- ~#661A1A
+local gray            = ZO_ColorDef:New(0.5, 0.5, 0.5, 1)          -- #808080
 
 -- Defaults/Settings Storage
 M.settings       = {}
 M.dbVersion      = 0
 M.savedVariables = "CruxCounterReimaginedData"
-M.defaults       = {
-    top             = 0,
-    left            = 0,
-    hideOutOfCombat = false,
-    locked          = false,
-    lockToReticle   = false,
-    size            = 128,
-    elements        = {
-        number     = {
-            enabled = true,
-            color   = veryLightGreen,
+M.defaults = {
+    -------------------------------------------------------------------
+    -- Position of the UI element on screen
+    -------------------------------------------------------------------
+    top             = 0,                                                -- Vertical position (Y-axis)
+    left            = 0,                                                -- Horizontal position (X-axis)
+
+    -- General display settings
+    hideOutOfCombat = false,                                            -- Whether to hide the display when not in combat
+    locked          = false,                                            -- Whether the UI is locked in place
+    lockToReticle   = false,                                            -- Whether to follow the reticle position
+    size            = 128,                                              -- Size of the main display in pixels
+    -------------------------------------------------------------------
+    -- Appearance and behavior settings for UI elements
+    -------------------------------------------------------------------
+    elements = {
+        number = {
+            enabled = true,                                             -- Show the numeric counter
+            color   = veryLightGreen,                                   -- Color of the numeric counter
         },
-        runes      = {
-            enabled                     = true,
-            rotate                      = true,
-            rotationSpeed               = 9600,
-            color                       = lightGreen,
+        runes = {
+            enabled        = true,                                      -- Show the orbiting runes
+            rotate         = true,                                      -- Animate rune rotation
+            rotationSpeed  = 9600,                                      -- Rotation speed in units (degrees per second * 100)
+            color          = lightGreen                                 -- Color of the runes
         },
         background = {
-            enabled        = true,
-            rotate         = true,
-            hideZeroStacks = false,
-            color          = mediumGreen,
+            enabled        = true,                                      -- Show the background ring
+            rotate         = true,                                      -- Animate background rotation
+            hideZeroStacks = false,                                     -- Hide when there are zero Crux stacks
+            color          = mediumGreen                                -- Color of the background ring
         },
     },
-    sounds          = {
+    -------------------------------------------------------------------
+    -- Sound effect settings for Crux state changes
+    -------------------------------------------------------------------
+    sounds = {
         cruxGained = {
-            enabled = false,
-            name    = "ENCHANTING_POTENCY_RUNE_PLACED",
-            volume  = 20,
+            enabled = false,                                            -- Play a sound when gaining a Crux
+            name    = "ENCHANTING_POTENCY_RUNE_PLACED",                 -- Sound name from ESO sound library
+            volume  = 20,                                               -- Playback volume (0-100)
         },
-        cruxLost   = {
-            enabled = false,
+        cruxLost = {
+            enabled = false,                                            -- Play a sound when losing a Crux
             name    = "ENCHANTING_WEAPON_GLYPH_REMOVED",
             volume  = 20,
         },
-        maxCrux    = {
-            enabled = true,
+        maxCrux = {
+            enabled = true,                                             -- Play a sound when reaching max Crux
             name    = "DEATH_RECAP_KILLING_BLOW_SHOWN",
             volume  = 20,
         },
     },
+    -------------------------------------------------------------------
+    -- Settings specific to the reimagined style mode
+    -------------------------------------------------------------------
     reimagined = {
-        cruxDuration = 30,
+        cruxDuration = 30,                                              -- Duration (in seconds) a Crux buff lasts
+        runeSpinAnimation = true,                                       -- Whether runes spin when displayed
+
+        -- Expiration warning feature
         expireWarning = {
-            threshold = 10,
-            pollingInterval = 200,
-            enabled = true,
+            threshold       = 10,                                       -- Seconds remaining before triggering a visual warning
+            pollingInterval = 200,                                      -- How often (in ms) to check for expiration
+            enabled         = true,                                     -- Enable expiration warning effects
+
             elements = {
                 number = {
-                    color = brightRed,
+                    color = brightRed,                                  -- Warning color for numeric counter
                 },
                 runes = {
-                    color = brightMagenta,
+                    color = brightMagenta,                              -- Warning color for runes
                 },
                 background = {
-                    color = white,
+                    color = white,                                      -- Warning color for background ring
                 }
             }
         },
-        runeSpinAnimation = true,
+        -------------------------------------------------------------------
+        -- Flashing effect settings before expiration
+        -------------------------------------------------------------------
+        flash = {
+            enabled   = false,                                          -- Global toggle for flash feature
+            threshold = 5,                                              -- Seconds before expiration to start flashing (must be ≤ threshold in expireWarning)
+            speed     = 2,                                              -- Flashing speed (Hz = flashes per second)
+
+            elements = {
+                runes = {
+                    color1 = brightMagenta,                             -- First flash color for runes
+                    color2 = darkMagenta,                               -- Second flash color for runes
+                },
+                background = {
+                    color1 = white,                                     -- First flash color for background
+                    color2 = gray,                                      -- Second flash color for background
+                },
+                number = {
+                    color1 = brightRed,                                 -- First flash color for number
+                    color2 = darkRed,                                   -- Second flash color for number
+                },
+            }
+        }
     }
 }
+
 
 --- Save counter position
 --- @param top number Top position
@@ -113,7 +157,6 @@ end
 -- -----------------------------------------------------------------------------
 -- Settings Panel Data
 -- -----------------------------------------------------------------------------
-
 --- @type table Options data
 local optionsData               = {}
 CruxCounterR_LockButton         = nil
@@ -122,7 +165,6 @@ CruxCounterR_MoveToCenterButton = nil
 -- -----------------------------------------------------------------------------
 -- Display
 -- -----------------------------------------------------------------------------
-
 --- Move the counter to the center of the screen
 --- @return nil
 local function moveToCenter()
@@ -202,12 +244,8 @@ local function setLockToReticle(state)
     setLocked(state)
     M.settings.lockToReticle = state
 
-    CruxCounterR_LockButton.button.data = {
-        tooltipText = LAM.util.GetStringFromValue(getLockUnlockTooltipText())
-    }
-    CruxCounterR_MoveToCenterButton.button.data = {
-        tooltipText = LAM.util.GetStringFromValue(getMoveToCenterTooltipText())
-    }
+    CruxCounterR_LockButton.button.data = { tooltipText = LAM.util.GetStringFromValue(getLockUnlockTooltipText()) }
+    CruxCounterR_MoveToCenterButton.button.data = { tooltipText = LAM.util.GetStringFromValue(getMoveToCenterTooltipText()) }
     CruxCounterR_LockButton.button:SetText(getLockUnlockButtonText())
 end
 
@@ -216,6 +254,7 @@ end
 --- @return nil
 local function setHideOutOfCombat(hide)
     M.settings.hideOutOfCombat = hide
+
     if hide then
         CC.Events:RegisterForCombat()
     else
@@ -246,7 +285,9 @@ end
 --- @type table Options for Display settings
 local displayOptions = {
     {
+        -------------------------------------------------------------------
         -- Display
+        -------------------------------------------------------------------
         type = "header",
         name = function() 
             local colorPalette = {"72b007"}
@@ -259,7 +300,9 @@ local displayOptions = {
         width = "full",
     },
     {
+        -------------------------------------------------------------------
         -- Lock/Unlock
+        -------------------------------------------------------------------
         type = "button",
         name = getLockUnlockButtonText,
         tooltip = getLockUnlockTooltipText,
@@ -269,7 +312,9 @@ local displayOptions = {
         reference = "CruxCounterR_LockButton"
     },
     {
+        -------------------------------------------------------------------
         -- Move to Center
+        -------------------------------------------------------------------
         type = "button",
         name = function() return CC.Language:GetString("SETTINGS_MOVE_TO_CENTER") end,
         tooltip = getMoveToCenterTooltipText,
@@ -279,7 +324,9 @@ local displayOptions = {
         reference = "CruxCounterR_MoveToCenterButton",
     },
     {
+        -------------------------------------------------------------------
         -- Lock to Reticle
+        -------------------------------------------------------------------
         type = "checkbox",
         name = function() return CC.Language:GetString("SETTINGS_LOCK_TO_RETICLE") end,
         tooltip = function() return CC.Language:GetString("SETTINGS_LOCK_TO_RETICLE_DESC") end,
@@ -288,7 +335,9 @@ local displayOptions = {
         width = "full",
     },
     {
+        -------------------------------------------------------------------
         -- Hide out of Combat
+        -------------------------------------------------------------------
         type = "checkbox",
         name = function() return CC.Language:GetString("SETTINGS_HIDE_OUT_OF_COMBAT") end,
         tooltip = function() return CC.Language:GetString("SETTINGS_HIDE_OUT_OF_COMBAT_DESC") end,
@@ -297,7 +346,9 @@ local displayOptions = {
         width = "full",
     },
     {
+        -------------------------------------------------------------------
         -- Size
+        -------------------------------------------------------------------
         type = "slider",
         name = function() return CC.Language:GetString("SETTINGS_SIZE") end,
         tooltip = function() return CC.Language:GetString("SETTINGS_SIZE_DESC") end,
@@ -314,7 +365,6 @@ local displayOptions = {
 -- -----------------------------------------------------------------------------
 -- Style
 -- -----------------------------------------------------------------------------
-
 --- Set if a UI element is shown/enabled
 --- @param element string Name of the element
 --- @param enabled boolean True to enable the element
@@ -408,9 +458,12 @@ local function setElementColor(element, color, isReimagined)
     end
 end
 
---- Get the color of an element
---- @param element string Name of the element
---- @return ZO_ColorDef
+--- Retrieves the color setting for a specified UI element.
+--- This function returns the color as a `ZO_ColorDef` object, either from the
+--- standard settings or the reimagined style settings depending on the `isReimagined` flag.
+--- @param element string The name of the UI element (e.g., "runes", "background", "number").
+--- @param isReimagined boolean|nil If true, fetches from `reimagined.expireWarning` settings; otherwise from default style. Defaults to false.
+--- @return ZO_ColorDef A `ZO_ColorDef` instance representing the configured color.
 local function getElementColor(element, isReimagined)
     isReimagined = isReimagined or false
 
@@ -434,6 +487,7 @@ local function getDefaultColor(element, isReimagined)
 
     if isReimagined then
         color = M.defaults.reimagined.expireWarning.elements[element].color
+
         if color then
             local r, g, b, a = color:UnpackRGBA()
             CC.Debug:Trace(3, string.format("Default warn color for '%s': r=%.2f, g=%.2f, b=%.2f, a=%.2f", element, r, g, b, a))
@@ -486,22 +540,14 @@ local function isElementDefaultReimaginedColor(element)
     return current:IsEqual(default)
 end
 
---- Reset an element to its default color
---- @param element string Name of the element
---- @return nil
+--- Resets the color of a specified UI element to its default value.
+--- This affects either the standard style or the reimagined style, depending on the `isReimagined` flag.
+--- @param element string The name of the UI element (e.g., "runes", "background", "number").
+--- @param isReimagined boolean|nil If true, applies the reimagined default color. Defaults to false.
 local function setToDefaultColor(element, isReimagined)
     isReimagined = isReimagined or false
 
     setElementColor(element, getDefaultColor(element, isReimagined), isReimagined)
-end
-
---- Sets the warning color of a specified UI element to its default reimagined color.
---- Fetches the default color for the element and applies it using the setter function.
---- @param element string The name/key of the UI element whose warning color should be reset
-local function setToDefaultReimaginedWarnColor(element)
-    local defaultColor = getDefaultColor(element, true)
-
-    setElementColor(element, defaultColor, true)
 end
 
 --- Get the Hide for No Crux setting
@@ -543,55 +589,63 @@ local function setRotationSpeed(value)
     CC.Debug:Trace(3, "Value: <<1>>, Speed: <<2>>", value, speed)
 end
 
---- Retrieves the total duration of the crux effect in seconds.
---- Falls back to default if not explicitly set in current settings.
---- @return number duration in seconds
+--- Retrieve the total duration of the crux effect in seconds
+--- @return number Duration in seconds
 local function getCruxDuration()
-    return M.settings.reimagined.cruxDuration or M.defaults.reimagined.cruxDuration
+    return CC.Utils:DeepGet(M.settings, "reimagined", "cruxDuration") or M.defaults.reimagined.cruxDuration
 end
 
---- Sets the total duration of the crux effect in seconds.
---- @param value number The new crux duration in seconds
+--- Set the total duration of the crux effect in seconds
+--- @param value number Duration in seconds
 local function setCruxDuration(value)
-    M.settings.reimagined.cruxDuration = value
+    M.settings.reimagined               = M.settings.reimagined or {}
+    M.settings.reimagined.cruxDuration  = value
 end
 
---- Retrieves the warning threshold (time before crux expiration to start warning) in seconds.
---- Falls back to default if not set.
---- @return number threshold in seconds
+--- Retrieve the warning threshold (seconds before expiration to warn)
+--- @return number Threshold in seconds
 local function getExpireWarnThreshold()
-    return M.settings.reimagined.expireWarning.threshold or M.defaults.reimagined.expireWarning.threshold
+    return CC.Utils:DeepGet(M.settings, "reimagined", "expireWarning", "threshold") or M.defaults.reimagined.expireWarning.threshold
 end
 
---- Sets the warning threshold time (seconds before expiration to warn).
---- @param value number Warning threshold in seconds
+--- Set the warning threshold (seconds before expiration to warn)
+--- @param value number Threshold in seconds
 local function setExpireWarnThreshold(value)
-    M.settings.reimagined.expireWarning.threshold = value
+    M.settings.reimagined                           = M.settings.reimagined or {}
+    M.settings.reimagined.expireWarning             = M.settings.reimagined.expireWarning or {}
+    M.settings.reimagined.expireWarning.threshold   = value
 end
 
---- Retrieves the polling interval (in milliseconds) for checking expire warnings.
---- Used to control how often color updates occur as expiration nears.
---- Falls back to default if unset.
+--- Retrieve the polling interval for expire warning updates (in ms)
 --- @return number Polling interval in milliseconds
 local function getExpireWarnPollingInterval()
-    return M.settings.reimagined.expireWarning.pollingInterval or M.defaults.reimagined.expireWarning.pollingInterval
+    return CC.Utils:DeepGet(M.settings, "reimagined", "expireWarning", "pollingInterval") or M.defaults.reimagined.expireWarning.pollingInterval
 end
 
---- Sets the polling interval (milliseconds) for expire warning updates.
+--- Set the polling interval for expire warning updates (in ms)
 --- @param value number Polling interval in milliseconds
 local function setExpireWarnPollingInterval(value)
+    M.settings.reimagined                               = M.settings.reimagined or {}
+    M.settings.reimagined.expireWarning                 = M.settings.reimagined.expireWarning or {}
     M.settings.reimagined.expireWarning.pollingInterval = value
 end
 
---- Gets whether the rune spin animation is enabled.
---- @return boolean
+--- Get whether the rune spin animation is enabled
+--- @return boolean Whether the spin animation is enabled
 function M:getRuneSpinAnimationEnabled()
-    return M.settings.reimagined.runeSpinAnimation
+    local value = CC.Utils:DeepGet(M.settings, "reimagined", "runeSpinAnimation")
+
+    if value == nil then
+        return M.defaults.reimagined.runeSpinAnimation
+    end
+
+    return value
 end
 
---- Sets whether the rune spin animation is enabled.
---- @param value boolean
+--- Set whether the rune spin animation is enabled
+--- @param value boolean Enable or disable spin animation
 function M:setRuneSpinAnimationEnabled(value)
+    M.settings.reimagined                   = M.settings.reimagined or {}
     M.settings.reimagined.runeSpinAnimation = value
 
     if CruxCounterR_Display and CruxCounterR_Display.orbit then
@@ -601,12 +655,176 @@ function M:setRuneSpinAnimationEnabled(value)
     end
 end
 
+--- Get whether flash effect is enabled for expire warnings
+--- @return boolean Flash enabled state
+local function getFlashEnabled()
+    return CC.Utils:DeepGet(M.settings, "reimagined", "flash", "enabled") or M.defaults.reimagined.flash.enabled
+end
+
+--- Set whether flash effect is enabled for expire warnings
+--- @param value boolean Flash enabled state
+local function setFlashEnabled(value)
+    M.settings.reimagined               = M.settings.reimagined or {}
+    M.settings.reimagined.flash         = M.settings.reimagined.flash or {}
+    M.settings.reimagined.flash.enabled = value
+end
+
+--- Get flash threshold for expire warning flash start (in seconds)
+--- @return number Threshold in seconds
+local function getFlashThreshold()
+    return CC.Utils:DeepGet(M.settings, "reimagined", "flash", "threshold") or M.defaults.reimagined.flash.threshold
+end
+
+--- Set flash threshold for expire warning flash start (in seconds)
+--- @param value number Threshold in seconds
+local function setFlashThreshold(value)
+    M.settings.reimagined                   = M.settings.reimagined or {}
+    M.settings.reimagined.flash             = M.settings.reimagined.flash or {}
+    M.settings.reimagined.flash.threshold   = value
+end
+
+--- Get flash animation speed for expire warnings
+--- @return number Speed multiplier
+local function getFlashSpeed()
+    return CC.Utils:DeepGet(M.settings, "reimagined", "flash", "speed") or M.defaults.reimagined.flash.speed
+end
+
+--- Set flash animation speed for expire warnings
+--- @param value number Speed multiplier
+local function setFlashSpeed(value)
+    M.settings.reimagined               = M.settings.reimagined or {}
+    M.settings.reimagined.flash         = M.settings.reimagined.flash or {}
+    M.settings.reimagined.flash.speed   = value
+end
+
+--- Gets the current flash color for a given element and index.
+--- Returns a ZO_ColorDef object representing the color.
+--- If not found, returns white and logs a debug trace.
+--- @param element string The element name (e.g., "runes", "background", "number").
+--- @param idx number The color index (usually 1 or 2).
+--- @return ZO_ColorDef The color object.
+local function getFlashColor(element, idx)
+    local colorKey = "color" .. tostring(idx)
+
+    local color = M.settings.reimagined.flash.elements[element] and M.settings.reimagined.flash.elements[element][colorKey]
+
+    if color then
+        return ZO_ColorDef:New(color)
+    else
+        -- Fallback to white if not found
+        CC.Debug:Trace(1, string.format("No flash color found for '%s' index %d", element, idx))
+
+        return ZO_ColorDef:New(1, 1, 1, 1)
+    end
+end
+
+--- Sets the flash color for a given element and index.
+--- Updates the settings table with the RGBA components of the provided ZO_ColorDef color.
+--- @param element string The element name (e.g., "runes", "background", "number").
+--- @param idx number The color index (usually 1 or 2).
+--- @param color ZO_ColorDef The color object to set.
+local function setFlashColor(element, idx, color)
+    local colorKey      = "color" .. tostring(idx)
+    local r, g, b, a    = color:UnpackRGBA()
+
+    -- Ensure settings path exists
+    local flashSettings = M.settings.reimagined
+        and M.settings.reimagined.flash
+        and M.settings.reimagined.flash.elements
+        and M.settings.reimagined.flash.elements[element]
+
+    if not flashSettings then
+        M.settings.reimagined                           = M.settings.reimagined or {}
+        M.settings.reimagined.flash                     = M.settings.reimagined.flash or {}
+        M.settings.reimagined.flash.elements            = M.settings.reimagined.flash.elements or {}
+        M.settings.reimagined.flash.elements[element]   = {}
+        flashSettings                                   = M.settings.reimagined.flash.elements[element]
+    end
+
+    flashSettings[colorKey] = { r = r, g = g, b = b, a = a }
+
+    CC.Debug:Trace(2, string.format("Set flash color for '%s' (%s) to RGBA(%.2f, %.2f, %.2f, %.2f)", element, colorKey, r, g, b, a))
+end
+
+--- Gets the default flash color for a given element and index from the defaults table.
+--- Returns a ZO_ColorDef object representing the default color.
+--- If not found, returns white and logs a debug trace.
+--- @param element string The element name (e.g., "runes", "background", "number").
+--- @param idx number The color index (usually 1 or 2).
+--- @return ZO_ColorDef The default color object.
+local function getDefaultFlashColor(element, idx)
+    local colorKey  = "color" .. tostring(idx)
+    local color     = M.defaults.reimagined.flash
+                        and M.defaults.reimagined.flash.elements
+                        and M.defaults.reimagined.flash.elements[element]
+                        and M.defaults.reimagined.flash.elements[element][colorKey]
+
+    if color then
+        local r, g, b, a = color.r or color[1], color.g or color[2], color.b or color[3], color.a or color[4]
+
+        CC.Debug:Trace(3, string.format("Default flash color for '%s' (%s): r=%.2f, g=%.2f, b=%.2f, a=%.2f", element, colorKey, r, g, b, a))
+        
+        return ZO_ColorDef:New(r, g, b, a)
+    else
+        CC.Debug:Trace(2, string.format("No default flash color found for '%s' (%s)", element, colorKey))
+
+        return ZO_ColorDef:New(1, 1, 1, 1) -- fallback white
+    end
+end
+
+--- Resets all flash colors for all elements and indices to their default values.
+--- Updates the settings and refreshes the LibAddonMenu panel if it exists.
+local function resetAllFlashColorsToDefault()
+    local elements      = { "runes", "background", "number" }
+    local colorIndices  = { 1, 2 }
+
+    for _, element in ipairs(elements) do
+        for _, idx in ipairs(colorIndices) do
+            local defaultColor = getDefaultFlashColor(element, idx)
+
+            setFlashColor(element, idx, defaultColor)
+        end
+    end
+
+    -- Refresh the menu to update all colorpickers (LAM-specific)
+    if CC.LAMPanel then
+        LibStub("LibAddonMenu-2.0"):RefreshPanel(CC.LAMPanel)
+    end
+end
+
+--- Checks if all flash colors for all elements and indices are currently set to their default values.
+--- Returns true if all match defaults, false otherwise.
+--- Logs current and default colors if debug level >= 2.
+--- @return boolean True if all flash colors are default, false otherwise.
+local function areAllFlashColorsDefault()
+    local elements      = { "runes", "background", "number" }
+    local colorIndices  = { 1, 2 }
+
+    for _, element in ipairs(elements) do
+        for _, idx in ipairs(colorIndices) do
+            local current = getFlashColor(element, idx)
+            local default = getDefaultFlashColor(element, idx)
+
+            if (CruxCounterR.settings and CruxCounterR.settings.debugLevel or 0) >= 2 then
+                CruxCounterR.PrintColor(string.format("Current Flash [%s][%d]", element, idx), current)
+                CruxCounterR.PrintColor(string.format("Default Flash [%s][%d]", element, idx), default)
+            end
+
+            -- If one is not default, return false
+            if not current or not default or not current:IsEqual(default) then
+                return false
+            end
+        end
+    end
+
+    return true
+end
+
 --- Retrieves the rune-related settings table with defaults as fallback.
 --- This function accesses the current saved settings and their defaults,
 --- prints debug info listing the keys in each rune settings table,
 --- and returns the rune settings table with a metatable to fall back
 --- to default values for missing keys.
----
 --- @return table Rune settings with fallback to default rune settings
 local function GetRuneSettings()
     local settings          = M.settings or {}                      -- Get current saved settings or empty table if missing
@@ -618,12 +836,14 @@ local function GetRuneSettings()
 
     -- Debug print keys of current rune settings table
     CC.Debug:Trace(2, "runes table keys:")
+
     for k, v in pairs(runes) do
         CC.Debug:Trace(2, "  " .. tostring(k) .. " = " .. tostring(v))
     end
 
     -- Debug print keys of default rune settings table
     CC.Debug:Trace(2, "defaultRunes table keys:")
+
     for k, v in pairs(defaultRunes) do
         CC.Debug:Trace(2, "  " .. tostring(k) .. " = " .. tostring(v))
     end
@@ -650,7 +870,9 @@ local styleOptions = {
         width = "full",
     },
     {
+        -------------------------------------------------------------------
         -- Number
+        -------------------------------------------------------------------
         type = "checkbox",
         name = function()
             return CC.Language:GetString("SETTINGS_STYLE_NUMBER")
@@ -671,7 +893,9 @@ local styleOptions = {
         width = "half",
     },
     {
+        -------------------------------------------------------------------
         -- Number Color
+        -------------------------------------------------------------------
         type = "colorpicker",
         name = function()
             return CC.Language:GetString("SETTINGS_STYLE_NUMBER_COLOR")
@@ -685,11 +909,12 @@ local styleOptions = {
         end,
         setFunc = function(r, g, b, a)
             local newColor = ZO_ColorDef:New(r, g, b, a)
-            if newColor then
-                setElementColor("number", newColor)
-            end
+            setElementColor("number", newColor)
         end,
-        default = getDefaultColor("number"),
+        default = function()
+            local color = getDefaultColor("number")
+            return color:UnpackRGBA()
+        end,
         disabled = function()
             return not getElementEnabled("number")
         end,
@@ -717,7 +942,9 @@ local styleOptions = {
         type = "divider",
     },
     {
+        -------------------------------------------------------------------
         -- Crux Runes
+        -------------------------------------------------------------------
         type = "checkbox",
         name = function()
             return CC.Language:GetString("SETTINGS_STYLE_CRUX_RUNES")
@@ -734,7 +961,9 @@ local styleOptions = {
         width = "half",
     },
     {
+        -------------------------------------------------------------------
         -- Rotate
+        -------------------------------------------------------------------
         type = "checkbox",
         name = function()
             return CC.Language:GetString("SETTINGS_STYLE_ROTATE")
@@ -754,7 +983,9 @@ local styleOptions = {
         end,
     },
     {
-        -- Crux Color
+        -------------------------------------------------------------------
+        -- Runes (Crux) Color
+        -------------------------------------------------------------------
         type = "colorpicker",
         name = function()
             return CC.Language:GetString("SETTINGS_STYLE_CRUX_COLOR")
@@ -768,18 +999,21 @@ local styleOptions = {
         end,
         setFunc = function(r, g, b, a)
             local newColor = ZO_ColorDef:New(r, g, b, a)
-            if newColor then
-                setElementColor("runes", newColor)
-            end
+            setElementColor("runes", newColor)
         end,
-        default = getDefaultColor("runes"),
+        default = function()
+            local color = getDefaultColor("runes")
+            return color:UnpackRGBA()
+        end,
         disabled = function()
             return not getElementEnabled("runes")
         end,
         width = "half",
     },
     {
-        -- Rotation Speed
+        -------------------------------------------------------------------
+        -- Runes (Crux) Rotation Speed
+        -------------------------------------------------------------------
         type = "slider",
         name = function()
             return CC.Language:GetString("SETTINGS_STYLE_CRUX_RUNES_ROTATION_SPEED")
@@ -816,7 +1050,9 @@ local styleOptions = {
         type = "divider",
     },
     {
+        -------------------------------------------------------------------
         -- Background
+        -------------------------------------------------------------------
         type = "checkbox",
         name = function()
             return CC.Language:GetString("SETTINGS_STYLE_BACKGROUND")
@@ -833,7 +1069,9 @@ local styleOptions = {
         width = "half",
     },
     {
-        -- Rotate
+        -------------------------------------------------------------------
+        -- Background Rotate
+        -------------------------------------------------------------------
         type = "checkbox",
         name = function()
             return CC.Language:GetString("SETTINGS_STYLE_ROTATE")
@@ -853,7 +1091,9 @@ local styleOptions = {
         end,
     },
     {
+        -------------------------------------------------------------------
         -- Background Color
+        -------------------------------------------------------------------
         type = "colorpicker",
         name = function()
             return CC.Language:GetString("SETTINGS_STYLE_BACKGROUND_COLOR")
@@ -867,18 +1107,21 @@ local styleOptions = {
         end,
         setFunc = function(r, g, b, a)
             local newColor = ZO_ColorDef:New(r, g, b, a)
-            if newColor then
-                setElementColor("background", newColor)
-            end
+            setElementColor("background", newColor)
         end,
-        default = getDefaultColor("background"),
+        default = function()
+            local color = getDefaultColor("background")
+            return color:UnpackRGBA()
+        end,
         disabled = function()
             return not getElementEnabled("background")
         end,
         width = "half",
     },
     {
+        -------------------------------------------------------------------
         -- Hide on Zero Stacks
+        -------------------------------------------------------------------
         type = "checkbox",
         name = function()
             return CC.Language:GetString("SETTINGS_STYLE_BACKGROUND_HIDE_ZERO_CRUX")
@@ -923,6 +1166,9 @@ local styleOptions = {
         width = "full",
     },
     {
+        -------------------------------------------------------------------
+        -- Max Crux Buff Duration
+        -------------------------------------------------------------------
         type = "slider",
         name = function()
             return CC.Language:GetString("SETTINGS_STYLE_CRUX_DURATION")
@@ -935,10 +1181,15 @@ local styleOptions = {
         step = 1,
         getFunc = getCruxDuration,
         setFunc = setCruxDuration,
-        default = M.defaults.reimagined.cruxDuration,
+        default = function()
+            return (M.defaults.reimagined and M.defaults.reimagined.cruxDuration) or 30
+        end,
         width = "full",
     },
     {
+        -------------------------------------------------------------------
+        -- Warn Threshold Polling Interval
+        -------------------------------------------------------------------
         type = "slider",
         name = function()
             return CC.Language:GetString("SETTINGS_STYLE_CRUX_WARN_POLLING_INTERVAL")
@@ -951,10 +1202,15 @@ local styleOptions = {
         step = 100,
         getFunc = getExpireWarnPollingInterval,
         setFunc = setExpireWarnPollingInterval,
-        default = M.defaults.reimagined.expireWarning.pollingInterval,
+        default = function()
+            return (M.defaults.reimagined and M.defaults.reimagined.expireWarning and M.defaults.reimagined.expireWarning.pollingInterval) or 200
+        end,
         width = "full",
     },
     {
+        -------------------------------------------------------------------
+        -- Warn Threshold
+        -------------------------------------------------------------------
         type = "slider",
         name = function()
             return CC.Language:GetString("SETTINGS_STYLE_CRUX_WARN_THRESHOLD")
@@ -967,7 +1223,9 @@ local styleOptions = {
         step = 1,
         getFunc = getExpireWarnThreshold,
         setFunc = setExpireWarnThreshold,
-        default = M.defaults.reimagined.expireWarning.threshold,
+        default = function()
+            return (M.defaults.reimagined and M.defaults.reimagined.expireWarning and M.defaults.reimagined.expireWarning.threshold) or 10
+        end,
         width = "full",
         disabled = function() return not getElementEnabled("runes") end,
     },
@@ -975,6 +1233,9 @@ local styleOptions = {
         type = "divider",
     },
     {
+        -------------------------------------------------------------------
+        -- Number (Aura) Warn Color
+        -------------------------------------------------------------------
         type = "colorpicker",
         name = function()
             return CC.Language:GetString("SETTINGS_STYLE_NUMBER_WARN_COLOR")
@@ -983,16 +1244,17 @@ local styleOptions = {
             return CC.Language:GetString("SETTINGS_STYLE_NUMBER_WARN_COLOR_DESC")
         end,
         getFunc = function()
-            local color = getElementColor("number", true)  -- reimagined color
+            local color = getElementColor("number", true)
             return color:UnpackRGBA()
         end,
         setFunc = function(r, g, b, a)
             local newColor = ZO_ColorDef:New(r, g, b, a)
-            if newColor then
-                setElementColor("number", newColor, true)  -- update reimagined color
-            end
+            setElementColor("number", newColor, true)
         end,
-        default = getDefaultColor("number", true),
+        default = function()
+            local color = getDefaultColor("number", true)
+            return color:UnpackRGBA()
+        end,
         disabled = function()
             return not getElementEnabled("number")
         end,
@@ -1027,6 +1289,9 @@ local styleOptions = {
         width = "full",
     },
     {
+        -------------------------------------------------------------------
+        -- Rune (Crux) Warn Color
+        -------------------------------------------------------------------
         type = "colorpicker",
         name = function()
             return CC.Language:GetString("SETTINGS_STYLE_CRUX_WARN_COLOR")
@@ -1035,17 +1300,17 @@ local styleOptions = {
             return CC.Language:GetString("SETTINGS_STYLE_CRUX_WARN_COLOR_DESC")
         end,
         getFunc = function()
-            local color = getElementColor("runes", true)  -- reimagined color
+            local color = getElementColor("runes", true)
             return color:UnpackRGBA()
         end,
         setFunc = function(r, g, b, a)
             local newColor = ZO_ColorDef:New(r, g, b, a)
-
-            if newColor then
-                setElementColor("runes", newColor, true)  -- update reimagined color
-            end
+            setElementColor("runes", newColor, true)
         end,
-        default = getDefaultColor("runes", true),
+        default = function()
+            local color = getDefaultColor("runes", true)
+            return color:UnpackRGBA()
+        end,
         disabled = function()
             return not getElementEnabled("runes")
         end,
@@ -1080,6 +1345,9 @@ local styleOptions = {
         width = "full",
     },
     {
+        -------------------------------------------------------------------
+        -- Backround Warn Color
+        -------------------------------------------------------------------
         type = "colorpicker",
         name = function()
             return CC.Language:GetString("SETTINGS_STYLE_BACKGROUND_WARN_COLOR")
@@ -1088,17 +1356,17 @@ local styleOptions = {
             return CC.Language:GetString("SETTINGS_STYLE_BACKGROUND_WARN_COLOR_DESC")
         end,
         getFunc = function()
-            local color = getElementColor("background", true)  -- reimagined color
+            local color = getElementColor("background", true)
             return color:UnpackRGBA()
         end,
         setFunc = function(r, g, b, a)
             local newColor = ZO_ColorDef:New(r, g, b, a)
-
-            if newColor then
-                setElementColor("background", newColor, true)  -- update reimagined color
-            end
+            setElementColor("background", newColor, true)
         end,
-        default = getDefaultColor("background", true),
+        default = function()
+            local color = getDefaultColor("background", true)
+            return color:UnpackRGBA()
+        end,
         disabled = function()
             return not getElementEnabled("background")
         end,
@@ -1132,7 +1400,9 @@ local styleOptions = {
         width = "full",
     },
     {
-        -- Enable/Disable spin animation on runes
+        -------------------------------------------------------------------
+        -- Enable/Disable spin animation on runes (crux)
+        -------------------------------------------------------------------
         type = "checkbox",
         name = function()
             return CC.Language:GetString("SETTINGS_STYLE_CRUX_SPIN_ANIMATION")
@@ -1144,16 +1414,329 @@ local styleOptions = {
         setFunc = function(value) 
             CC.Settings:setRuneSpinAnimationEnabled(value) 
         end,
-        default = M.defaults.reimagined.runeSpinAnimation,
+        default = function()
+            return (M.defaults.reimagined and M.defaults.reimagined.runeSpinAnimation) or true
+        end,
         width = "full",
     },
+    {
+        type = "divider",
+    },
+    {
+        -------------------------------------------------------------------
+        -- Enable/Disable flash within warn threshold
+        -------------------------------------------------------------------
+        type = "checkbox",
+        name = function()
+            return CC.Language:GetString("SETTINGS_STYLE_WARN_FLASH_ENABLE")
+        end,
+        tooltip = function()
+            return CC.Language:GetString("SETTINGS_STYLE_WARN_FLASH_ENABLE_DESC")
+        end,
+        getFunc = getFlashEnabled,
+        setFunc = setFlashEnabled,
+        width = "full",
+        default = function()
+            return (M.defaults.reimagined and M.defaults.reimagined.flash and M.defaults.reimagined.flash.enabled) or false
+        end,
+        width = "full"
+    },
+    {
+        -------------------------------------------------------------------
+        -- Flash start threshold
+        -------------------------------------------------------------------
+        type = "slider",
+        name = function()
+            return CC.Language:GetString("SETTINGS_STYLE_WARN_FLASH_START_THRESHOLD")
+        end,
+        tooltip = function()
+            return CC.Language:GetString("SETTINGS_STYLE_WARN_FLASH_START_THRESHOLD_DESC")
+        end,
+        min = 0,
+        max = 30,
+        step = 1,
+        getFunc = function()
+            local flashVal  = getFlashThreshold()
+            local maxVal    = getExpireWarnThreshold()
+            
+            if flashVal > maxVal then
+                return maxVal
+            end
+            
+            return flashVal
+        end,
+        setFunc = function(value)
+            local maxVal = getExpireWarnThreshold()
+            
+            if value > maxVal then
+                value = maxVal
+            end
+            
+            setFlashThreshold(value)
+        end,
+        default = function()
+            return (M.defaults.reimagined and M.defaults.reimagined.flash and M.defaults.reimagined.flash.threshold) or 0
+        end,
+        disabled = function()
+            return not getFlashEnabled() or (
+                not getElementEnabled("runes")
+                and not getElementEnabled("background")
+                and not getElementEnabled("number")
+            )
+        end,
+        width = "full"
+    },
+    {
+        -------------------------------------------------------------------
+        -- Flash speed
+        -------------------------------------------------------------------
+        type = "slider",
+        name = function()
+            return CC.Language:GetString("SETTINGS_STYLE_WARN_FLASH_SPEED")
+        end,
+        tooltip = function()
+            return CC.Language:GetString("SETTINGS_STYLE_WARN_FLASH_SPEED_DESC")
+        end,
+        min = 0.5,  -- Half a flash per second (slower)
+        max = 5.0,  -- 5 flashes per second (very fast)
+        step = 0.5,
+        getFunc = getFlashSpeed,
+        setFunc = setFlashSpeed,
+        default = function()
+            return (M.defaults.reimagined and M.defaults.reimagined.flash and M.defaults.reimagined.flash.speed) or 2.0
+        end,
+        disabled = function()
+            return not getFlashEnabled() or (
+                not getElementEnabled("runes")
+                and not getElementEnabled("background")
+                and not getElementEnabled("number")
+            )
+        end,
+        width = "full"
+    },
+    {
+        -------------------------------------------------------------------
+        -- Flash Rune (Crux) Color 1
+        -------------------------------------------------------------------
+        type = "colorpicker",
+        name = function()
+            return CC.Language:GetString("SETTINGS_STYLE_WARN_FLASH_RUNE_COLOR_1")
+        end,
+        tooltip = function()
+            return CC.Language:GetString("SETTINGS_STYLE_WARN_FLASH_RUNE_COLOR_1_DESC")
+        end,
+        getFunc = function()
+            local color = getFlashColor("runes", 1)
 
+            return color:UnpackRGBA()
+        end,
+        setFunc = function(r, g, b, a)
+            local newColor = ZO_ColorDef:New(r, g, b, a)
+            
+            setFlashColor("runes", 1, newColor)
+        end,
+        default = function()
+            local color = getDefaultFlashColor("runes", 1)
+            
+            return color:UnpackRGBA()
+        end,
+        disabled = function()
+            return not getFlashEnabled() or (
+                not getElementEnabled("runes")
+            ) 
+        end,
+        width = "full"
+    },
+    {
+        -------------------------------------------------------------------
+        -- Flash Runes (Crux) Color 2
+        -------------------------------------------------------------------
+        type = "colorpicker",
+        name = function()
+            return CC.Language:GetString("SETTINGS_STYLE_WARN_FLASH_RUNE_COLOR_2")
+        end,
+        tooltip = function()
+            return CC.Language:GetString("SETTINGS_STYLE_WARN_FLASH_RUNE_COLOR_2_DESC")
+        end,
+        getFunc = function()
+            local color = getFlashColor("runes", 2)
+
+            return color:UnpackRGBA()
+        end,
+        setFunc = function(r, g, b, a)
+            local newColor = ZO_ColorDef:New(r, g, b, a)
+
+            setFlashColor("runes", 2, newColor)
+        end,
+        default = function()
+            local color = getDefaultFlashColor("runes", 2)
+
+            return color:UnpackRGBA()
+        end,
+        disabled = function()
+            return not getFlashEnabled() or (
+                not getElementEnabled("runes")
+            ) 
+        end,
+        width = "full"
+    },
+    {
+        -------------------------------------------------------------------
+        -- Flash Background Color 1
+        -------------------------------------------------------------------
+        type = "colorpicker",
+        name = function()
+            return CC.Language:GetString("SETTINGS_STYLE_WARN_FLASH_BACKGROUND_COLOR_1")
+        end,
+        tooltip = function()
+            return CC.Language:GetString("SETTINGS_STYLE_WARN_FLASH_BACKGROUND_COLOR_1_DESC")
+        end,
+        getFunc = function()
+            local color = getFlashColor("background", 1)
+
+            return color:UnpackRGBA()
+        end,
+        setFunc = function(r, g, b, a)
+            local newColor = ZO_ColorDef:New(r, g, b, a)
+
+            setFlashColor("background", 1, newColor)
+        end,
+        default = function()
+            local color = getDefaultFlashColor("background", 1)
+
+            return color:UnpackRGBA()
+        end,
+        disabled = function()
+            return not getFlashEnabled() or (
+                not getElementEnabled("background")
+            ) 
+        end,
+        width = "full"
+    },
+    {
+        -------------------------------------------------------------------
+        -- Flash Background Color 2
+        -------------------------------------------------------------------
+        type = "colorpicker",
+        name = function()
+            return CC.Language:GetString("SETTINGS_STYLE_WARN_FLASH_BACKGROUND_COLOR_2")
+        end,
+        tooltip = function()
+            return CC.Language:GetString("SETTINGS_STYLE_WARN_FLASH_BACKGROUND_COLOR_2_DESC")
+        end,
+        getFunc = function()
+            local color = getFlashColor("background", 2)
+
+            return color:UnpackRGBA()
+        end,
+        setFunc = function(r, g, b, a)
+            local newColor = ZO_ColorDef:New(r, g, b, a)
+
+            setFlashColor("background", 2, newColor)
+        end,
+        default = function()
+            local color = getDefaultFlashColor("background", 2)
+
+            return color:UnpackRGBA()
+        end,
+        disabled = function()
+            return not getFlashEnabled() or (
+                not getElementEnabled("background")
+            ) 
+        end,
+        width = "full"
+    },
+    {
+        -------------------------------------------------------------------
+        -- Flash Aura Color 1
+        -------------------------------------------------------------------
+        type = "colorpicker",
+        name = function()
+            return CC.Language:GetString("SETTINGS_STYLE_WARN_FLASH_NUMBER_COLOR_1")
+        end,
+        tooltip = function()
+            return CC.Language:GetString("SETTINGS_STYLE_WARN_FLASH_NUMBER_COLOR_1_DESC")
+        end,
+        getFunc = function()
+            local color = getFlashColor("number", 1)
+
+            return color:UnpackRGBA()
+        end,
+        setFunc = function(r, g, b, a)
+            local newColor = ZO_ColorDef:New(r, g, b, a)
+
+            setFlashColor("number", 1, newColor)
+        end,
+        default = function()
+            local color = getDefaultFlashColor("number", 1)
+
+            return color:UnpackRGBA()
+        end,
+        disabled = function()
+            return not getFlashEnabled() or (
+                not getElementEnabled("number")
+            )
+        end,
+        width = "full"
+    },
+    {
+        -------------------------------------------------------------------
+        -- Flash Aura Color 2 
+        -------------------------------------------------------------------
+        type = "colorpicker",
+        name = function()
+            return CC.Language:GetString("SETTINGS_STYLE_WARN_FLASH_NUMBER_COLOR_2")
+        end,
+        tooltip = function()
+            return CC.Language:GetString("SETTINGS_STYLE_WARN_FLASH_NUMBER_COLOR_2_DESC")
+        end,
+        getFunc = function()
+            local color = getFlashColor("number", 2)
+
+            return color:UnpackRGBA()
+        end,
+        setFunc = function(r, g, b, a)
+            local newColor = ZO_ColorDef:New(r, g, b, a)
+
+            setFlashColor("number", 2, newColor)
+        end,
+        default = function()
+            local color = getDefaultFlashColor("number", 2)
+
+            return color:UnpackRGBA()
+        end,
+        disabled = function()
+            return not getFlashEnabled() or (
+                not getElementEnabled("number")
+            )
+        end,
+        width = "full"
+    },
+    {
+        type = "divider",
+    },
+    {
+        -------------------------------------------------------------------
+        -- Reset all flash colors
+        -------------------------------------------------------------------
+        type = "button",
+        name = function()
+            return CC.Language:GetString("SETTINGS_STYLE_WARN_FLASH_RESET_COLORS")
+        end,
+        tooltip = function()
+            return CC.Language:GetString("SETTINGS_STYLE_WARN_FLASH_RESET_COLORS_DESC")
+        end,
+        func = resetAllFlashColorsToDefault,
+        disabled = function()
+            return not getFlashEnabled() or not getElementEnabled("runes")
+        end,
+        width = "full",
+    },
 }
 
 -- -----------------------------------------------------------------------------
 -- Sound
 -- -----------------------------------------------------------------------------
-
 --- Set if a sound playback condition should play
 --- @param type string Name of the playback condition
 --- @param enabled boolean True if the condition should play a sound
@@ -1202,7 +1785,9 @@ end
 --- @type table Options for Sound settings
 local soundOptions = {
     {
+        -------------------------------------------------------------------
         -- Sounds
+        -------------------------------------------------------------------
         type = "header",
         name = function()
             local colorPalette = {"72b007"}
@@ -1215,7 +1800,9 @@ local soundOptions = {
         width = "full",
     },
     {
+        -------------------------------------------------------------------
         -- Crux Gained
+        -------------------------------------------------------------------
         type = "checkbox",
         name = function()
             return CC.Language:GetString("SETTINGS_SOUNDS_CRUX_GAINED")
@@ -1283,7 +1870,9 @@ local soundOptions = {
         type = "divider",
     },
     {
+        -------------------------------------------------------------------
         -- Maximum Crux
+        -------------------------------------------------------------------
         type = "checkbox",
         name = function()
             return CC.Language:GetString("SETTINGS_SOUNDS_MAXIMUM_CRUX")
@@ -1351,7 +1940,9 @@ local soundOptions = {
         type = "divider",
     },
     {
+        -------------------------------------------------------------------
         -- Crux Lost
+        -------------------------------------------------------------------
         type = "checkbox",
         name = function()
             return CC.Language:GetString("SETTINGS_SOUNDS_CRUX_LOST")
@@ -1420,7 +2011,6 @@ local soundOptions = {
 -- -----------------------------------------------------------------------------
 -- Setup
 -- -----------------------------------------------------------------------------
-
 --- Add an option to the LibAddonMenu settings menu
 --- @param options table Menu options
 --- @return nil
@@ -1488,10 +2078,99 @@ function M:GetElement(element)
     return selection
 end
 
+--- Migrates old settings to the new 'reimagined' settings structure.
+--- Copies legacy threshold, polling interval, and warning colors into
+--- the new format if they are not already set.
+--- Marks migration as done to prevent repeated execution.
+--- @param settings table The settings table to migrate. If nil or not a table, migration is skipped.
+local function MigrateOldSettings(settings)
+    if not settings or type(settings) ~= "table" then return end
+
+    -- Skip if migration already done
+    if settings.reimagined and settings.reimagined._migrationDone then return end
+
+    -- Ensure structure exists
+    settings.reimagined = settings.reimagined or {}
+    local r = settings.reimagined
+
+    r.expireWarning                     = r.expireWarning or {}
+    r.expireWarning.elements            = r.expireWarning.elements or {}
+    r.expireWarning.elements.runes      = r.expireWarning.elements.runes or {}
+    r.expireWarning.elements.number     = r.expireWarning.elements.number or {}
+    r.expireWarning.elements.background = r.expireWarning.elements.background or {}
+
+    -- Migrate threshold
+    if not r.expireWarning.threshold then
+        local legacy = settings.elements and settings.elements.runes and settings.elements.runes.reimagined
+
+        if legacy and legacy.expireWarnThreshold then
+            r.expireWarning.threshold = legacy.expireWarnThreshold
+        elseif settings.reimagined and settings.reimagined.runes and settings.reimagined.runes.expireWarn then
+            r.expireWarning.threshold = settings.reimagined.runes.expireWarn.threshold
+        else
+            r.expireWarning.threshold = M.defaults.reimagined.expireWarning.threshold
+        end
+    end
+
+    -- Migrate polling interval
+    if not r.expireWarning.pollingInterval then
+        local legacy = settings.elements and settings.elements.runes and settings.elements.runes.reimagined
+        
+        if legacy and legacy.expireWarnPollingInterval then
+            r.expireWarning.pollingInterval = legacy.expireWarnPollingInterval
+        elseif settings.reimagined and settings.reimagined.runes and settings.reimagined.runes.expireWarn then
+            r.expireWarning.pollingInterval = settings.reimagined.runes.expireWarn.pollingInterval
+        else
+            r.expireWarning.pollingInterval = M.defaults.reimagined.expireWarning.pollingInterval
+        end
+    end
+
+    -- Migrate warn colors
+    local function migrateColorElement(elementName)
+        local target = r.expireWarning.elements[elementName]
+
+        if not target.color then
+            local legacyColor = settings.elements
+                and settings.elements[elementName]
+                and settings.elements[elementName].reimagined
+                and settings.elements[elementName].reimagined.expireWarnColor
+            if legacyColor then
+                target.color = legacyColor
+                return
+            end
+
+            local flatColor = settings.elements
+                and settings.elements[elementName]
+                and settings.elements[elementName].expireWarnColor
+            if flatColor then
+                target.color = flatColor
+                return
+            end
+
+            target.color = M.defaults.reimagined.expireWarning.elements[elementName].color
+        end
+    end
+
+    migrateColorElement("runes")
+    migrateColorElement("number")
+    migrateColorElement("background")
+
+    -- Mark migration as complete
+    r._migrationDone = true
+end
+
 --- Setup settings
 --- @return nil
 function M:Setup()
-    local addon   = CC.Addon
+    local addon = CC.Addon
+
+    -- Load raw saved variables (no defaults applied yet)
+    local rawSaved = ZO_SavedVars:NewAccountWide(self.savedVariables, self.dbVersion, nil, nil)
+
+    -- Run migration BEFORE loading final settings (important!)
+    MigrateOldSettings(rawSaved)
+
+    -- Now apply defaults after migration
     self.settings = ZO_SavedVars:NewAccountWide(self.savedVariables, self.dbVersion, nil, self.defaults)
 
     populateSounds()
@@ -1500,15 +2179,47 @@ function M:Setup()
     addToMenu(styleOptions)
     addToMenu(soundOptions)
 
-    LAM:RegisterAddonPanel(addon.name, {
-        type               = "panel",
-        name               = "Crux Counter (reIMAGINED)",
-        displayName        = "Crux Counter (reIMAGINED)",
-        author             = "Dim (@xDiminish)",
-        version            = addon.version,
-        registerForRefresh = true,
-        slashCommand       = "/ccr",
+    CC.panel = LAM:RegisterAddonPanel(addon.name, {
+        type                = "panel",
+        name                = "Crux Counter (reIMAGINED)",
+        displayName         = "Crux Counter (reIMAGINED)",
+        author              = "Dim (@xDiminish)",
+        version             = addon.version,
+        registerForRefresh  = true,
+        slashCommand        = "/ccr",
     })
+
+    -- Register debug/help slash commands
+    SLASH_COMMANDS["/ccr"] = function(text)
+        local args = {}
+
+        for word in text:gmatch("%S+") do
+            table.insert(args, word)
+        end
+
+        if args[1] == "debug" then
+            local level = tonumber(args[2])
+
+            if level and level >= 0 and level <= 3 then
+                CruxCounterR.Debug.level = level
+                CruxCounterR.Debug:Say("Debug level set to <<1>>", level)
+            else
+                CruxCounterR.Debug:Say("Usage: /ccr debug [0-3]")
+            end
+        elseif args[1] == "help" then
+            CruxCounterR.Debug:Say("Slash commands:")
+            CruxCounterR.Debug:Say("/ccr - Open settings panel")
+            CruxCounterR.Debug:Say("/ccr debug [0-3] - Set debug level")
+            CruxCounterR.Debug:Say("/ccr help - Show this message")
+        else
+            if CC.panel then
+                LibAddonMenu2:OpenToPanel(CC.panel)
+            else
+                CruxCounterR.Debug:Say("Settings panel not found.")
+            end
+        end
+    end
+
     LAM:RegisterOptionControls(addon.name, optionsData)
 
     CC.Debug:Trace(2, "Finished InitSettings()")

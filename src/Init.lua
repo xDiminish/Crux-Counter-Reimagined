@@ -26,6 +26,7 @@ local function init(_, addonName)
 
     CC.Language:Setup()
     CC.Settings:Setup()
+
     CC.settings = CC.Settings.settings
 
     CC.Debug:Trace(1, "CC.settings initialized: " .. tostring(CC.settings))
@@ -42,9 +43,6 @@ local function init(_, addonName)
     EM:RegisterForEvent("CruxCounterR_InitPlayerActivated", EVENT_PLAYER_ACTIVATED, function()
         EM:UnregisterForEvent("CruxCounterR_InitPlayerActivated", EVENT_PLAYER_ACTIVATED)
         CC.Events:RegisterEvents()
-
-        -- Start polling for updates to the warn state
-        --CC.Events:PollUpdateWarnState()
     end)
 end
 

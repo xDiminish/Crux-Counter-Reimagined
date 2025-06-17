@@ -15,18 +15,18 @@ CruxCounterR_Aura = ZO_InitializingObject:Subclass()
 --- @param control any Element control
 --- @return nil
 function CruxCounterR_Aura:Initialize(control)
-    self.control = control
-    self.fragment = nil
-    self.hideOutOfCombat = CC.Settings:Get("hideOutOfCombat")
-    self.locked = CC.Settings:Get("locked")
-
-    self.ring = Ring:New(control:GetNamedChild("BG"))
-    self.orbit = Orbit:New(control:GetNamedChild("Orbit"))
-    self.count = control:GetNamedChild("Count")
+    self.control            = control
+    self.fragment           = nil
+    self.hideOutOfCombat    = CC.Settings:Get("hideOutOfCombat")
+    self.locked             = CC.Settings:Get("locked")
+    self.ring               = Ring:New(control:GetNamedChild("BG"))
+    self.orbit              = Orbit:New(control:GetNamedChild("Orbit"))
+    self.count              = control:GetNamedChild("Count")
 
     self:SetHandlers()
 
     local oldSetHidden = self.control.SetHidden
+
     self.control.SetHidden = function(ctrl, hidden)
         CC.Debug:Trace(2, "SetHidden(<<1>>) called", tostring(hidden))
 
@@ -47,6 +47,7 @@ end
 function CruxCounterR_Aura:SetNumberColor(color)
     if not self.control then
         CC.Debug:Trace(3, "[CruxCounterR_Aura] ERROR: self.control is nil")
+
         return
     end
 
@@ -70,6 +71,7 @@ function CruxCounterR_Aura:ApplySettings()
 
     -- Other control settings
     local number = CC.Settings:GetElement("number")
+
     self:SetNumberEnabled(number.enabled)
     self:SetNumberColor(ZO_ColorDef:New(number.color))
     self.ring:ApplySettings()
@@ -238,21 +240,4 @@ end
 --- @return nil
 function CruxCounterR_Aura_OnMoveStop(self)
     self.OnMoveStop()
-end
-
---- Update aura number color based on elapsed time
---- @param self any
---- @param elapsedSec number
---- @param baseSettings table
-function CruxCounterR_Aura:UpdateColorBasedOnElapsed(elapsedSec, baseSettings)
-    local currentStacks = CruxCounterR.State and CruxCounterR.State.stacks or 0
-    if currentStacks == 0 then
-        local baseColor = CruxCounterR.UI:GetEnsuredColor(baseSettings.elements.number.color)
-        CruxCounterR_Display:SetNumberColor(baseColor)
-        return
-    end
-
-    CruxCounterR.Utils.UpdateColorBasedOnElapsed(elapsedSec, baseSettings, "number", function(color)
-        CruxCounterR_Display:SetNumberColor(color)
-    end)
 end

@@ -76,6 +76,7 @@ end
 --- @return nil
 function CruxCounterR_Ring:SetEnabled(enabled)
     self.enabled = enabled
+    
     self.control:SetHidden(not enabled)
     self:UpdateRotation()
 end
@@ -99,6 +100,7 @@ end
 --- @return nil
 function CruxCounterR_Ring:SetRotationEnabled(rotationEnabled)
     self.rotationEnabled = rotationEnabled
+
     self:UpdateRotation()
 end
 
@@ -143,14 +145,4 @@ function CruxCounterR_Ring:UpdateCount(count)
     else
         self:SetShowing(true)
     end
-end
-
---- Update ring color based on elapsed time
---- @param self any
---- @param elapsedSec number
---- @param baseSettings table
-function CruxCounterR_Ring:UpdateColorBasedOnElapsed(elapsedSec, baseSettings)
-    CruxCounterR.Utils.UpdateColorBasedOnElapsed(elapsedSec, baseSettings, "background", function(color)
-        self:SetColor(color)
-    end)
 end

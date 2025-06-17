@@ -26,6 +26,19 @@ An updated build of the original Crux Counter ESO addon by @g4rr3t, redesigned t
 
 ---
 
+## 📌 What's New
+
+  - Added flash animations for runes, background, and aura numbers using smooth interpolation and sine wave-based timing.
+  - Introduced customizable flash speed and color transitions via the addon settings panel.
+  - Improved settings panel with new sliders, toggles, and per-element color pickers.
+  - Replaced alpha-based visibility logic with more robust SetHidden() handling.
+  - Enhanced debug command support (/ccr help, /ccr debug 1–3) for easier diagnostics.
+  - Added localization support for all new settings UI strings.
+
+👉 [View full changelog →](CHANGELOG.md)
+
+---
+
 ## 📦 Installation
 
 1. Extract into your AddOns directory:  
@@ -43,7 +56,7 @@ Created by **Dim** (`@xDiminish`) [PCNA]
 
 ## 🔢 Version
 
-**1.0.4**
+**1.0.4 r02**
 
 ---
 
