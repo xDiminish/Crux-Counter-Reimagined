@@ -20,13 +20,14 @@ An updated build of the original Crux Counter ESO addon by @g4rr3t, redesigned t
   - The crux runes color updates to the Expiry Warn Rune Color specified in the addon settings
   - The background ring color updates to the Expiry Warn Background Color specified in the addon settings
   - The aura (crux count) color updates to the Expiry Warn Aura Color specified in the addon settings
+  - Flash in warn threshold animation effects
 
 - **UI and performance improvements**  
   Includes code refactoring, visual polish, and optimzation of the original Crux Counter addon.
 
 ---
 
-## 📌 What's New
+## 📌 What's New in version 1.0.4 r02
 
   - Added flash animations for runes, background, and aura numbers using smooth interpolation and sine wave-based timing.
   - Introduced customizable flash speed and color transitions via the addon settings panel.
