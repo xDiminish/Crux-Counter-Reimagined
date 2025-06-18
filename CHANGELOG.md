@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 [v1.0.4.03 - 2025-06-17]
 
 🛠 Functionality Changes
+
 	- No longer listens for EFFECT_RESULT_FADED events for ALL effects, and not specifically targets only the Crux effect. 
 	- Cleaned up some redundant code.
 
