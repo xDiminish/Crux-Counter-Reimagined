@@ -133,21 +133,13 @@ function CC.Utils.UpdateCruxVisuals(elapsedSec, baseSettings)
     end
 
     local function setNumberColor(color)
-        if CC.State and CC.State.stacks and CC.State.stacks > 0 then
-            CruxCounterR_Display:SetNumberColor(color)
-        else
-            -- If no stacks, use base color? Could also pass base color here.
-            CruxCounterR_Display:SetNumberColor(color)
-        end
+        CruxCounterR_Display:SetNumberColor(color)
     end
-
-    local baseElements = baseSettings.elements or {}
 
     CC.Utils.CheckWarnState(elapsedSec, baseSettings, "runes", setRuneColor)
     CC.Utils.CheckWarnState(elapsedSec, baseSettings, "background", setBackgroundColor)
     CC.Utils.CheckWarnState(elapsedSec, baseSettings, "number", setNumberColor)
 end
-
 
 --- Linearly interpolates between two colors.
 --- @param colorA ZO_ColorDef Starting color

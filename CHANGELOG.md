@@ -2,6 +2,17 @@ Crux Counter (reIMAGINED) – Change Log
 
 All notable changes to this project will be documented in this file.
 
+
+[v1.0.4.03 - 2025-06-17]
+
+🛠 Functionality Changes
+	- No longer listens for EFFECT_RESULT_FADED events for ALL effects, and not specifically targets only the Crux effect. 
+	- Cleaned up some redundant code.
+
+🐞 Bug Fixes
+	
+	- Fixed issue where if the effect was within the warn state, and the player was in a menu when the Crux buff wore off it would not trigger a UI reset cause the expiry warn state colors to persist when the effect ended.
+
 [v1.0.4.02 - 2025-06-16]
 
 ✨ New Features

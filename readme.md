@@ -27,7 +27,7 @@ An updated build of the original Crux Counter ESO addon by @g4rr3t, redesigned t
 
 ---
 
-## 📌 What's New in version 1.0.4 r02
+## 📌 What's New in the latest 1.0.4 r03 version
 
   - Added flash animations for runes, background, and aura numbers using smooth interpolation and sine wave-based timing.
   - Introduced customizable flash speed and color transitions via the addon settings panel.
@@ -57,7 +57,7 @@ Created by **Dim** (`@xDiminish`) [PCNA]
 
 ## 🔢 Version
 
-**1.0.4 r02**
+**1.0.4 r03**
 
 ---
 

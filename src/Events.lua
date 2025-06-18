@@ -15,9 +15,6 @@ local knownArcanistLines = {
 
 local wasArcanist = nil
 
--- local flashToggle = false
-local flashPeriod = 0.5 -- seconds for full pulse cycle (fade in + fade out)
-
 --- @type integer Crux ability ID
 M.abilityId = 184220
 
@@ -95,9 +92,9 @@ end
 --- @param statusEffectType integer Type of status effect (unused)
 --- @param abilityId integer Unique identifier for the ability applied
 --- @return nil
-local function onEffectChanged(eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, abilityId)
+local function onEffectChanged(eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType)
     -- Debug
-    local args = { CC.Debug:PrintSafe(eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, abilityId) }
+    local args = { CC.Debug:PrintSafe(eventCode, changeType, effectSlot, effectName, unitTag, beginTime, endTime, stackCount, iconName, buffType, effectType, abilityType, statusEffectType, unitName, unitId, abilityId, sourceType) }
     local output =
         "eventCode: "           .. args[1]  ..
         ", changeType: "        .. args[2]  ..
@@ -112,17 +109,21 @@ local function onEffectChanged(eventCode, changeType, effectSlot, effectName, un
         ", effectType: "        .. args[11] ..
         ", abilityType: "       .. args[12] ..
         ", statusEffectType: "  .. args[13] ..
-        ", abilityId: "         .. args[14]
+        ", unitName: "          .. args[14] ..
+        ", unitId: "            .. args[15] ..
+        ", abilityId: "         .. args[16] ..
+        ", sourceType: "        .. args[17]
 
     CC.Debug:Trace(2, output)
 
-    -- Check if the crux buff has ended
-    if changeType == EFFECT_RESULT_FADED then
+    if changeType == EFFECT_RESULT_FADED and unitTag == "player" and effectName == "Crux" and abilityId == M.abilityId then
         CC.State:ClearStacks()
+        CC.Display:ResetUI()
 
         CC.Global.WarnState = false
-        
+
         EVENT_MANAGER:UnregisterForUpdate("CruxTracker_Countdown")
+
         return
     end
 
